@@ -7,6 +7,7 @@ import { MeasureManager } from './managers/MeasureManager.js';
 import { MapManager } from './managers/MapManager.js';
 import { UIEngine } from './managers/UIEngine.js';
 import { LayerEngine } from './managers/LayerEngine.js';
+import { GridManager } from './managers/GridManager.js'; // GridManager 불러오기
 
 export class GameEngine {
     constructor(canvasId) {
@@ -26,25 +27,22 @@ export class GameEngine {
         this.renderer.canvas.width = this.measureManager.get('gameResolution.width');
         this.renderer.canvas.height = this.measureManager.get('gameResolution.height');
 
-        // MapManager 및 UIEngine 초기화
+        // MapManager 및 GridManager 초기화
         this.mapManager = new MapManager(this.measureManager);
-        this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager);
+        this.gridManager = new GridManager(this.measureManager); // GridManager 인스턴스 생성
+
+        // UIEngine 초기화 (맵 매니저와 그리드 매니저 인스턴스 전달)
+        this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager, this.mapManager, this.gridManager);
 
         // LayerEngine 초기화
         this.layerEngine = new LayerEngine(this.renderer);
 
         // LayerEngine에 렌더링할 레이어 등록
-        this.layerEngine.registerLayer('mapLayer', (ctx) => {
-            const mapRenderData = this.mapManager.getMapRenderData();
-            ctx.fillStyle = 'gray';
-            ctx.font = '20px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText(`Map: ${mapRenderData.gridCols}x${mapRenderData.gridRows} Grid, Tile Size: ${mapRenderData.tileSize}`, 10, 30);
-        }, 10);
-
-        this.layerEngine.registerLayer('uiLayer', () => {
-            this.uiEngine.draw();
-        }, 100);
+        // 맵 화면의 모든 복잡한 렌더링은 UIEngine 내부에서 관리되므로,
+        // LayerEngine에는 UIEngine 자체를 UI 레이어로 등록합니다.
+        this.layerEngine.registerLayer('uiLayer', (ctx) => {
+            this.uiEngine.draw(); // UIEngine의 draw 메서드를 호출하여 UI와 그 안에 포함된 맵/그리드를 그림
+        }, 100); // zIndex 100
 
         // 게임의 핵심 로직과 렌더링 함수 정의 (GameLoop에 전달될 콜백)
         this._update = this._update.bind(this); // `this` 컨텍스트 바인딩
@@ -137,6 +135,10 @@ export class GameEngine {
 
     getMapManager() {
         return this.mapManager;
+    }
+
+    getGridManager() { // GridManager의 getter 추가
+        return this.gridManager;
     }
 
     getUIEngine() {
