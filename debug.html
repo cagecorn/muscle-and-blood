@@ -9,7 +9,7 @@
             margin: 0;
             overflow: hidden;
             display: flex;
-            flex-direction: column; /* 세로 방향 정렬 */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -24,19 +24,32 @@
             background-color: rgba(0, 0, 0, 0.7);
             padding: 10px;
             border-radius: 5px;
-            z-index: 1000; /* 캔버스 위에 표시되도록 */
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* 버튼과 섹션 사이 간격 */
+        }
+        #debugInfo h4 {
+            margin: 10px 0 5px 0;
+            color: #ccc;
         }
         #debugInfo button {
-            background-color: #f44336; /* 빨간색 버튼 */
+            background-color: #4CAF50; /* 초록색 버튼 */
             color: white;
             padding: 8px 12px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-top: 5px;
             font-size: 0.9em;
+            transition: background-color 0.2s;
         }
         #debugInfo button:hover {
+            background-color: #45a049;
+        }
+        #debugInfo button.fault-btn {
+            background-color: #f44336; /* 빨간색 버튼 */
+        }
+        #debugInfo button.fault-btn:hover {
             background-color: #d32f2f;
         }
         canvas {
@@ -49,33 +62,63 @@
     <div id="debugInfo">
         <h3>디버그 정보</h3>
         <p>FPS: <span id="fpsCounter">--</span></p>
-        <h4>결함 주입 테스트</h4>
-        <button id="injectRendererFaultBtn">렌더러 결함 주입</button>
-        <button id="injectUpdateFaultBtn">Update 함수 결함 주입</button>
-        <button id="injectDrawFaultBtn">Draw 함수 결함 주입</button>
+        
+        <h4>엔진 기본 테스트</h4>
+        <button id="runAllEngineTestsBtn">모든 엔진 테스트 실행</button>
+
+        <h4>엔진 결함 주입 테스트</h4>
+        <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
+        <button id="injectUpdateFaultBtn" class="fault-btn">Update 함수 결함 주입</button>
+        <button id="injectDrawFaultBtn" class="fault-btn">Draw 함수 결함 주입</button>
+        <button id="injectEventManagerFaultsBtn" class="fault-btn">이벤트 매니저 결함 주입</button>
+        <h4>이벤트 발생 시뮬레이션</h4>
+        <button id="simulateEventsBtn">이벤트 시뮬레이션 시작/정지</button>
     </div>
     <canvas id="gameCanvas"></canvas>
     <script type="module">
-        // Debug 페이지에서는 main.js의 일부 기능을 확장하여 사용합니다.
-        // GameLoop와 Renderer 모듈을 불러옵니다.
         import { Renderer } from './js/Renderer.js';
         import { GameLoop } from './js/GameLoop.js';
+        import { EventManager } from './js/managers/EventManager.js'; // EventManager 불러오기
         // 엔진 테스트 모듈과 결함 주입 테스트 함수들을 불러옵니다.
-        import { runEngineTests, injectRendererFault, injectGameLoopFault, getFaultFlags, setFaultFlag } from './js/tests/engineTests.js';
+        import { 
+            runEngineTests, 
+            injectRendererFault, 
+            injectGameLoopFault, 
+            getFaultFlags, 
+            setFaultFlag,
+            runEventManagerTests, // 추가
+            injectEventManagerFaults // 추가
+        } from './js/tests/engineTests.js'; 
 
         document.addEventListener('DOMContentLoaded', () => {
             const renderer = new Renderer('gameCanvas');
             if (!renderer.canvas) {
-                console.error("Failed to initialize Renderer. Game cannot start.");
+                console.error('Failed to initialize Renderer. Game cannot start.');
                 return;
             }
             const ctx = renderer.ctx;
+
+            const eventManager = new EventManager(); // EventManager 인스턴스 생성
+
+            // 테스트용 EventManager 구독 (debug.html에서만 필요)
+            eventManager.subscribe('unitDeath', (data) => {
+                console.log(`[Debug Main] Unit ${data.unitId} (${data.unitName}) has died!`);
+            });
+            eventManager.subscribe('skillExecuted', (data) => {
+                console.log(`[Debug Main] Skill '${data.skillName}' was executed.`);
+            });
+
 
             let frameCount = 0;
             let lastFpsTime = 0;
             const fpsCounterElement = document.getElementById('fpsCounter');
 
-            // 결함 주입 버튼 이벤트 리스너 설정
+            // --- 버튼 이벤트 리스너 설정 ---
+            document.getElementById('runAllEngineTestsBtn').addEventListener('click', () => {
+                runEngineTests(renderer, gameLoop);
+                runEventManagerTests(eventManager); // EventManager 테스트 실행
+            });
+
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
                 injectRendererFault(renderer);
             });
@@ -85,14 +128,39 @@
             document.getElementById('injectDrawFaultBtn').addEventListener('click', () => {
                 injectGameLoopFault('draw', setFaultFlag);
             });
+            document.getElementById('injectEventManagerFaultsBtn').addEventListener('click', () => { // 추가
+                injectEventManagerFaults(eventManager);
+            });
+
+            let isSimulatingEvents = false; // 이벤트 시뮬레이션 플래그 추가
+            let lastEmittedSecond = -1; // 이벤트 시뮬레이션 타이머
+            document.getElementById('simulateEventsBtn').addEventListener('click', (e) => { // 추가
+                isSimulatingEvents = !isSimulatingEvents;
+                e.target.textContent = isSimulatingEvents ? '이벤트 시뮬레이션 정지' : '이벤트 시뮬레이션 시작';
+                if (!isSimulatingEvents) {
+                    console.log('Event simulation stopped.');
+                } else {
+                    console.log('Event simulation started. Check console.');
+                }
+            });
+
 
             // 게임 업데이트 함수 정의
             const update = (deltaTime) => {
-                // 이곳에서 게임의 논리를 업데이트합니다.
                 const faultFlags = getFaultFlags();
                 if (faultFlags.update) {
-                    setFaultFlag('update', false); // 한 번만 오류 발생
-                    throw new Error("Simulated Error: Something went wrong in update()!");
+                    setFaultFlag('update', false);
+                    throw new Error('Simulated Error: Something went wrong in update()!');
+                }
+
+                // 이벤트 시뮬레이션 로직 (debug.html에서만)
+                if (isSimulatingEvents) {
+                    if (Math.floor(performance.now() / 1000) % 5 === 0 && Math.floor(performance.now() / 1000) !== lastEmittedSecond) {
+                        eventManager.emit('unitAttack', { attackerId: 'DebugHero', targetId: 'DebugGoblin', damageDealt: 15 });
+                        eventManager.emit('unitDeath', { unitId: 'DebugGoblin', unitName: '디버그 고블린', unitType: 'normal' });
+                        eventManager.emit('unitDeath', { unitId: 'DebugOgreBoss', unitName: '디버그 오우거 보스', unitType: 'elite' });
+                        lastEmittedSecond = Math.floor(performance.now() / 1000);
+                    }
                 }
             };
 
@@ -100,8 +168,8 @@
             const draw = () => {
                 const faultFlags = getFaultFlags();
                 if (faultFlags.draw) {
-                    setFaultFlag('draw', false); // 한 번만 오류 발생
-                    throw new Error("Simulated Error: Drawing failed in draw()!");
+                    setFaultFlag('draw', false);
+                    throw new Error('Simulated Error: Drawing failed in draw()!');
                 }
 
                 renderer.clear();
@@ -112,12 +180,12 @@
                 ctx.textAlign = 'center';
                 ctx.fillText('Muscle & Blood', renderer.canvas.width / 2, renderer.canvas.height / 2);
                 ctx.font = '24px Arial';
-                ctx.fillText('디버그 모드', renderer.canvas.width / 2, renderer.canvas.height / 2 + 50);
+                ctx.fillText('디버그 모드 (이벤트 매니저 테스트)', renderer.canvas.width / 2, renderer.canvas.height / 2 + 50);
 
                 // FPS 카운터 업데이트
                 frameCount++;
                 const currentTime = performance.now();
-                if (currentTime - lastFpsTime >= 1000) { // 1초마다 업데이트
+                if (currentTime - lastFpsTime >= 1000) {
                     const fps = frameCount / ((currentTime - lastFpsTime) / 1000);
                     fpsCounterElement.textContent = fps.toFixed(0);
                     frameCount = 0;
@@ -128,8 +196,9 @@
             const gameLoop = new GameLoop(update, draw);
             gameLoop.start();
 
-            // 엔진 테스트 실행 (렌더러와 게임 루프 인스턴스를 전달합니다.)
+            // 페이지 로드 시 기본 엔진 테스트 자동 실행
             runEngineTests(renderer, gameLoop);
+            // EventManager 테스트는 이제 버튼으로 실행됩니다.
         });
     </script>
 </body>
