@@ -6,8 +6,8 @@ export class MeasureManager {
 
         // 게임의 모든 사이즈 관련 설정을 이곳에 정의
         this._measurements = {
-            tileSize: 512,
-            mapGrid: { rows: 10, cols: 15 },
+            tileSize: 512, // 맵 타일의 기본 사이즈
+            mapGrid: { rows: 10, cols: 15 }, // 맵 그리드의 행/열
             gameResolution: {
                 width: 1280,
                 height: 720
@@ -17,14 +17,7 @@ export class MeasureManager {
                 mapPanelHeightRatio: 0.9,
                 buttonHeight: 50,
                 buttonWidth: 200,
-                buttonMargin: 10,
-                mapPanelColor: 'rgba(50, 50, 200, 0.7)'
-            },
-            gridPaddingY: 100,
-            colors: {
-                gameScreen: 'yellow',
-                grid: 'red',
-                background: '#333'
+                buttonMargin: 10
             }
         };
     }
