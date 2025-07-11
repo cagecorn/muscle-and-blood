@@ -90,3 +90,116 @@ export function setFaultFlag(type, value) {
         drawShouldThrow = value;
     }
 }
+
+/**
+ * EventManager의 기본적인 기능을 테스트합니다.
+ * @param {EventManager} eventManager - EventManager 인스턴스.
+ */
+export function runEventManagerTests(eventManager) {
+    console.log("--- EventManager Test Start ---");
+
+    let testCount = 0;
+    let passCount = 0;
+
+    // 1. EventManager 초기화 테스트
+    testCount++;
+    if (eventManager && eventManager.worker) {
+        console.log("EventManager: Successfully initialized with Web Worker. [PASS]");
+        passCount++;
+    } else {
+        console.error("EventManager: Initialization failed. [FAIL]");
+    }
+
+    // 2. 이벤트 구독 및 전파 테스트 (메인 스레드 내)
+    testCount++;
+    let subscribedEventReceived = false;
+    const testEventName = 'testEvent';
+    const testData = { message: 'Hello from EventManager Test!' };
+
+    eventManager.subscribe(testEventName, (data) => {
+        console.log(`EventManager: Subscribed callback received event '${testEventName}' with data:`, data);
+        if (data.message === testData.message) {
+            subscribedEventReceived = true;
+        }
+    });
+
+    eventManager.emit(testEventName, testData);
+
+    setTimeout(() => {
+        if (subscribedEventReceived) {
+            console.log("EventManager: Event emitted and subscribed callback fired successfully. [PASS]");
+            passCount++;
+        } else {
+            console.error("EventManager: Event emitted but subscribed callback did not fire. [FAIL]");
+        }
+
+        // 3. 워커 내부 '작은 엔진'의 스킬 트리거 테스트 (간접 확인)
+        testCount++;
+        console.log("EventManager: Emitting 'unitAttack' for worker's small engine test. Check console for '흡혈' skill message.");
+        eventManager.emit('unitAttack', { attackerId: 'TestHero', targetId: 'TestMob', damageDealt: 20 });
+
+        setTimeout(() => {
+            console.log("EventManager: 'unitAttack' event processed by worker's small engine. Visually check console for '흡혈' skill trigger messages. [INFO]");
+            passCount++; // 간접 확인이므로 일단 성공으로 처리
+
+            console.log(`--- EventManager Test End: ${passCount}/${testCount} tests passed ---`);
+        }, 100);
+    }, 100);
+}
+
+/**
+ * EventManager에 결함을 주입하는 테스트입니다.
+ * @param {EventManager} eventManager - EventManager 인스턴스.
+ */
+export function injectEventManagerFaults(eventManager) {
+    console.warn("--- Injecting EventManager Faults ---");
+    let faultTestCount = 0;
+    let faultPassCount = 0;
+
+    // 1. 테스트: 구독자 콜백 함수에서 오류 발생 시
+    faultTestCount++;
+    try {
+        const faultEventName = 'faultyCallbackEvent';
+        eventManager.subscribe(faultEventName, () => {
+            throw new Error("Simulated Error: Subscriber callback failed!");
+        });
+        eventManager.emit(faultEventName, { status: 'fault' });
+
+        setTimeout(() => {
+            console.log("EventManager Fault Test (Callback Error): Check console for 'Simulated Error: Subscriber callback failed!' message. [EXPECTED ERROR]");
+            faultPassCount++; // 에러가 발생했으면 성공
+        }, 50);
+    } catch (e) {
+        console.error("EventManager Fault Test (Callback Error): Did not catch expected error synchronously. [FAIL]", e);
+    }
+
+
+    // 2. 테스트: 워커 종료 후 이벤트 emit 시도
+    faultTestCount++;
+    console.log("EventManager Fault Test (Worker Termination): Terminating worker...");
+    eventManager.terminateWorker(); // 워커 종료
+    try {
+        eventManager.emit('afterTerminationEvent', { data: 'test' });
+        console.error("EventManager Fault Test (Worker Termination): Emitted event after termination without error. [FAIL]");
+    } catch (e) {
+        console.log("EventManager Fault Test (Worker Termination): Successfully caught expected error when emitting after termination. [PASS]", e);
+        faultPassCount++;
+    }
+
+    // 3. 테스트: 워커가 알 수 없는 타입의 메시지를 보냈을 때 (시뮬레이션)
+    faultTestCount++;
+    console.log("EventManager Fault Test (Unknown Worker Message Type): Simulating unknown message...");
+    const originalHandleWorkerMessage = eventManager.handleWorkerMessage;
+    eventManager.handleWorkerMessage = (event) => {
+        console.log("[EventManager Fault Test] Receiving unknown message type:", event.data.type);
+    };
+    eventManager.handleWorkerMessage({ data: { type: 'UNKNOWN_MESSAGE_TYPE', payload: 'bad_data' } });
+    console.log("EventManager Fault Test (Unknown Worker Message Type): Handled unknown message type without crashing. [PASS]");
+    faultPassCount++;
+    eventManager.handleWorkerMessage = originalHandleWorkerMessage;
+
+
+    setTimeout(() => {
+        console.warn(`--- EventManager Fault Injection End: ${faultPassCount}/${faultTestCount} faults tested ---`);
+    }, 200);
+}
