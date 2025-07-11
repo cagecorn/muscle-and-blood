@@ -11,6 +11,7 @@ export class UIManager {
         this.ctx = renderer.ctx;
 
         this.uiState = 'mapScreen';
+        this.mapPanelColor = this.measureManager.get('ui.mapPanelColor');
 
         // 초기 UI 크기 설정을 MeasureManager 값에 맞추어 계산
         this._recalculateUIDimensions();
@@ -84,7 +85,7 @@ export class UIManager {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (this.uiStateEngine.getState() === 'mapScreen') {
-            this.ctx.fillStyle = 'lightblue';
+            this.ctx.fillStyle = this.mapPanelColor;
             this.ctx.fillRect(
                 (this.canvas.width - this.mapPanelWidth) / 2,
                 (this.canvas.height - this.mapPanelHeight) / 2,

@@ -9,6 +9,7 @@ import { UIManager } from './managers/UIManager.js';
 import { GridManager } from './managers/GridManager.js';
 import { InputManager } from './managers/InputManager.js';
 import { CameraManager } from './managers/CameraManager.js';
+import { LayerManager } from './managers/LayerManager.js';
 
 export class GameEngine {
     constructor(canvasId) {
@@ -36,6 +37,7 @@ export class GameEngine {
         this.cameraManager = new CameraManager(this.renderer, this.measureManager, this.mapManager, this.uiManager);
         this.gridManager = new GridManager(this.renderer, this.measureManager, this.mapManager);
         this.inputManager = new InputManager(this.renderer.canvas, this.cameraManager);
+        this.layerManager = new LayerManager(this.renderer, this.measureManager, this.gridManager, this.uiManager, this.cameraManager);
 
         // 게임의 핵심 로직과 렌더링 함수 정의 (GameLoop에 전달될 콜백)
         this._update = this._update.bind(this); // `this` 컨텍스트 바인딩
@@ -97,21 +99,13 @@ export class GameEngine {
      * 게임 루프의 그리기 단계에서 호출될 핵심 렌더링 함수입니다.
      */
     _draw() {
-        // 렌더러를 사용하여 기본 배경과 맵 정보를 그립니다.
-        this.renderer.clear();
-        this.renderer.drawBackground();
+        this.layerManager.drawLayers();
 
         const mapRenderData = this.mapManager.getMapRenderData();
         this.renderer.ctx.fillStyle = 'gray';
         this.renderer.ctx.font = '20px Arial';
         this.renderer.ctx.textAlign = 'left';
         this.renderer.ctx.fillText(`Map: ${mapRenderData.gridCols}x${mapRenderData.gridRows} Grid, Tile Size: ${mapRenderData.tileSize}`, 10, 30);
-
-        // 카메라 변환을 적용하여 그리드 그리기
-        this.gridManager.draw(this.cameraManager.getTransform());
-
-        // UI 매니저가 UI를 그립니다.
-        this.uiManager.draw();
     }
 
     /**
@@ -157,5 +151,9 @@ export class GameEngine {
 
     getInputManager() {
         return this.inputManager;
+    }
+
+    getLayerManager() {
+        return this.layerManager;
     }
 }

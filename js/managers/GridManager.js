@@ -11,6 +11,8 @@ export class GridManager {
         this.gridCols = mapManager.getGridDimensions().cols;
         this.gridRows = mapManager.getGridDimensions().rows;
         this.tileSize = measureManager.get('tileSize');
+        this.gridPaddingY = measureManager.get('gridPaddingY');
+        this.gridColor = measureManager.get('colors.grid');
     }
 
     /**
@@ -28,8 +30,10 @@ export class GridManager {
         ctx.translate(cameraTransform.x, cameraTransform.y);
         ctx.scale(cameraTransform.zoom, cameraTransform.zoom);
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 1;
+        ctx.translate(0, this.gridPaddingY / cameraTransform.zoom);
+
+        ctx.strokeStyle = this.gridColor;
+        ctx.lineWidth = 1 / cameraTransform.zoom;
 
         for (let i = 0; i <= this.gridCols; i++) {
             const x = i * this.tileSize;
