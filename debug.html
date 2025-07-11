@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muscle & Blood Debug</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column; /* 세로 방향 정렬 */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #222;
+            font-family: Arial, sans-serif;
+            color: #eee;
+        }
+        #debugInfo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000; /* 캔버스 위에 표시되도록 */
+        }
+        canvas {
+            border: 2px solid #fff;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div id="debugInfo">
+        <h3>디버그 정보</h3>
+        <p>FPS: <span id="fpsCounter">--</span></p>
+        </div>
+    <canvas id="gameCanvas"></canvas>
+    <script type="module">
+        // Debug 페이지에서는 main.js의 일부 기능을 확장하여 사용합니다.
+        // GameLoop와 Renderer 모듈을 불러옵니다.
+        import { Renderer } from './js/Renderer.js';
+        import { GameLoop } from './js/GameLoop.js';
+        // 새로 만든 엔진 테스트 모듈을 불러옵니다.
+        import { runEngineTests } from './js/tests/engineTests.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const renderer = new Renderer('gameCanvas');
+            if (!renderer.canvas) {
+                console.error("Failed to initialize Renderer. Game cannot start.");
+                return;
+            }
+            const ctx = renderer.ctx;
+
+            let frameCount = 0;
+            let lastFpsTime = 0;
+            const fpsCounterElement = document.getElementById('fpsCounter');
+
+            // 게임 업데이트 함수 정의
+            const update = (deltaTime) => {
+                // 이곳에서 게임의 논리를 업데이트합니다.
+            };
+
+            // 게임 그리기 함수 정의
+            const draw = () => {
+                renderer.clear();
+                renderer.drawBackground();
+
+                ctx.fillStyle = 'white';
+                ctx.font = '48px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Muscle & Blood', renderer.canvas.width / 2, renderer.canvas.height / 2);
+                ctx.font = '24px Arial';
+                ctx.fillText('디버그 모드', renderer.canvas.width / 2, renderer.canvas.height / 2 + 50);
+
+                // FPS 카운터 업데이트
+                frameCount++;
+                const currentTime = performance.now();
+                if (currentTime - lastFpsTime >= 1000) { // 1초마다 업데이트
+                    const fps = frameCount / ((currentTime - lastFpsTime) / 1000);
+                    fpsCounterElement.textContent = fps.toFixed(0);
+                    frameCount = 0;
+                    lastFpsTime = currentTime;
+                }
+            };
+
+            const gameLoop = new GameLoop(update, draw);
+            gameLoop.start();
+
+            // 엔진 테스트 실행 (렌더러와 게임 루프 인스턴스를 전달합니다.)
+            runEngineTests(renderer, gameLoop);
+        });
+    </script>
+</body>
+</html>
