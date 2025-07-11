@@ -1,8 +1,8 @@
-// js/managers/UIManager.js
+// js/managers/UIEngine.js
 
-export class UIManager {
+export class UIEngine {
     constructor(renderer, measureManager, eventManager) {
-        console.log("\ud83d\udcbb UIManager initialized. Ready to draw interfaces. \ud83d\udcbb");
+        console.log("\ud83d\udcbb UIEngine initialized. Ready to draw interfaces. \ud83d\udcbb");
         this.renderer = renderer;
         this.measureManager = measureManager;
         this.eventManager = eventManager;
@@ -34,7 +34,7 @@ export class UIManager {
      * 캔버스 크기 변화나 측정값 변경 시 호출됩니다.
      */
     _recalculateUIDimensions() {
-        console.log("[UIManager] Recalculating UI dimensions based on MeasureManager...");
+        console.log("[UIEngine] Recalculating UI dimensions based on MeasureManager...");
         this.mapPanelWidth = this.canvas.width * this.measureManager.get('ui.mapPanelWidthRatio');
         this.mapPanelHeight = this.canvas.height * this.measureManager.get('ui.mapPanelHeightRatio');
         this.buttonHeight = this.measureManager.get('ui.buttonHeight');
@@ -52,11 +52,11 @@ export class UIManager {
     }
 
     _createUIStateEngine() {
-        console.log("[UIManager] Small Engine: UI State Engine created.");
+        console.log("[UIEngine] Small Engine: UI State Engine created.");
         return {
             getState: () => this.uiState,
             setState: (newState) => {
-                console.log(`[UIManager] UI State changed from '${this.uiState}' to '${newState}'`);
+                console.log(`[UIEngine] UI State changed from '${this.uiState}' to '${newState}'`);
                 this.uiState = newState;
             }
         };
@@ -72,7 +72,7 @@ export class UIManager {
                 mouseX >= this.battleStartButton.x && mouseX <= this.battleStartButton.x + this.battleStartButton.width &&
                 mouseY >= this.battleStartButton.y && mouseY <= this.battleStartButton.y + this.battleStartButton.height
             ) {
-                console.log("[UIManager] '전투 시작' 버튼 클릭됨!");
+                console.log("[UIEngine] '전투 시작' 버튼 클릭됨!");
                 this.eventManager.emit('battleStart', { mapId: 'currentMap', difficulty: 'normal' });
                 this.uiStateEngine.setState('combatScreen');
             }
