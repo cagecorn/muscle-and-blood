@@ -203,3 +203,128 @@ export function injectEventManagerFaults(eventManager) {
         console.warn(`--- EventManager Fault Injection End: ${faultPassCount}/${faultTestCount} faults tested ---`);
     }, 200);
 }
+
+/**
+ * GuardianManager의 기본적인 기능을 테스트합니다.
+ * @param {GuardianManager} guardianManager - GuardianManager 인스턴스.
+ */
+export function runGuardianManagerTests(guardianManager) {
+    console.log("--- GuardianManager Test Start ---");
+
+    let testCount = 0;
+    let passCount = 0;
+
+    // 1. GuardianManager 초기화 테스트
+    testCount++;
+    if (guardianManager) {
+        console.log("GuardianManager: Successfully initialized. [PASS]");
+        passCount++;
+    } else {
+        console.error("GuardianManager: Initialization failed. [FAIL]");
+    }
+
+    // 2. 유효한 데이터로 규칙 강제 테스트 (성공 예상)
+    testCount++;
+    const validData = {
+        units: [{ id: 'u1', name: 'Valid Unit', hp: 50 }],
+        config: { resolution: { width: 1024, height: 768 } }
+    };
+    try {
+        const result = guardianManager.enforceRules(validData);
+        if (result === true) {
+            console.log("GuardianManager: Enforced rules with valid data successfully. [PASS]");
+            passCount++;
+        } else {
+            console.error("GuardianManager: Enforced rules with valid data returned unexpected result. [FAIL]");
+        }
+    } catch (e) {
+        console.error("GuardianManager: Enforced rules with valid data threw an unexpected error. [FAIL]", e);
+    }
+
+    // 3. 유효하지 않은 데이터 (HP <= 0)로 규칙 강제 테스트 (오류 예상)
+    testCount++;
+    const invalidDataHp = {
+        units: [{ id: 'u2', name: 'Dead Unit', hp: 0 }],
+        config: { resolution: { width: 1024, height: 768 } }
+    };
+    try {
+        guardianManager.enforceRules(invalidDataHp);
+        console.error("GuardianManager: Enforced rules with invalid HP did not throw error. [FAIL]");
+    } catch (e) {
+        if (e.name === "ImmutableRuleViolationError") {
+            console.log("GuardianManager: Enforced rules with invalid HP threw expected ImmutableRuleViolationError. [PASS]", e.message);
+            passCount++;
+        } else {
+            console.error("GuardianManager: Enforced rules with invalid HP threw unexpected error. [FAIL]", e);
+        }
+    }
+
+    // 4. 유효하지 않은 데이터 (해상도 작음)로 규칙 강제 테스트 (오류 예상)
+    testCount++;
+    const invalidDataResolution = {
+        units: [{ id: 'u3', name: 'Another Unit', hp: 10 }],
+        config: { resolution: { width: 799, height: 599 } }
+    };
+    try {
+        guardianManager.enforceRules(invalidDataResolution);
+        console.error("GuardianManager: Enforced rules with invalid resolution did not throw error. [FAIL]");
+    } catch (e) {
+        if (e.name === "ImmutableRuleViolationError") {
+            console.log("GuardianManager: Enforced rules with invalid resolution threw expected ImmutableRuleViolationError. [PASS]", e.message);
+            passCount++;
+        } else {
+            console.error("GuardianManager: Enforced rules with invalid resolution threw unexpected error. [FAIL]", e);
+        }
+    }
+
+    console.log(`--- GuardianManager Test End: ${passCount}/${testCount} tests passed ---`);
+}
+
+/**
+ * GuardianManager에 결함을 주입하는 테스트입니다.
+ * @param {GuardianManager} guardianManager - GuardianManager 인스턴스.
+ */
+export function injectGuardianManagerFaults(guardianManager) {
+    console.warn("--- Injecting GuardianManager Faults ---");
+    let faultTestCount = 0;
+    let faultPassCount = 0;
+
+    // 1. 테스트: 유닛 데이터가 null일 때 (예상: 경고 또는 에러 없이 처리)
+    faultTestCount++;
+    try {
+        console.log("GuardianManager Fault Test (Null unit data): Enforcing rules with null units...");
+        guardianManager.enforceRules({ units: null, config: { resolution: { width: 1280, height: 720 } } });
+        console.log("GuardianManager Fault Test (Null unit data): Handled null unit data gracefully. [PASS]");
+        faultPassCount++;
+    } catch (e) {
+        console.error("GuardianManager Fault Test (Null unit data): Threw unexpected error. [FAIL]", e);
+    }
+
+    // 2. 테스트: 유닛 데이터가 배열이 아닐 때 (예상: TypeError 또는 경고)
+    faultTestCount++;
+    try {
+        console.log("GuardianManager Fault Test (Non-array unit data): Enforcing rules with non-array units...");
+        guardianManager.enforceRules({ units: "not an array", config: { resolution: { width: 1280, height: 720 } } });
+        console.error("GuardianManager Fault Test (Non-array unit data): Did not throw TypeError as expected. [FAIL]");
+    } catch (e) {
+        if (e instanceof TypeError) {
+            console.log("GuardianManager Fault Test (Non-array unit data): Threw expected TypeError. [PASS]", e);
+            faultPassCount++;
+        } else {
+            console.error("GuardianManager Fault Test (Non-array unit data): Threw unexpected error type. [FAIL]", e);
+        }
+    }
+
+    // 3. 테스트: 해상도 데이터가 누락되었을 때 (예상: 경고 또는 에러 없이 처리)
+    faultTestCount++;
+    try {
+        console.log("GuardianManager Fault Test (Missing resolution data): Enforcing rules with missing resolution...");
+        guardianManager.enforceRules({ units: [{ id: 'u4', name: 'Test Unit', hp: 1 }], config: {} });
+        console.log("GuardianManager Fault Test (Missing resolution data): Handled missing resolution data gracefully. [PASS]");
+        faultPassCount++;
+    } catch (e) {
+        console.error("GuardianManager Fault Test (Missing resolution data): Threw unexpected error. [FAIL]", e);
+    }
+
+    console.warn(`--- GuardianManager Fault Injection End: ${faultPassCount}/${faultTestCount} faults tested ---`);
+}

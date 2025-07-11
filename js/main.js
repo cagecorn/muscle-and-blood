@@ -3,6 +3,7 @@
 import { Renderer } from './Renderer.js';
 import { GameLoop } from './GameLoop.js';
 import { EventManager } from './managers/EventManager.js'; // <-- EventManager 불러오기
+import { GuardianManager } from './managers/GuardianManager.js'; // <-- GuardianManager 불러오기
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. 렌더러 엔진 초기화
@@ -15,6 +16,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. 이벤트 매니저 초기화
     const eventManager = new EventManager();
+    const guardianManager = new GuardianManager(); // <-- GuardianManager 인스턴스 생성
+
+    // 이곳에서 게임의 초기 데이터를 GuardianManager로 검증할 수 있습니다.
+    const initialGameData = {
+        units: [
+            { id: 'u1', name: 'Knight', hp: 100 },
+            { id: 'u2', name: 'Archer', hp: 70 }
+        ],
+        config: {
+            resolution: { width: 1280, height: 720 },
+            difficulty: 'normal'
+        }
+    };
+
+    try {
+        guardianManager.enforceRules(initialGameData);
+        console.log("[Main] Initial game data passed GuardianManager rules. \u2728");
+    } catch (e) {
+        if (e.name === "ImmutableRuleViolationError") {
+            console.error("[Main] CRITICAL ERROR: Game initialization failed due to immutable rule violation!", e.message);
+            return; // 오류 발생 시 게임 시작 중단
+        } else {
+            throw e;
+        }
+    }
 
     // 예시: 메인 스레드에서 'unitDeath' 이벤트를 구독
     eventManager.subscribe('unitDeath', (data) => {
@@ -50,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.textAlign = 'center';
         ctx.fillText('Muscle & Blood', renderer.canvas.width / 2, renderer.canvas.height / 2);
         ctx.font = '24px Arial';
-        ctx.fillText('이벤트 매니저 작동 중...', renderer.canvas.width / 2, renderer.canvas.height / 2 + 50);
+        ctx.fillText('가디언 매니저 작동 중...', renderer.canvas.width / 2, renderer.canvas.height / 2 + 50);
     };
 
     const gameLoop = new GameLoop(update, draw);
