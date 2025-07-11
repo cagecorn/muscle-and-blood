@@ -3,6 +3,9 @@ import { Renderer } from './Renderer.js';
 import { GameLoop } from './GameLoop.js';
 import { EventManager } from './managers/EventManager.js';
 import { GuardianManager } from './managers/GuardianManager.js';
+import { MeasureManager } from './managers/MeasureManager.js';
+import { MapManager } from './managers/MapManager.js';
+import { UIManager } from './managers/UIManager.js';
 
 export class GameEngine {
     constructor(canvasId) {
@@ -16,6 +19,15 @@ export class GameEngine {
         }
         this.eventManager = new EventManager();
         this.guardianManager = new GuardianManager();
+        this.measureManager = new MeasureManager();
+
+        // MeasureManager를 통해 Renderer의 해상도 설정
+        this.renderer.canvas.width = this.measureManager.get('gameResolution.width');
+        this.renderer.canvas.height = this.measureManager.get('gameResolution.height');
+
+        // MapManager 및 UIManager 초기화
+        this.mapManager = new MapManager(this.measureManager);
+        this.uiManager = new UIManager(this.renderer, this.measureManager, this.eventManager);
 
         // 게임의 핵심 로직과 렌더링 함수 정의 (GameLoop에 전달될 콜백)
         this._update = this._update.bind(this); // `this` 컨텍스트 바인딩
@@ -23,14 +35,14 @@ export class GameEngine {
 
         this.gameLoop = new GameLoop(this._update, this._draw);
 
-        // 초기 게임 데이터 및 규칙 검증
+        // 초기 게임 데이터 및 규칙 검증 (MeasureManager 값 활용)
         const initialGameData = {
             units: [
                 { id: 'u1', name: 'Knight', hp: 100 },
                 { id: 'u2', name: 'Archer', hp: 70 }
             ],
             config: {
-                resolution: { width: this.renderer.canvas.width, height: this.renderer.canvas.height },
+                resolution: this.measureManager.get('gameResolution'),
                 difficulty: 'normal'
             }
         };
@@ -55,6 +67,10 @@ export class GameEngine {
         this.eventManager.subscribe('skillExecuted', (data) => {
             console.log(`[GameEngine] Notification: Skill '${data.skillName}' was executed.`);
         });
+        this.eventManager.subscribe('battleStart', (data) => {
+            console.log(`[GameEngine] Battle started for map: ${data.mapId}, difficulty: ${data.difficulty}`);
+            // TODO: 실제 전투 준비 및 시작 로직
+        });
 
         console.log("\u2699\ufe0f GameEngine initialized successfully. \u2699\ufe0f");
     }
@@ -73,17 +89,19 @@ export class GameEngine {
      * 게임 루프의 그리기 단계에서 호출될 핵심 렌더링 함수입니다.
      */
     _draw() {
-        // 렌더러를 사용하여 모든 시각적 요소를 그립니다.
+        // 렌더러를 사용하여 기본 배경과 맵 정보를 그립니다.
         this.renderer.clear();
         this.renderer.drawBackground();
 
-        // 테스트용 텍스트 (나중에 제거하거나 실제 게임 요소로 대체)
-        this.renderer.ctx.fillStyle = 'white';
-        this.renderer.ctx.font = '48px Arial';
-        this.renderer.ctx.textAlign = 'center';
-        this.renderer.ctx.fillText('Muscle & Blood', this.renderer.canvas.width / 2, this.renderer.canvas.height / 2);
-        this.renderer.ctx.font = '24px Arial';
-        this.renderer.ctx.fillText('Game Engine is Running!', this.renderer.canvas.width / 2, this.renderer.canvas.height / 2 + 50);
+        const mapRenderData = this.mapManager.getMapRenderData();
+        this.renderer.ctx.fillStyle = 'gray';
+        this.renderer.ctx.font = '20px Arial';
+        this.renderer.ctx.textAlign = 'left';
+        this.renderer.ctx.fillText(`Map: ${mapRenderData.gridCols}x${mapRenderData.gridRows} Grid, Tile Size: ${mapRenderData.tileSize}`, 10, 30);
+        this.mapManager.pathfindingEngine.findPath(0, 0, 1, 1);
+
+        // UI 매니저가 UI를 그립니다.
+        this.uiManager.draw();
     }
 
     /**
@@ -105,5 +123,17 @@ export class GameEngine {
 
     getGuardianManager() {
         return this.guardianManager;
+    }
+
+    getMeasureManager() {
+        return this.measureManager;
+    }
+
+    getMapManager() {
+        return this.mapManager;
+    }
+
+    getUIManager() {
+        return this.uiManager;
     }
 }
