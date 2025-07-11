@@ -12,12 +12,10 @@ export class UIManager {
 
         this.uiState = 'mapScreen';
 
-        this.mapPanelWidth = this.canvas.width * this.measureManager.get('ui.mapPanelWidthRatio');
-        this.mapPanelHeight = this.canvas.height * this.measureManager.get('ui.mapPanelHeightRatio');
-        this.buttonHeight = this.measureManager.get('ui.buttonHeight');
-        this.buttonWidth = this.measureManager.get('ui.buttonWidth');
-        this.buttonMargin = this.measureManager.get('ui.buttonMargin');
+        // 초기 UI 크기 설정을 MeasureManager 값에 맞추어 계산
+        this._recalculateUIDimensions();
 
+        // UI 요소 초기화 (버튼 위치 계산)
         this.battleStartButton = {
             x: (this.canvas.width - this.buttonWidth) / 2,
             y: this.canvas.height - this.buttonHeight - this.buttonMargin,
@@ -29,6 +27,28 @@ export class UIManager {
         this.canvas.addEventListener('click', this._handleClick.bind(this));
 
         this.uiStateEngine = this._createUIStateEngine();
+    }
+
+    /**
+     * UI 요소들의 크기와 위치를 MeasureManager로부터 다시 계산합니다.
+     * 캔버스 크기 변화나 측정값 변경 시 호출됩니다.
+     */
+    _recalculateUIDimensions() {
+        console.log("[UIManager] Recalculating UI dimensions based on MeasureManager...");
+        this.mapPanelWidth = this.canvas.width * this.measureManager.get('ui.mapPanelWidthRatio');
+        this.mapPanelHeight = this.canvas.height * this.measureManager.get('ui.mapPanelHeightRatio');
+        this.buttonHeight = this.measureManager.get('ui.buttonHeight');
+        this.buttonWidth = this.measureManager.get('ui.buttonWidth');
+        this.buttonMargin = this.measureManager.get('ui.buttonMargin');
+
+        // 버튼 위치도 새로 계산
+        this.battleStartButton = {
+            x: (this.canvas.width - this.buttonWidth) / 2,
+            y: this.canvas.height - this.buttonHeight - this.buttonMargin,
+            width: this.buttonWidth,
+            height: this.buttonHeight,
+            text: '전투 시작'
+        };
     }
 
     _createUIStateEngine() {
@@ -96,5 +116,20 @@ export class UIManager {
             this.ctx.textAlign = 'center';
             this.ctx.fillText('전투 중!', this.canvas.width / 2, this.canvas.height / 2);
         }
+    }
+
+    // 테스트를 위해 맵 패널 크기와 버튼 크기를 반환합니다.
+    getMapPanelDimensions() {
+        return {
+            width: this.mapPanelWidth,
+            height: this.mapPanelHeight
+        };
+    }
+
+    getButtonDimensions() {
+        return {
+            width: this.battleStartButton.width,
+            height: this.battleStartButton.height
+        };
     }
 }

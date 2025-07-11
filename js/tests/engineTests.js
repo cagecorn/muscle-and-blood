@@ -328,3 +328,69 @@ export function injectGuardianManagerFaults(guardianManager) {
 
     console.warn(`--- GuardianManager Fault Injection End: ${faultPassCount}/${faultTestCount} faults tested ---`);
 }
+
+/**
+ * MeasureManager 통합 테스트를 실행합니다.
+ * MeasureManager의 값을 변경했을 때 UIManager와 MapManager가 올바르게 연동되는지 확인합니다.
+ * @param {GameEngine} gameEngine - GameEngine 인스턴스
+ */
+export function runMeasureManagerIntegrationTest(gameEngine) {
+    console.log("--- MeasureManager Integration Test Start ---");
+
+    const measureManager = gameEngine.getMeasureManager();
+    const uiManager = gameEngine.getUIManager();
+    const mapManager = gameEngine.getMapManager();
+
+    let testCount = 0;
+    let passCount = 0;
+
+    // 1. 초기 값 확인
+    testCount++;
+    const initialTileSize = measureManager.get('tileSize');
+    const initialMapGridCols = measureManager.get('mapGrid.cols');
+    const initialMapPanelWidthRatio = measureManager.get('ui.mapPanelWidthRatio');
+
+    const uiInitialMapPanelWidth = uiManager.getMapPanelDimensions().width;
+    const mapInitialTileSize = mapManager.getTileSize();
+    const mapInitialGridCols = mapManager.getGridDimensions().cols;
+
+    if (uiInitialMapPanelWidth > 0 && mapInitialTileSize === initialTileSize && mapInitialGridCols === initialMapGridCols) {
+        console.log("Integration Test: Initial dimensions loaded correctly. [PASS]");
+        passCount++;
+    } else {
+        console.error("Integration Test: Initial dimensions mismatch. [FAIL]");
+    }
+
+    // 2. MeasureManager 값 변경
+    testCount++;
+    const newTileSize = 256;
+    const newMapGridCols = 20;
+    const newMapPanelWidthRatio = 0.5;
+
+    measureManager.set('tileSize', newTileSize);
+    measureManager.set('mapGrid.cols', newMapGridCols);
+    measureManager.set('ui.mapPanelWidthRatio', newMapPanelWidthRatio);
+
+    // 3. 종속 매니저의 값 재계산 호출
+    uiManager._recalculateUIDimensions();
+    mapManager._recalculateMapDimensions();
+
+    // 4. 변경된 값 확인
+    const uiNewMapPanelWidth = uiManager.getMapPanelDimensions().width;
+    const mapNewTileSize = mapManager.getTileSize();
+    const mapNewGridCols = mapManager.getGridDimensions().cols;
+
+    const expectedUIMapPanelWidth = gameEngine.getRenderer().canvas.width * newMapPanelWidthRatio;
+
+    if (mapNewTileSize === newTileSize && mapNewGridCols === newMapGridCols && uiNewMapPanelWidth === expectedUIMapPanelWidth) {
+        console.log("Integration Test: Dimensions updated correctly after MeasureManager change. [PASS]");
+        passCount++;
+    } else {
+        console.error("Integration Test: Dimensions did not update as expected. [FAIL]");
+        console.error(`Expected Map Tile Size: ${newTileSize}, Actual: ${mapNewTileSize}`);
+        console.error(`Expected Map Grid Cols: ${newMapGridCols}, Actual: ${mapNewGridCols}`);
+        console.error(`Expected UI Map Panel Width: ${expectedUIMapPanelWidth}, Actual: ${uiNewMapPanelWidth}`);
+    }
+
+    console.log(`--- MeasureManager Integration Test End: ${passCount}/${testCount} tests passed ---`);
+}
