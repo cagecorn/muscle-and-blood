@@ -5,14 +5,24 @@ export class MapManager {
         console.log("\ud83d\udddc\ufe0f MapManager initialized. Ready to build worlds. \ud83d\udddc\ufe0f");
         this.measureManager = measureManager;
 
-        this.gridRows = this.measureManager.get('mapGrid.rows');
-        this.gridCols = this.measureManager.get('mapGrid.cols');
-        this.tileSize = this.measureManager.get('tileSize');
+        // 측정값을 기반으로 초기 맵 크기를 계산
+        this._recalculateMapDimensions();
 
         this.mapData = this._generateRandomMap();
         this.pathfindingEngine = this._createPathfindingEngine();
 
         console.log(`[MapManager] Map grid: ${this.gridCols}x${this.gridRows}, Tile size: ${this.tileSize}`);
+    }
+
+    /**
+     * 맵의 그리드 및 타일 크기를 MeasureManager로부터 다시 계산합니다.
+     * 측정값이 변경된 경우 호출됩니다.
+     */
+    _recalculateMapDimensions() {
+        console.log("[MapManager] Recalculating map dimensions based on MeasureManager...");
+        this.gridRows = this.measureManager.get('mapGrid.rows');
+        this.gridCols = this.measureManager.get('mapGrid.cols');
+        this.tileSize = this.measureManager.get('tileSize');
     }
 
     _createPathfindingEngine() {
@@ -60,5 +70,17 @@ export class MapManager {
             gridRows: this.gridRows,
             tileSize: this.tileSize
         };
+    }
+
+    // 테스트를 위해 그리드 크기와 타일 크기를 반환합니다.
+    getGridDimensions() {
+        return {
+            rows: this.gridRows,
+            cols: this.gridCols
+        };
+    }
+
+    getTileSize() {
+        return this.tileSize;
     }
 }

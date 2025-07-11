@@ -65,6 +65,7 @@
         
         <h4>엔진 기본 테스트</h4>
         <button id="runAllEngineTestsBtn">모든 엔진 테스트 실행</button>
+        <button id="runMeasureManagerIntegrationTestBtn">측량 매니저 통합 테스트</button>
 
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
@@ -87,8 +88,9 @@
             runEventManagerTests,
             injectEventManagerFaults,
             runGuardianManagerTests,
-            injectGuardianManagerFaults
-        } from './js/tests/engineTests.js'; 
+            injectGuardianManagerFaults,
+            runMeasureManagerIntegrationTest
+        } from './js/tests/engineTests.js';
 
         document.addEventListener('DOMContentLoaded', () => {
             let gameEngine; // gameEngine 인스턴스를 스코프 밖으로 뺍니다.
@@ -128,6 +130,11 @@
                 runEngineTests(renderer, gameLoop);
                 runEventManagerTests(eventManager);
                 runGuardianManagerTests(guardianManager);
+                runMeasureManagerIntegrationTest(gameEngine);
+            });
+
+            document.getElementById('runMeasureManagerIntegrationTestBtn').addEventListener('click', () => {
+                runMeasureManagerIntegrationTest(gameEngine);
             });
 
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
@@ -214,6 +221,7 @@
             runEngineTests(renderer, gameLoop);
             runEventManagerTests(eventManager); // EventManager 테스트도 자동 실행
             runGuardianManagerTests(guardianManager); // GuardianManager 테스트도 자동 실행
+            runMeasureManagerIntegrationTest(gameEngine); // MeasureManager 통합 테스트도 자동 실행
         });
     </script>
 </body>
