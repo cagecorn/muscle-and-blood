@@ -13,17 +13,23 @@ export class MeasureManager {
                 height: 720
             },
             ui: {
-                mapPanelWidthRatio: 0.7,
-                mapPanelHeightRatio: 0.9,
+                // 맵 패널이 캔버스를 거의 가득 채우도록 비율을 확대
+                mapPanelWidthRatio: 0.95,
+                mapPanelHeightRatio: 0.95,
                 buttonHeight: 50,
                 buttonWidth: 200,
                 buttonMargin: 10,
-                mapPanelColor: 'rgba(50, 50, 200, 0.7)'
+                // 맵 패널 기본 배경색은 검정색으로 통일
+                mapPanelColor: 'black'
             },
+            // 게임 월드의 위아래 여백(유닛 배치 등을 위한 패딩)
             gridPaddingY: 100,
             colors: {
+                // 실제 게임 화면을 채울 색상
                 gameScreen: 'yellow',
+                // 그리드 선 색상
                 grid: 'red',
+                // 전체 캔버스 기본 배경색
                 background: '#333'
             }
         };
