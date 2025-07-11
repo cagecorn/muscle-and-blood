@@ -6,9 +6,6 @@ import { GuardianManager } from './managers/GuardianManager.js';
 import { MeasureManager } from './managers/MeasureManager.js';
 import { MapManager } from './managers/MapManager.js';
 import { UIManager } from './managers/UIManager.js';
-import { GridManager } from './managers/GridManager.js';
-import { InputManager } from './managers/InputManager.js';
-import { CameraManager } from './managers/CameraManager.js';
 
 export class GameEngine {
     constructor(canvasId) {
@@ -31,11 +28,6 @@ export class GameEngine {
         // MapManager 및 UIManager 초기화
         this.mapManager = new MapManager(this.measureManager);
         this.uiManager = new UIManager(this.renderer, this.measureManager, this.eventManager);
-
-        // Camera, Grid, Input 매니저 초기화 (의존성 주의)
-        this.cameraManager = new CameraManager(this.renderer, this.measureManager, this.mapManager, this.uiManager);
-        this.gridManager = new GridManager(this.renderer, this.measureManager, this.mapManager);
-        this.inputManager = new InputManager(this.renderer.canvas, this.cameraManager);
 
         // 게임의 핵심 로직과 렌더링 함수 정의 (GameLoop에 전달될 콜백)
         this._update = this._update.bind(this); // `this` 컨텍스트 바인딩
@@ -107,9 +99,6 @@ export class GameEngine {
         this.renderer.ctx.textAlign = 'left';
         this.renderer.ctx.fillText(`Map: ${mapRenderData.gridCols}x${mapRenderData.gridRows} Grid, Tile Size: ${mapRenderData.tileSize}`, 10, 30);
 
-        // 카메라 변환을 적용하여 그리드 그리기
-        this.gridManager.draw(this.cameraManager.getTransform());
-
         // UI 매니저가 UI를 그립니다.
         this.uiManager.draw();
     }
@@ -145,17 +134,5 @@ export class GameEngine {
 
     getUIManager() {
         return this.uiManager;
-    }
-
-    getCameraManager() {
-        return this.cameraManager;
-    }
-
-    getGridManager() {
-        return this.gridManager;
-    }
-
-    getInputManager() {
-        return this.inputManager;
     }
 }
