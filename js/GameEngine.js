@@ -106,7 +106,6 @@ export class GameEngine {
         this.renderer.ctx.font = '20px Arial';
         this.renderer.ctx.textAlign = 'left';
         this.renderer.ctx.fillText(`Map: ${mapRenderData.gridCols}x${mapRenderData.gridRows} Grid, Tile Size: ${mapRenderData.tileSize}`, 10, 30);
-        this.mapManager.pathfindingEngine.findPath(0, 0, 1, 1);
 
         // 카메라 변환을 적용하여 그리드 그리기
         this.gridManager.draw(this.cameraManager.getTransform());
