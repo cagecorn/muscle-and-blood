@@ -5,7 +5,8 @@ import { EventManager } from './managers/EventManager.js';
 import { GuardianManager } from './managers/GuardianManager.js';
 import { MeasureManager } from './managers/MeasureManager.js';
 import { MapManager } from './managers/MapManager.js';
-import { UIManager } from './managers/UIManager.js';
+import { UIEngine } from './managers/UIEngine.js';
+import { LayerEngine } from './managers/LayerEngine.js';
 
 export class GameEngine {
     constructor(canvasId) {
@@ -25,9 +26,25 @@ export class GameEngine {
         this.renderer.canvas.width = this.measureManager.get('gameResolution.width');
         this.renderer.canvas.height = this.measureManager.get('gameResolution.height');
 
-        // MapManager 및 UIManager 초기화
+        // MapManager 및 UIEngine 초기화
         this.mapManager = new MapManager(this.measureManager);
-        this.uiManager = new UIManager(this.renderer, this.measureManager, this.eventManager);
+        this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager);
+
+        // LayerEngine 초기화
+        this.layerEngine = new LayerEngine(this.renderer);
+
+        // LayerEngine에 렌더링할 레이어 등록
+        this.layerEngine.registerLayer('mapLayer', (ctx) => {
+            const mapRenderData = this.mapManager.getMapRenderData();
+            ctx.fillStyle = 'gray';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Map: ${mapRenderData.gridCols}x${mapRenderData.gridRows} Grid, Tile Size: ${mapRenderData.tileSize}`, 10, 30);
+        }, 10);
+
+        this.layerEngine.registerLayer('uiLayer', () => {
+            this.uiEngine.draw();
+        }, 100);
 
         // 게임의 핵심 로직과 렌더링 함수 정의 (GameLoop에 전달될 콜백)
         this._update = this._update.bind(this); // `this` 컨텍스트 바인딩
@@ -89,18 +106,8 @@ export class GameEngine {
      * 게임 루프의 그리기 단계에서 호출될 핵심 렌더링 함수입니다.
      */
     _draw() {
-        // 렌더러를 사용하여 기본 배경과 맵 정보를 그립니다.
-        this.renderer.clear();
-        this.renderer.drawBackground();
-
-        const mapRenderData = this.mapManager.getMapRenderData();
-        this.renderer.ctx.fillStyle = 'gray';
-        this.renderer.ctx.font = '20px Arial';
-        this.renderer.ctx.textAlign = 'left';
-        this.renderer.ctx.fillText(`Map: ${mapRenderData.gridCols}x${mapRenderData.gridRows} Grid, Tile Size: ${mapRenderData.tileSize}`, 10, 30);
-
-        // UI 매니저가 UI를 그립니다.
-        this.uiManager.draw();
+        // LayerEngine을 사용하여 모든 등록된 레이어를 그립니다.
+        this.layerEngine.draw();
     }
 
     /**
@@ -132,7 +139,11 @@ export class GameEngine {
         return this.mapManager;
     }
 
-    getUIManager() {
-        return this.uiManager;
+    getUIEngine() {
+        return this.uiEngine;
+    }
+
+    getLayerEngine() {
+        return this.layerEngine;
     }
 }

@@ -4,7 +4,7 @@ export { runEventManagerTests } from './unit/eventManagerUnitTests.js';
 export { runGuardianManagerTests } from './unit/guardianManagerUnitTests.js';
 export { runMeasureManagerUnitTests } from './unit/measureManagerUnitTests.js';
 export { runMapManagerUnitTests } from './unit/mapManagerUnitTests.js';
-export { runUIManagerUnitTests } from './unit/uiManagerUnitTests.js';
+export { runUIEngineUnitTests } from './unit/uiEngineUnitTests.js';
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 

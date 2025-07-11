@@ -2,7 +2,7 @@ export function runMeasureManagerIntegrationTest(gameEngine) {
     console.log("--- MeasureManager Integration Test Start ---");
 
     const measureManager = gameEngine.getMeasureManager();
-    const uiManager = gameEngine.getUIManager();
+    const uiEngine = gameEngine.getUIEngine();
     const mapManager = gameEngine.getMapManager();
 
     let testCount = 0;
@@ -13,7 +13,7 @@ export function runMeasureManagerIntegrationTest(gameEngine) {
     const initialMapGridCols = measureManager.get('mapGrid.cols');
     const initialMapPanelWidthRatio = measureManager.get('ui.mapPanelWidthRatio');
 
-    const uiInitialMapPanelWidth = uiManager.getMapPanelDimensions().width;
+    const uiInitialMapPanelWidth = uiEngine.getMapPanelDimensions().width;
     const mapInitialTileSize = mapManager.getTileSize();
     const mapInitialGridCols = mapManager.getGridDimensions().cols;
 
@@ -33,10 +33,10 @@ export function runMeasureManagerIntegrationTest(gameEngine) {
     measureManager.set('mapGrid.cols', newMapGridCols);
     measureManager.set('ui.mapPanelWidthRatio', newMapPanelWidthRatio);
 
-    uiManager._recalculateUIDimensions();
+    uiEngine._recalculateUIDimensions();
     mapManager._recalculateMapDimensions();
 
-    const uiNewMapPanelWidth = uiManager.getMapPanelDimensions().width;
+    const uiNewMapPanelWidth = uiEngine.getMapPanelDimensions().width;
     const mapNewTileSize = mapManager.getTileSize();
     const mapNewGridCols = mapManager.getGridDimensions().cols;
 
