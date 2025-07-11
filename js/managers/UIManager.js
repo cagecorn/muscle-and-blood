@@ -11,6 +11,7 @@ export class UIManager {
         this.ctx = renderer.ctx;
 
         this.uiState = 'mapScreen';
+        this.mapPanelColor = this.measureManager.get('ui.mapPanelColor');
 
         // 초기 UI 크기 설정을 MeasureManager 값에 맞추어 계산
         this._recalculateUIDimensions();
@@ -27,10 +28,6 @@ export class UIManager {
         this.canvas.addEventListener('click', this._handleClick.bind(this));
 
         this.uiStateEngine = this._createUIStateEngine();
-
-        // 경계선 스타일 (맵 패널 배경은 LayerManager가 담당)
-        this.mapPanelBorderColor = 'white';
-        this.mapPanelBorderWidth = 2;
     }
 
     /**
@@ -84,23 +81,17 @@ export class UIManager {
     }
 
     draw() {
-        // 배경색 채우기는 LayerManager에서 수행하므로 UIManager는 경계선만 그린다.
-
-        // 맵 패널 경계선
-        const mapPanelRect = this.getMapPanelRect();
-        this.ctx.save();
-        this.ctx.strokeStyle = this.mapPanelBorderColor;
-        this.ctx.lineWidth = this.mapPanelBorderWidth;
-        this.ctx.strokeRect(
-            mapPanelRect.x,
-            mapPanelRect.y,
-            mapPanelRect.width,
-            mapPanelRect.height
-        );
-        this.ctx.restore();
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (this.uiStateEngine.getState() === 'mapScreen') {
-            // 맵 화면 UI 텍스트 및 버튼
+            this.ctx.fillStyle = this.mapPanelColor;
+            this.ctx.fillRect(
+                (this.canvas.width - this.mapPanelWidth) / 2,
+                (this.canvas.height - this.mapPanelHeight) / 2,
+                this.mapPanelWidth,
+                this.mapPanelHeight
+            );
             this.ctx.fillStyle = 'black';
             this.ctx.font = '30px Arial';
             this.ctx.textAlign = 'center';
