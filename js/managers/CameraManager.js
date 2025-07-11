@@ -16,6 +16,7 @@ export class CameraManager {
 
         this.minZoom = 0.1;
         this.maxZoom = 3.0;
+        this.gridPaddingY = measureManager.get('gridPaddingY');
 
         this.isDragging = false;
         this.lastMouseX = 0;
@@ -30,23 +31,23 @@ export class CameraManager {
     _initializeCameraView() {
         console.log("[CameraManager] Initializing camera view to fit map panel...");
         const mapPixelWidth = this.mapManager.getGridDimensions().cols * this.mapManager.getTileSize();
-        const mapPixelHeight = this.mapManager.getGridDimensions().rows * this.mapManager.getTileSize();
+        const totalGameWorldHeight = (this.mapManager.getGridDimensions().rows * this.mapManager.getTileSize()) + (this.gridPaddingY * 2);
 
         const mapPanelRect = this.uiManager.getMapPanelRect();
         const panelWidth = mapPanelRect.width;
         const panelHeight = mapPanelRect.height;
 
         const zoomX = panelWidth / mapPixelWidth;
-        const zoomY = panelHeight / mapPixelHeight;
+        const zoomY = panelHeight / totalGameWorldHeight;
         this.zoom = Math.min(zoomX, zoomY);
 
         this.minZoom = Math.min(this.minZoom, this.zoom);
 
         const scaledMapWidth = mapPixelWidth * this.zoom;
-        const scaledMapHeight = mapPixelHeight * this.zoom;
+        const scaledGameWorldHeight = totalGameWorldHeight * this.zoom;
 
         this.x = mapPanelRect.x + (panelWidth - scaledMapWidth) / 2;
-        this.y = mapPanelRect.y + (panelHeight - scaledMapHeight) / 2;
+        this.y = mapPanelRect.y + (panelHeight - scaledGameWorldHeight) / 2;
 
         console.log(`[CameraManager] Initial Camera: x=${this.x.toFixed(2)}, y=${this.y.toFixed(2)}, zoom=${this.zoom.toFixed(4)}`);
 
@@ -77,25 +78,26 @@ export class CameraManager {
     _clampCameraPosition() {
         const mapPixelWidth = this.mapManager.getGridDimensions().cols * this.mapManager.getTileSize();
         const mapPixelHeight = this.mapManager.getGridDimensions().rows * this.mapManager.getTileSize();
+        const totalGameWorldHeight = mapPixelHeight + (this.gridPaddingY * 2);
 
         const mapPanelRect = this.uiManager.getMapPanelRect();
         const viewWidth = mapPanelRect.width;
         const viewHeight = mapPanelRect.height;
 
         const scaledMapWidth = mapPixelWidth * this.zoom;
-        const scaledMapHeight = mapPixelHeight * this.zoom;
+        const scaledGameWorldHeight = totalGameWorldHeight * this.zoom;
 
         let minX = mapPanelRect.x + viewWidth - scaledMapWidth;
         let maxX = mapPanelRect.x;
-        let minY = mapPanelRect.y + viewHeight - scaledMapHeight;
+        let minY = mapPanelRect.y + viewHeight - scaledGameWorldHeight;
         let maxY = mapPanelRect.y;
 
         if (scaledMapWidth < viewWidth) {
             minX = mapPanelRect.x + (viewWidth - scaledMapWidth) / 2;
             maxX = minX;
         }
-        if (scaledMapHeight < viewHeight) {
-            minY = mapPanelRect.y + (viewHeight - scaledMapHeight) / 2;
+        if (scaledGameWorldHeight < viewHeight) {
+            minY = mapPanelRect.y + (viewHeight - scaledGameWorldHeight) / 2;
             maxY = minY;
         }
 
