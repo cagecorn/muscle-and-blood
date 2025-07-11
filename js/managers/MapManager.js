@@ -72,42 +72,6 @@ export class MapManager {
         };
     }
 
-    /**
-     * 맵 패널에 배경과 타일을 그립니다. UIEngine에서 호출되어
-     * "1층 게임 화면"을 담당합니다.
-     * @param {CanvasRenderingContext2D} ctx - 캔버스 렌더링 컨텍스트
-     * @param {number} offsetX - 그리기 시작할 X 오프셋
-     * @param {number} offsetY - 그리기 시작할 Y 오프셋
-     * @param {number} panelWidth - 맵 패널의 너비
-     * @param {number} panelHeight - 맵 패널의 높이
-     */
-    draw(ctx, offsetX, offsetY, panelWidth, panelHeight) {
-        // 맵 패널 전체를 채우는 기본 배경색
-        ctx.fillStyle = '#6B8E23';
-        ctx.fillRect(offsetX, offsetY, panelWidth, panelHeight);
-
-        // 타일 단위로 맵을 그림
-        const tileWidth = panelWidth / this.gridCols;
-        const tileHeight = panelHeight / this.gridRows;
-
-        for (let y = 0; y < this.gridRows; y++) {
-            for (let x = 0; x < this.gridCols; x++) {
-                const tileType = this.mapData[y][x];
-                const tileX = offsetX + x * tileWidth;
-                const tileY = offsetY + y * tileHeight;
-
-                if (tileType === 'obstacle') {
-                    ctx.fillStyle = '#8B4513';
-                } else {
-                    ctx.fillStyle = '#A0C060';
-                }
-                ctx.fillRect(tileX, tileY, tileWidth, tileHeight);
-            }
-        }
-
-        console.log('[MapManager] Map drawn.');
-    }
-
     // 테스트를 위해 그리드 크기와 타일 크기를 반환합니다.
     getGridDimensions() {
         return {

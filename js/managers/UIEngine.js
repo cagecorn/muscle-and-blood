@@ -1,20 +1,11 @@
 // js/managers/UIEngine.js
 
-// MapManager와 GridManager를 불러옵니다.
-import { MapManager } from './MapManager.js';
-import { GridManager } from './GridManager.js';
-
 export class UIEngine {
-    // 생성자에서 mapManager와 gridManager를 추가로 받습니다.
-    constructor(renderer, measureManager, eventManager, mapManager, gridManager) {
+    constructor(renderer, measureManager, eventManager) {
         console.log("\ud83d\udcbb UIEngine initialized. Ready to draw interfaces. \ud83d\udcbb");
         this.renderer = renderer;
         this.measureManager = measureManager;
         this.eventManager = eventManager;
-
-        // MapManager와 GridManager 인스턴스 저장
-        this.mapManager = mapManager;
-        this.gridManager = gridManager;
 
         this.canvas = renderer.canvas;
         this.ctx = renderer.ctx;
@@ -35,7 +26,6 @@ export class UIEngine {
 
         this.canvas.addEventListener('click', this._handleClick.bind(this));
 
-        // UI 상태를 관리하는 내부 "작은 엔진"
         this.uiStateEngine = this._createUIStateEngine();
     }
 
@@ -45,11 +35,8 @@ export class UIEngine {
      */
     _recalculateUIDimensions() {
         console.log("[UIEngine] Recalculating UI dimensions based on MeasureManager...");
-        // 맵 패널 크기를 계산하고 중앙에 배치하기 위한 좌표도 저장
         this.mapPanelWidth = this.canvas.width * this.measureManager.get('ui.mapPanelWidthRatio');
         this.mapPanelHeight = this.canvas.height * this.measureManager.get('ui.mapPanelHeightRatio');
-        this.mapPanelX = (this.canvas.width - this.mapPanelWidth) / 2;
-        this.mapPanelY = (this.canvas.height - this.mapPanelHeight) / 2;
         this.buttonHeight = this.measureManager.get('ui.buttonHeight');
         this.buttonWidth = this.measureManager.get('ui.buttonWidth');
         this.buttonMargin = this.measureManager.get('ui.buttonMargin');
@@ -93,33 +80,22 @@ export class UIEngine {
     }
 
     draw() {
-        // 전체 화면의 반투명 배경 (모든 UI 인터페이스의 공통 배경)
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (this.uiStateEngine.getState() === 'mapScreen') {
-            // 맵 패널 배경 (아파트 A동의 외부 형태)
             this.ctx.fillStyle = 'lightblue';
             this.ctx.fillRect(
-                this.mapPanelX,
-                this.mapPanelY,
+                (this.canvas.width - this.mapPanelWidth) / 2,
+                (this.canvas.height - this.mapPanelHeight) / 2,
                 this.mapPanelWidth,
                 this.mapPanelHeight
             );
-
-            // 1층 게임 화면 매니저 (MapManager) 호출
-            this.mapManager.draw(this.ctx, this.mapPanelX, this.mapPanelY, this.mapPanelWidth, this.mapPanelHeight);
-
-            // 2층 그리드 매니저 (GridManager) 호출
-            this.gridManager.draw(this.ctx, this.mapPanelX, this.mapPanelY, this.mapPanelWidth, this.mapPanelHeight);
-
-            // 맵 화면 텍스트 (옵션, 맵과 그리드 위에 그려집니다)
             this.ctx.fillStyle = 'black';
             this.ctx.font = '30px Arial';
             this.ctx.textAlign = 'center';
             this.ctx.fillText('맵 화면 (지도 영역)', this.canvas.width / 2, this.canvas.height / 2);
 
-            // '전투 시작' 버튼 (UI 요소)
             this.ctx.fillStyle = 'darkgreen';
             this.ctx.fillRect(
                 this.battleStartButton.x,
