@@ -7,6 +7,9 @@ import { MeasureManager } from './managers/MeasureManager.js';
 import { MapManager } from './managers/MapManager.js';
 import { UIEngine } from './managers/UIEngine.js';
 import { LayerEngine } from './managers/LayerEngine.js';
+import { TerritoryManager } from './managers/TerritoryManager.js';
+import { BattleStageManager } from './managers/BattleStageManager.js';
+import { BattleGridManager } from './managers/BattleGridManager.js';
 
 export class GameEngine {
     constructor(canvasId) {
@@ -30,20 +33,33 @@ export class GameEngine {
         this.mapManager = new MapManager(this.measureManager);
         this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager);
 
-        // LayerEngine 초기화
-        this.layerEngine = new LayerEngine(this.renderer);
+        // LayerEngine 초기화 (UIEngine 인스턴스 전달)
+        this.layerEngine = new LayerEngine(this.renderer, this.uiEngine);
 
-        // LayerEngine에 렌더링할 레이어 등록
-        this.layerEngine.registerLayer('mapLayer', (ctx) => {
-            const mapRenderData = this.mapManager.getMapRenderData();
-            ctx.fillStyle = 'gray';
-            ctx.font = '20px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText(`Map: ${mapRenderData.gridCols}x${mapRenderData.gridRows} Grid, Tile Size: ${mapRenderData.tileSize}`, 10, 30);
+        // 새로운 매니저들 초기화
+        this.territoryManager = new TerritoryManager(this.uiEngine); // UIEngine 전달
+        this.battleStageManager = new BattleStageManager(this.uiEngine); // UIEngine 전달
+        this.battleGridManager = new BattleGridManager(this.measureManager, this.uiEngine); // MeasureManager, UIEngine 전달
+
+        // LayerEngine에 렌더링할 레이어 등록 (zIndex는 그리는 순서를 결정합니다. 낮은 값이 먼저 그려집니다.)
+        // 영지 화면 (가장 낮은 zIndex, 배경 역할)
+        this.layerEngine.registerLayer('territoryLayer', (ctx) => {
+            this.territoryManager.draw(ctx);
+        }, 1);
+
+        // 전투 스테이지 (영지 화면 위에 그려지지만, 영지 화면이 숨겨질 때만 보임)
+        this.layerEngine.registerLayer('battleStageLayer', (ctx) => {
+            this.battleStageManager.draw(ctx);
         }, 10);
 
-        this.layerEngine.registerLayer('uiLayer', () => {
-            this.uiEngine.draw();
+        // 전투 그리드 (전투 스테이지 위에 그려짐)
+        this.layerEngine.registerLayer('battleGridLayer', (ctx) => {
+            this.battleGridManager.draw(ctx);
+        }, 20);
+
+        // UI 레이어 (가장 위에 그려져 버튼 등을 표시)
+        this.layerEngine.registerLayer('uiLayer', (ctx) => { // ctx를 전달하도록 수정
+            this.uiEngine.draw(ctx);
         }, 100);
 
         // 게임의 핵심 로직과 렌더링 함수 정의 (GameLoop에 전달될 콜백)

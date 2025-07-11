@@ -1,9 +1,10 @@
 // js/managers/LayerEngine.js
 
 export class LayerEngine {
-    constructor(renderer) {
+    constructor(renderer, uiEngine) { // uiEngine을 생성자로 받도록 수정
         console.log("\uD83C\uDCC3 LayerEngine initialized. Ready to manage rendering layers. \uD83C\uDCC3");
         this.renderer = renderer;
+        this.uiEngine = uiEngine; // UIEngine 저장
         this.layers = [];
     }
 
@@ -24,7 +25,8 @@ export class LayerEngine {
         this.renderer.drawBackground();
 
         for (const layer of this.layers) {
-            layer.drawFunction(this.renderer.ctx);
+            // 각 레이어의 drawFunction에 ctx와 uiEngine을 함께 전달
+            layer.drawFunction(this.renderer.ctx, this.uiEngine);
         }
     }
 }
