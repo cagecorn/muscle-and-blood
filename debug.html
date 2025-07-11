@@ -71,6 +71,7 @@
         <button id="injectUpdateFaultBtn" class="fault-btn">Update 함수 결함 주입</button>
         <button id="injectDrawFaultBtn" class="fault-btn">Draw 함수 결함 주입</button>
         <button id="injectEventManagerFaultsBtn" class="fault-btn">이벤트 매니저 결함 주입</button>
+        <button id="injectGuardianManagerFaultsBtn" class="fault-btn">가디언 매니저 결함 주입</button>
         <h4>이벤트 발생 시뮬레이션</h4>
         <button id="simulateEventsBtn">이벤트 시뮬레이션 시작/정지</button>
     </div>
@@ -79,16 +80,19 @@
         import { Renderer } from './js/Renderer.js';
         import { GameLoop } from './js/GameLoop.js';
         import { EventManager } from './js/managers/EventManager.js'; // EventManager 불러오기
+        import { GuardianManager } from './js/managers/GuardianManager.js'; // GuardianManager 불러오기
         // 엔진 테스트 모듈과 결함 주입 테스트 함수들을 불러옵니다.
-        import { 
-            runEngineTests, 
-            injectRendererFault, 
-            injectGameLoopFault, 
-            getFaultFlags, 
+        import {
+            runEngineTests,
+            injectRendererFault,
+            injectGameLoopFault,
+            getFaultFlags,
             setFaultFlag,
             runEventManagerTests, // 추가
-            injectEventManagerFaults // 추가
-        } from './js/tests/engineTests.js'; 
+            injectEventManagerFaults,
+            runGuardianManagerTests,    // 추가
+            injectGuardianManagerFaults // 추가
+        } from './js/tests/engineTests.js';
 
         document.addEventListener('DOMContentLoaded', () => {
             const renderer = new Renderer('gameCanvas');
@@ -99,6 +103,7 @@
             const ctx = renderer.ctx;
 
             const eventManager = new EventManager(); // EventManager 인스턴스 생성
+            const guardianManager = new GuardianManager(); // GuardianManager 인스턴스 생성
 
             // 테스트용 EventManager 구독 (debug.html에서만 필요)
             eventManager.subscribe('unitDeath', (data) => {
@@ -116,7 +121,8 @@
             // --- 버튼 이벤트 리스너 설정 ---
             document.getElementById('runAllEngineTestsBtn').addEventListener('click', () => {
                 runEngineTests(renderer, gameLoop);
-                runEventManagerTests(eventManager); // EventManager 테스트 실행
+                runEventManagerTests(eventManager);
+                runGuardianManagerTests(guardianManager); // GuardianManager 테스트 실행
             });
 
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
@@ -128,8 +134,11 @@
             document.getElementById('injectDrawFaultBtn').addEventListener('click', () => {
                 injectGameLoopFault('draw', setFaultFlag);
             });
-            document.getElementById('injectEventManagerFaultsBtn').addEventListener('click', () => { // 추가
+            document.getElementById('injectEventManagerFaultsBtn').addEventListener('click', () => {
                 injectEventManagerFaults(eventManager);
+            });
+            document.getElementById('injectGuardianManagerFaultsBtn').addEventListener('click', () => {
+                injectGuardianManagerFaults(guardianManager);
             });
 
             let isSimulatingEvents = false; // 이벤트 시뮬레이션 플래그 추가
@@ -180,7 +189,7 @@
                 ctx.textAlign = 'center';
                 ctx.fillText('Muscle & Blood', renderer.canvas.width / 2, renderer.canvas.height / 2);
                 ctx.font = '24px Arial';
-                ctx.fillText('디버그 모드 (이벤트 매니저 테스트)', renderer.canvas.width / 2, renderer.canvas.height / 2 + 50);
+                ctx.fillText('디버그 모드 (가디언 매니저 테스트)', renderer.canvas.width / 2, renderer.canvas.height / 2 + 50);
 
                 // FPS 카운터 업데이트
                 frameCount++;
