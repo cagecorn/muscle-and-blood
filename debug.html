@@ -77,33 +77,37 @@
     </div>
     <canvas id="gameCanvas"></canvas>
     <script type="module">
-        import { Renderer } from './js/Renderer.js';
-        import { GameLoop } from './js/GameLoop.js';
-        import { EventManager } from './js/managers/EventManager.js'; // EventManager 불러오기
-        import { GuardianManager } from './js/managers/GuardianManager.js'; // GuardianManager 불러오기
-        // 엔진 테스트 모듈과 결함 주입 테스트 함수들을 불러옵니다.
-        import {
-            runEngineTests,
-            injectRendererFault,
-            injectGameLoopFault,
-            getFaultFlags,
+        import { GameEngine } from './js/GameEngine.js'; // <-- GameEngine 불러오기
+        import { 
+            runEngineTests, 
+            injectRendererFault, 
+            injectGameLoopFault, 
+            getFaultFlags, 
             setFaultFlag,
-            runEventManagerTests, // 추가
+            runEventManagerTests,
             injectEventManagerFaults,
-            runGuardianManagerTests,    // 추가
-            injectGuardianManagerFaults // 추가
-        } from './js/tests/engineTests.js';
+            runGuardianManagerTests,
+            injectGuardianManagerFaults
+        } from './js/tests/engineTests.js'; 
 
         document.addEventListener('DOMContentLoaded', () => {
-            const renderer = new Renderer('gameCanvas');
-            if (!renderer.canvas) {
-                console.error('Failed to initialize Renderer. Game cannot start.');
-                return;
-            }
-            const ctx = renderer.ctx;
+            let gameEngine; // gameEngine 인스턴스를 스코프 밖으로 뺍니다.
 
-            const eventManager = new EventManager(); // EventManager 인스턴스 생성
-            const guardianManager = new GuardianManager(); // GuardianManager 인스턴스 생성
+            try {
+                gameEngine = new GameEngine('gameCanvas'); // GameEngine 인스턴스 생성
+                gameEngine.start(); // 게임 엔진 시작
+            } catch (error) {
+                console.error("Fatal Error in Debug Mode: Game Engine failed to start.", error);
+                // debug.html에서는 오류가 나도 계속 실행되도록 alert는 생략
+                return; // 오류 발생 시 디버그 페이지의 나머지 로직도 중단
+            }
+
+            // GameEngine에서 각 매니저 인스턴스를 가져옵니다.
+            const renderer = gameEngine.getRenderer();
+            const eventManager = gameEngine.getEventManager();
+            const guardianManager = gameEngine.getGuardianManager();
+            const gameLoop = gameEngine.gameLoop; // GameLoop는 GameEngine에서 직접 노출되지 않으므로, GameEngine 내부에 getter를 추가해야 할 수도 있습니다. (현재 예시에서는 gameEngine.gameLoop로 접근)
+
 
             // 테스트용 EventManager 구독 (debug.html에서만 필요)
             eventManager.subscribe('unitDeath', (data) => {
@@ -120,19 +124,29 @@
 
             // --- 버튼 이벤트 리스너 설정 ---
             document.getElementById('runAllEngineTestsBtn').addEventListener('click', () => {
+                // gameLoop는 gameEngine 내부에 있으므로 gameEngine.gameLoop로 전달 (혹은 getter)
                 runEngineTests(renderer, gameLoop);
                 runEventManagerTests(eventManager);
-                runGuardianManagerTests(guardianManager); // GuardianManager 테스트 실행
+                runGuardianManagerTests(guardianManager);
             });
 
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
                 injectRendererFault(renderer);
             });
             document.getElementById('injectUpdateFaultBtn').addEventListener('click', () => {
-                injectGameLoopFault('update', setFaultFlag);
+                // GameEngine의 _update/_draw 함수에 결함을 주입하려면,
+                // GameEngine 내부에서 _update/_draw가 getFaultFlags()를 호출해야 합니다.
+                // 현재 GameEngine의 _update/_draw에 이 로직이 없으므로,
+                // 이 버튼은 debug.html의 update/draw에 직접 영향을 미치지 않습니다.
+                // (이전 예시에서 debug.html 자체에 update/draw가 정의되어 있었기 때문)
+                // 따라서 이 버튼은 현재 debug.html의 _update/_draw 로직에 영향을 주지 않습니다.
+                // GameEngine의 _update/_draw 내부에서 faultFlags를 체크하도록 수정해야 합니다.
+                console.warn("Update/Draw fault injection in GameEngine is not directly supported by this debug button yet.");
+                console.warn("You need to modify GameEngine's _update and _draw methods to check getFaultFlags().");
             });
             document.getElementById('injectDrawFaultBtn').addEventListener('click', () => {
-                injectGameLoopFault('draw', setFaultFlag);
+                 console.warn("Update/Draw fault injection in GameEngine is not directly supported by this debug button yet.");
+                 console.warn("You need to modify GameEngine's _update and _draw methods to check getFaultFlags().");
             });
             document.getElementById('injectEventManagerFaultsBtn').addEventListener('click', () => {
                 injectEventManagerFaults(eventManager);
@@ -141,55 +155,28 @@
                 injectGuardianManagerFaults(guardianManager);
             });
 
-            let isSimulatingEvents = false; // 이벤트 시뮬레이션 플래그 추가
-            let lastEmittedSecond = -1; // 이벤트 시뮬레이션 타이머
-            document.getElementById('simulateEventsBtn').addEventListener('click', (e) => { // 추가
+            let isSimulatingEvents = false;
+            let lastEmittedSecond = -1;
+            document.getElementById('simulateEventsBtn').addEventListener('click', (e) => {
                 isSimulatingEvents = !isSimulatingEvents;
                 e.target.textContent = isSimulatingEvents ? '이벤트 시뮬레이션 정지' : '이벤트 시뮬레이션 시작';
                 if (!isSimulatingEvents) {
-                    console.log('Event simulation stopped.');
+                    console.log("Event simulation stopped.");
                 } else {
-                    console.log('Event simulation started. Check console.');
+                    console.log("Event simulation started. Check console.");
                 }
             });
 
 
-            // 게임 업데이트 함수 정의
-            const update = (deltaTime) => {
-                const faultFlags = getFaultFlags();
-                if (faultFlags.update) {
-                    setFaultFlag('update', false);
-                    throw new Error('Simulated Error: Something went wrong in update()!');
-                }
+            // 게임 업데이트 함수 정의 (DEBUG ONLY - GameEngine의 _update가 대신함)
+            // 이 함수는 더 이상 GameLoop에 직접 전달되지 않습니다.
+            // 대신 GameEngine 내부의 _update 메서드가 GameLoop에 전달됩니다.
+            // 하지만 FPS 카운터와 이벤트 시뮬레이션은 debug.html에서 별도로 관리할 수 있습니다.
 
-                // 이벤트 시뮬레이션 로직 (debug.html에서만)
-                if (isSimulatingEvents) {
-                    if (Math.floor(performance.now() / 1000) % 5 === 0 && Math.floor(performance.now() / 1000) !== lastEmittedSecond) {
-                        eventManager.emit('unitAttack', { attackerId: 'DebugHero', targetId: 'DebugGoblin', damageDealt: 15 });
-                        eventManager.emit('unitDeath', { unitId: 'DebugGoblin', unitName: '디버그 고블린', unitType: 'normal' });
-                        eventManager.emit('unitDeath', { unitId: 'DebugOgreBoss', unitName: '디버그 오우거 보스', unitType: 'elite' });
-                        lastEmittedSecond = Math.floor(performance.now() / 1000);
-                    }
-                }
-            };
-
-            // 게임 그리기 함수 정의
-            const draw = () => {
-                const faultFlags = getFaultFlags();
-                if (faultFlags.draw) {
-                    setFaultFlag('draw', false);
-                    throw new Error('Simulated Error: Drawing failed in draw()!');
-                }
-
-                renderer.clear();
-                renderer.drawBackground();
-
-                ctx.fillStyle = 'white';
-                ctx.font = '48px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Muscle & Blood', renderer.canvas.width / 2, renderer.canvas.height / 2);
-                ctx.font = '24px Arial';
-                ctx.fillText('디버그 모드 (가디언 매니저 테스트)', renderer.canvas.width / 2, renderer.canvas.height / 2 + 50);
+            // FPS 업데이트는 GameEngine의 _draw가 아닌 debug.html에서 계속 직접 처리
+            const originalDraw = gameEngine._draw; // GameEngine의 원래 _draw 함수를 저장
+            gameEngine._draw = function() { // GameEngine의 _draw를 오버라이드하여 FPS 로직 추가
+                originalDraw.apply(this, arguments); // 원래 _draw 함수 호출
 
                 // FPS 카운터 업데이트
                 frameCount++;
@@ -201,13 +188,32 @@
                     lastFpsTime = currentTime;
                 }
             };
+            
+            // 이벤트 시뮬레이션은 GameEngine의 _update와는 별개로 debug.html에서 직접 관리
+            const originalUpdate = gameEngine._update; // GameEngine의 원래 _update 함수를 저장
+            gameEngine._update = function(deltaTime) { // GameEngine의 _update를 오버라이드하여 이벤트 시뮬레이션 로직 추가
+                const faultFlags = getFaultFlags();
+                if (faultFlags.update) {
+                    setFaultFlag('update', false);
+                    throw new Error("Simulated Error: Something went wrong in GameEngine's _update()!");
+                }
 
-            const gameLoop = new GameLoop(update, draw);
-            gameLoop.start();
+                originalUpdate.apply(this, arguments); // 원래 _update 함수 호출
+
+                if (isSimulatingEvents) {
+                    if (Math.floor(performance.now() / 1000) % 5 === 0 && Math.floor(performance.now() / 1000) !== lastEmittedSecond) {
+                        eventManager.emit('unitAttack', { attackerId: 'DebugHero', targetId: 'DebugGoblin', damageDealt: 15 });
+                        eventManager.emit('unitDeath', { unitId: 'DebugGoblin', unitName: '디버그 고블린', unitType: 'normal' });
+                        eventManager.emit('unitDeath', { unitId: 'DebugOgreBoss', unitName: '디버그 오우거 보스', unitType: 'elite' });
+                        lastEmittedSecond = Math.floor(performance.now() / 1000);
+                    }
+                }
+            };
 
             // 페이지 로드 시 기본 엔진 테스트 자동 실행
             runEngineTests(renderer, gameLoop);
-            // EventManager 테스트는 이제 버튼으로 실행됩니다.
+            runEventManagerTests(eventManager); // EventManager 테스트도 자동 실행
+            runGuardianManagerTests(guardianManager); // GuardianManager 테스트도 자동 실행
         });
     </script>
 </body>
