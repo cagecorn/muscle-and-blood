@@ -26,6 +26,19 @@
             border-radius: 5px;
             z-index: 1000; /* 캔버스 위에 표시되도록 */
         }
+        #debugInfo button {
+            background-color: #f44336; /* 빨간색 버튼 */
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        #debugInfo button:hover {
+            background-color: #d32f2f;
+        }
         canvas {
             border: 2px solid #fff;
             background-color: #000;
@@ -36,15 +49,19 @@
     <div id="debugInfo">
         <h3>디버그 정보</h3>
         <p>FPS: <span id="fpsCounter">--</span></p>
-        </div>
+        <h4>결함 주입 테스트</h4>
+        <button id="injectRendererFaultBtn">렌더러 결함 주입</button>
+        <button id="injectUpdateFaultBtn">Update 함수 결함 주입</button>
+        <button id="injectDrawFaultBtn">Draw 함수 결함 주입</button>
+    </div>
     <canvas id="gameCanvas"></canvas>
     <script type="module">
         // Debug 페이지에서는 main.js의 일부 기능을 확장하여 사용합니다.
         // GameLoop와 Renderer 모듈을 불러옵니다.
         import { Renderer } from './js/Renderer.js';
         import { GameLoop } from './js/GameLoop.js';
-        // 새로 만든 엔진 테스트 모듈을 불러옵니다.
-        import { runEngineTests } from './js/tests/engineTests.js';
+        // 엔진 테스트 모듈과 결함 주입 테스트 함수들을 불러옵니다.
+        import { runEngineTests, injectRendererFault, injectGameLoopFault, getFaultFlags, setFaultFlag } from './js/tests/engineTests.js';
 
         document.addEventListener('DOMContentLoaded', () => {
             const renderer = new Renderer('gameCanvas');
@@ -58,13 +75,35 @@
             let lastFpsTime = 0;
             const fpsCounterElement = document.getElementById('fpsCounter');
 
+            // 결함 주입 버튼 이벤트 리스너 설정
+            document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
+                injectRendererFault(renderer);
+            });
+            document.getElementById('injectUpdateFaultBtn').addEventListener('click', () => {
+                injectGameLoopFault('update', setFaultFlag);
+            });
+            document.getElementById('injectDrawFaultBtn').addEventListener('click', () => {
+                injectGameLoopFault('draw', setFaultFlag);
+            });
+
             // 게임 업데이트 함수 정의
             const update = (deltaTime) => {
                 // 이곳에서 게임의 논리를 업데이트합니다.
+                const faultFlags = getFaultFlags();
+                if (faultFlags.update) {
+                    setFaultFlag('update', false); // 한 번만 오류 발생
+                    throw new Error("Simulated Error: Something went wrong in update()!");
+                }
             };
 
             // 게임 그리기 함수 정의
             const draw = () => {
+                const faultFlags = getFaultFlags();
+                if (faultFlags.draw) {
+                    setFaultFlag('draw', false); // 한 번만 오류 발생
+                    throw new Error("Simulated Error: Drawing failed in draw()!");
+                }
+
                 renderer.clear();
                 renderer.drawBackground();
 
