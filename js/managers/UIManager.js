@@ -118,6 +118,22 @@ export class UIManager {
         }
     }
 
+    /**
+     * 맵 화면 패널이 캔버스 내에서 차지하는 영역의 정보를 반환합니다.
+     * CameraManager가 이를 참조하여 맵의 초기 줌 및 드래그 경계를 계산합니다.
+     * @returns {{x: number, y: number, width: number, height: number}} 맵 패널의 픽셀 좌표와 크기
+     */
+    getMapPanelRect() {
+        const x = (this.canvas.width - this.mapPanelWidth) / 2;
+        const y = (this.canvas.height - this.mapPanelHeight) / 2;
+        return {
+            x: x,
+            y: y,
+            width: this.mapPanelWidth,
+            height: this.mapPanelHeight
+        };
+    }
+
     // 테스트를 위해 맵 패널 크기와 버튼 크기를 반환합니다.
     getMapPanelDimensions() {
         return {
