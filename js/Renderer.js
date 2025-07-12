@@ -8,9 +8,7 @@ export class Renderer {
         }
         this.ctx = this.canvas.getContext('2d');
 
-        // 캔버스 크기 설정 (게임 디자인에 맞게 조절 가능)
-        this.canvas.width = 1280;
-        this.canvas.height = 720;
+        // 캔버스 크기 설정은 CompatibilityManager를 통해 동적으로 결정됩니다.
 
         console.log("Renderer initialized.");
     }
