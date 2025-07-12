@@ -1,15 +1,16 @@
 // js/managers/MercenaryPanelManager.js
 
-import { Renderer } from '../Renderer.js';
+// Renderer는 이제 PanelEngine 또는 상위 GameEngine에서 관리되므로 여기서는 필요 없습니다.
 
 export class MercenaryPanelManager {
-    constructor(mercenaryCanvasId, measureManager, battleSimulationManager) {
+    // 생성자에서 캔버스 ID 대신 캔버스 요소를 직접 받도록 변경합니다.
+    constructor(mercenaryCanvasElement, measureManager, battleSimulationManager, logicManager) { // ✨ logicManager 추가
         console.log("\uD83D\uDC65 MercenaryPanelManager initialized. Ready to display mercenary details. \uD83D\uDC65");
-        this.renderer = new Renderer(mercenaryCanvasId);
-        this.canvas = this.renderer.canvas;
-        this.ctx = this.renderer.ctx;
+        this.canvas = mercenaryCanvasElement; // ✨ 캔버스 요소를 직접 받습니다.
+        this.ctx = this.canvas.getContext('2d'); // ✨ 컨텍스트를 직접 얻습니다.
         this.measureManager = measureManager;
-        this.battleSimulationManager = battleSimulationManager;
+        this.battleSimulationManager = battleSimulationManager; // 유닛 데이터를 가져오기 위함
+        this.logicManager = logicManager; // ✨ LogicManager 추가
 
         this.gridRows = 2; // 세로로 2줄
         this.gridCols = 6; // 가로로 6칸
@@ -17,14 +18,13 @@ export class MercenaryPanelManager {
 
         this.recalculatePanelDimensions();
 
+        // 창 크기 변경 시 치수 조정 (패널 캔버스 자체의 크기는 HTML/CSS에 의해 조정됩니다.)
+        // 따라서 여기서는 내부 그리드 계산만 다시 하면 됩니다.
         window.addEventListener('resize', this.recalculatePanelDimensions.bind(this));
     }
 
     recalculatePanelDimensions() {
-        // CSS 크기와 캔버스 해상도를 동기화
-        this.canvas.width = this.canvas.offsetWidth;
-        this.canvas.height = this.canvas.offsetHeight;
-
+        // 실제 캔버스 요소의 현재 크기를 기반으로 계산
         this.slotWidth = this.canvas.width / this.gridCols;
         this.slotHeight = this.canvas.height / this.gridRows;
         console.log(`[MercenaryPanelManager] Panel dimensions recalculated. Slot size: ${this.slotWidth}x${this.slotHeight}`);
@@ -32,7 +32,8 @@ export class MercenaryPanelManager {
 
     /**
      * 용병 패널과 그리드를 그립니다.
-     * @param {CanvasRenderingContext2D} ctx - 캔버스 2D 렌더링 컨텍스트 (이 매니저의 캔버스 컨텍스트)
+     * 이 메서드는 PanelEngine에 의해 호출되며, 해당 패널 캔버스의 컨텍스트를 받습니다.
+     * @param {CanvasRenderingContext2D} ctx - 패널 캔버스의 2D 렌더링 컨텍스트
      */
     draw(ctx) {
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

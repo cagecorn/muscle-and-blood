@@ -19,6 +19,7 @@ import { VFXManager } from './managers/VFXManager.js';
 import { BindingManager } from './managers/BindingManager.js';
 import { BattleCalculationManager } from './managers/BattleCalculationManager.js';
 import { MercenaryPanelManager } from './managers/MercenaryPanelManager.js'; // ✨ 새롭게 추가
+import { PanelEngine } from './managers/PanelEngine.js'; // ✨ 새롭게 추가
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -87,12 +88,25 @@ export class GameEngine {
         this.bindingManager = new BindingManager();
         this.battleCalculationManager = new BattleCalculationManager(this.eventManager, this.battleSimulationManager);
 
-        // ✨ MercenaryPanelManager 초기화
+        // ✨ PanelEngine 초기화
+        this.panelEngine = new PanelEngine();
+
+        // 용병 패널 캔버스 요소를 직접 가져옵니다.
+        const mercenaryPanelCanvasElement = document.getElementById('mercenaryPanelCanvas');
+        if (!mercenaryPanelCanvasElement) {
+            console.error("GameEngine: Mercenary Panel Canvas not found. Game cannot proceed without it.");
+            throw new Error("Mercenary Panel Canvas initialization failed.");
+        }
+
+        // MercenaryPanelManager 초기화 시 캔버스 요소와 LogicManager 전달
         this.mercenaryPanelManager = new MercenaryPanelManager(
-            'mercenaryPanelCanvas',
+            mercenaryPanelCanvasElement, // ✨ 캔버스 ID 대신 DOM 요소 자체를 전달
             this.measureManager,
-            this.battleSimulationManager
+            this.battleSimulationManager,
+            this.logicManager // ✨ LogicManager도 함께 전달
         );
+        // PanelEngine에 용병 패널 등록
+        this.panelEngine.registerPanel('mercenaryPanel', this.mercenaryPanelManager);
 
         this.sceneEngine.registerScene('territoryScene', [this.territoryManager]);
         this.sceneEngine.registerScene('battleScene', [
@@ -112,10 +126,6 @@ export class GameEngine {
             this.uiEngine.draw(ctx);
         }, 100);
 
-        // ✨ 용병 패널 레이어 등록 (UI 레이어보다 높은 zIndex로 최상단에 표시)
-        this.layerEngine.registerLayer('mercenaryPanelLayer', (ctx) => {
-            this.mercenaryPanelManager.draw(ctx);
-        }, 110);
 
         this._update = this._update.bind(this);
         this._draw = this._draw.bind(this);
@@ -218,6 +228,10 @@ export class GameEngine {
 
     _draw() {
         this.layerEngine.draw();
+        // 메인 캔버스와는 별도로 관리되는 패널도 그립니다.
+        if (this.panelEngine) {
+            this.panelEngine.drawPanel('mercenaryPanel', this.mercenaryPanelManager.ctx);
+        }
     }
 
     start() {
