@@ -18,6 +18,12 @@ export class MeasureManager {
                 buttonHeight: 50,
                 buttonWidth: 200,
                 buttonMargin: 10
+            },
+            // 새로 추가된 배틀 스테이지 크기와 내부 여백 설정
+            battleStage: {
+                widthRatio: 0.9, // 캔버스 너비 대비 배틀 스테이지 너비 비율
+                heightRatio: 0.8, // 캔버스 높이 대비 배틀 스테이지 높이 비율
+                padding: 40 // 배틀 스테이지 내부 여백 (그리드가 이 여백 안에 그려진다)
             }
         };
     }
