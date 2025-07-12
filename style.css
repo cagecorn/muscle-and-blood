@@ -1,14 +1,31 @@
 body {
     margin: 0;
-    overflow: hidden; /* Prevent scrollbar */
+    overflow: hidden; /* 스크롤바 방지 */
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #333; /* Background color */
+    background-color: #333; /* 배경색 */
+    flex-direction: column; /* 자식 요소들을 세로로 정렬 */
+}
+
+/* 두 캔버스를 담는 컨테이너 */
+#gameContainer {
+    display: flex;
+    flex-direction: column; /* 캔버스들을 세로로 정렬 */
+    align-items: center; /* 컨테이너 내에서 캔버스들을 수평 중앙 정렬 */
 }
 
 canvas {
-    border: 2px solid #fff; /* Canvas border */
-    background-color: #000; /* Canvas background */
+    border: 2px solid #fff; /* 캔버스 테두리 */
+    background-color: #000; /* 캔버스 배경 */
+    display: block; /* 캔버스 아래 추가 공간 방지 */
+}
+
+/* 용병 패널 캔버스 전용 스타일 */
+#mercenaryPanelCanvas {
+    width: 100%; /* 컨테이너(gameContainer)의 전체 너비 사용 */
+    height: 150px; /* 패널의 고정 높이 */
+    margin-bottom: 10px; /* 패널과 메인 게임 캔버스 사이의 간격 */
+    border: 2px solid #00f; /* 구분을 위한 다른 테두리 색상 */
 }
