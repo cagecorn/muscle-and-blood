@@ -4,7 +4,7 @@
 
 export class MercenaryPanelManager {
     // 생성자에서 캔버스 ID 대신 캔버스 요소를 직접 받도록 변경합니다.
-    constructor(mercenaryCanvasElement, measureManager, battleSimulationManager, logicManager) { // ✨ logicManager 추가
+    constructor(mercenaryCanvasElement, measureManager, battleSimulationManager, logicManager) {
         console.log("\uD83D\uDC65 MercenaryPanelManager initialized. Ready to display mercenary details. \uD83D\uDC65");
         this.canvas = mercenaryCanvasElement; // ✨ 캔버스 요소를 직접 받습니다.
         this.ctx = this.canvas.getContext('2d'); // ✨ 컨텍스트를 직접 얻습니다.
@@ -12,22 +12,27 @@ export class MercenaryPanelManager {
         this.battleSimulationManager = battleSimulationManager; // 유닛 데이터를 가져오기 위함
         this.logicManager = logicManager; // ✨ LogicManager 추가
 
-        this.gridRows = 2; // 세로로 2줄
-        this.gridCols = 6; // 가로로 6칸
-        this.numSlots = this.gridRows * this.gridCols; // 총 12칸
+        // ✨ MeasureManager에서 그리드 행/열 정보를 가져옴
+        this.gridRows = this.measureManager.get('mercenaryPanel.gridRows');
+        this.gridCols = this.measureManager.get('mercenaryPanel.gridCols');
+        this.numSlots = this.gridRows * this.gridCols;
 
         this.recalculatePanelDimensions();
 
-        // 창 크기 변경 시 치수 조정 (패널 캔버스 자체의 크기는 HTML/CSS에 의해 조정됩니다.)
-        // 따라서 여기서는 내부 그리드 계산만 다시 하면 됩니다.
-        window.addEventListener('resize', this.recalculatePanelDimensions.bind(this));
+        // ✨ 캔버스 크기가 MeasureManager에 의해 고정되므로, window.resize 이벤트 리스너는 제거합니다.
     }
 
     recalculatePanelDimensions() {
-        // 실제 캔버스 요소의 현재 크기를 기반으로 계산
+        // ✨ MeasureManager에서 패널의 고정된 너비와 높이를 가져와 캔버스 속성으로 설정
+        const panelWidth = this.measureManager.get('mercenaryPanel.width');
+        const panelHeight = this.measureManager.get('mercenaryPanel.height');
+
+        this.canvas.width = panelWidth; // 캔버스 내부 드로잉 버퍼의 너비 설정
+        this.canvas.height = panelHeight; // 캔버스 내부 드로잉 버퍼의 높이 설정
+
         this.slotWidth = this.canvas.width / this.gridCols;
         this.slotHeight = this.canvas.height / this.gridRows;
-        console.log(`[MercenaryPanelManager] Panel dimensions recalculated. Slot size: ${this.slotWidth}x${this.slotHeight}`);
+        console.log(`[MercenaryPanelManager] Panel dimensions recalculated and canvas size set to: ${this.canvas.width}x${this.canvas.height}. Slot size: ${this.slotWidth}x${this.slotHeight}`);
     }
 
     /**
