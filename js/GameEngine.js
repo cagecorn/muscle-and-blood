@@ -20,6 +20,7 @@ import { BindingManager } from './managers/BindingManager.js';
 import { BattleCalculationManager } from './managers/BattleCalculationManager.js';
 import { MercenaryPanelManager } from './managers/MercenaryPanelManager.js'; // ✨ MercenaryPanelManager 추가
 import { PanelEngine } from './managers/PanelEngine.js'; // ✨ PanelEngine 추가
+import { RuleManager } from './managers/RuleManager.js'; // ✨ RuleManager 추가
 
 import { TurnEngine } from './managers/TurnEngine.js'; // ✨ TurnEngine 추가
 import { DelayEngine } from './managers/DelayEngine.js'; // ✨ DelayEngine 추가
@@ -48,6 +49,8 @@ export class GameEngine {
         this.eventManager = new EventManager();
         this.guardianManager = new GuardianManager();
         this.measureManager = new MeasureManager();
+        // 게임 규칙을 관리하는 RuleManager 초기화
+        this.ruleManager = new RuleManager();
 
         // SceneEngine 초기화 (LogicManager보다 먼저 초기화되어야 함)
         this.sceneEngine = new SceneEngine();
@@ -230,6 +233,8 @@ export class GameEngine {
         // 1. IdManager에 전사 유닛과 클래스 ID 등록
         await this.idManager.addOrUpdateId(UNITS.WARRIOR.id, UNITS.WARRIOR);
         await this.idManager.addOrUpdateId(CLASSES.WARRIOR.id, CLASSES.WARRIOR);
+        // ✨ 새롭게 추가된 해골 클래스도 등록
+        await this.idManager.addOrUpdateId(CLASSES.SKELETON.id, CLASSES.SKELETON);
 
         // 2. AssetLoaderManager로 전사 스프라이트 로드
         await this.assetLoaderManager.loadImage(
@@ -288,6 +293,7 @@ export class GameEngine {
     getRenderer() { return this.renderer; }
     getEventManager() { return this.eventManager; }
     getGuardianManager() { return this.guardianManager; }
+    getRuleManager() { return this.ruleManager; }
     getMeasureManager() { return this.measureManager; }
     getMapManager() { return this.mapManager; }
     getUIEngine() { return this.uiEngine; }
