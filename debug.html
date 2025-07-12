@@ -68,7 +68,7 @@
         <button id="runMeasureManagerIntegrationTestBtn">측량 매니저 통합 테스트</button>
 
         <h4>개별 유닛 테스트</h4>
-        <button id="runSceneManagerUnitTestsBtn">SceneManager 유닛 테스트</button>
+        <button id="runSceneEngineUnitTestsBtn">SceneEngine 유닛 테스트</button>
         <button id="runLogicManagerUnitTestsBtn">LogicManager 유닛 테스트</button>
         <button id="runCompatibilityManagerUnitTestsBtn">CompatibilityManager 유닛 테스트</button>
         <button id="runEventManagerUnitTestsBtn">EventManager 유닛 테스트</button>
@@ -80,7 +80,7 @@
         <button id="injectDrawFaultBtn" class="fault-btn">Draw 함수 결함 주입</button>
         <button id="injectEventManagerFaultsBtn" class="fault-btn">이벤트 매니저 결함 주입</button>
         <button id="injectGuardianManagerFaultsBtn" class="fault-btn">가디언 매니저 결함 주입</button>
-        <button id="injectSceneManagerFaultsBtn" class="fault-btn">SceneManager 결함 주입</button>
+        <button id="injectSceneEngineFaultsBtn" class="fault-btn">SceneEngine 결함 주입</button>
         <button id="injectLogicManagerFaultsBtn" class="fault-btn">LogicManager 결함 주입</button>
         <button id="injectCompatibilityManagerFaultsBtn" class="fault-btn">CompatibilityManager 결함 주입</button>
         <h4>이벤트 발생 시뮬레이션</h4>
@@ -100,8 +100,8 @@
             runGuardianManagerTests,
             injectGuardianManagerFaults,
             runMeasureManagerIntegrationTest,
-            runSceneManagerUnitTests,
-            injectSceneManagerFaults,
+            runSceneEngineUnitTests,
+            injectSceneEngineFaults,
             runLogicManagerUnitTests,
             injectLogicManagerFaults,
             runCompatibilityManagerUnitTests,
@@ -126,7 +126,7 @@
             const guardianManager = gameEngine.getGuardianManager();
             const gameLoop = gameEngine.gameLoop; // GameLoop는 GameEngine에서 직접 노출되지 않으므로, GameEngine 내부에 getter를 추가해야 할 수도 있습니다. (현재 예시에서는 gameEngine.gameLoop로 접근)
             // 새로운 매니저 인스턴스 가져오기
-            const sceneManager = gameEngine.getSceneManager();
+            const sceneEngine = gameEngine.getSceneEngine();
             const logicManager = gameEngine.getLogicManager();
             const compatibilityManager = gameEngine.getCompatibilityManager();
 
@@ -152,7 +152,7 @@
                 runGuardianManagerTests(guardianManager);
                 runMeasureManagerIntegrationTest(gameEngine);
                 // 모든 유닛 테스트에 새 매니저 추가
-                runSceneManagerUnitTests(sceneManager);
+                runSceneEngineUnitTests(sceneEngine);
                 runLogicManagerUnitTests(logicManager);
                 runCompatibilityManagerUnitTests(compatibilityManager);
             });
@@ -162,8 +162,8 @@
             });
 
             // 개별 유닛 테스트 버튼 리스너 추가
-            document.getElementById('runSceneManagerUnitTestsBtn').addEventListener('click', () => {
-                runSceneManagerUnitTests(sceneManager);
+            document.getElementById('runSceneEngineUnitTestsBtn').addEventListener('click', () => {
+                runSceneEngineUnitTests(sceneEngine);
             });
             document.getElementById('runLogicManagerUnitTestsBtn').addEventListener('click', () => {
                 runLogicManagerUnitTests(logicManager);
@@ -203,8 +203,8 @@
                 injectGuardianManagerFaults(guardianManager);
             });
             // 새로운 결함 주입 테스트 버튼 리스너 추가
-            document.getElementById('injectSceneManagerFaultsBtn').addEventListener('click', () => {
-                injectSceneManagerFaults(sceneManager);
+            document.getElementById('injectSceneEngineFaultsBtn').addEventListener('click', () => {
+                injectSceneEngineFaults(sceneEngine);
             });
             document.getElementById('injectLogicManagerFaultsBtn').addEventListener('click', () => {
                 injectLogicManagerFaults(logicManager);
@@ -273,7 +273,7 @@
             runEventManagerTests(eventManager); // EventManager 테스트도 자동 실행
             runGuardianManagerTests(guardianManager); // GuardianManager 테스트도 자동 실행
             runMeasureManagerIntegrationTest(gameEngine); // MeasureManager 통합 테스트도 자동 실행
-            runSceneManagerUnitTests(sceneManager);
+            runSceneEngineUnitTests(sceneEngine);
             runLogicManagerUnitTests(logicManager);
             runCompatibilityManagerUnitTests(compatibilityManager);
         });

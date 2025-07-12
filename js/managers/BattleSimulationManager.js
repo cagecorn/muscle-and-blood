@@ -1,13 +1,14 @@
 // js/managers/BattleSimulationManager.js
 
 export class BattleSimulationManager {
-    constructor(measureManager, assetLoaderManager, idManager) {
+    constructor(measureManager, assetLoaderManager, idManager, logicManager) {
         console.log("\u2694\ufe0f BattleSimulationManager initialized. Preparing units for battle. \u2694\ufe0f");
         this.measureManager = measureManager;
         this.assetLoaderManager = assetLoaderManager;
         this.idManager = idManager;
+        this.logicManager = logicManager;
         this.unitsOnGrid = [];
-        this.gridRows = 10;
+        this.gridRows = 10; // BattleGridManager와 동일한 그리드 차원
         this.gridCols = 15;
     }
 
@@ -29,12 +30,14 @@ export class BattleSimulationManager {
      * @param {CanvasRenderingContext2D} ctx
      */
     draw(ctx) {
-        const canvasWidth = ctx.canvas.width;
-        const canvasHeight = ctx.canvas.height;
+        const sceneContentDimensions = this.logicManager.getCurrentSceneContentDimensions();
+        const contentWidth = sceneContentDimensions.width;
+        const contentHeight = sceneContentDimensions.height;
+
         const stagePadding = this.measureManager.get('battleStage.padding');
 
-        const gridDrawableWidth = canvasWidth - 2 * stagePadding;
-        const gridDrawableHeight = canvasHeight - 2 * stagePadding;
+        const gridDrawableWidth = contentWidth - 2 * stagePadding;
+        const gridDrawableHeight = contentHeight - 2 * stagePadding;
 
         const effectiveTileSize = Math.min(
             gridDrawableWidth / this.gridCols,

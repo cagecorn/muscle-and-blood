@@ -1,11 +1,12 @@
 // js/managers/BattleGridManager.js
 
 export class BattleGridManager {
-    constructor(measureManager) {
+    constructor(measureManager, logicManager) {
         console.log("\uD83D\uDCDC BattleGridManager initialized. Ready to draw the battlefield grid. \uD83D\uDCDC");
         this.measureManager = measureManager;
-        this.gridRows = 10; // 고정된 그리드 행 수
-        this.gridCols = 15; // 고정된 그리드 열 수
+        this.logicManager = logicManager;
+        this.gridRows = 10;
+        this.gridCols = 15;
     }
 
     /**
@@ -13,16 +14,14 @@ export class BattleGridManager {
      * @param {CanvasRenderingContext2D} ctx - 캔버스 2D 렌더링 컨텍스트
      */
     draw(ctx) {
-        const canvasWidth = ctx.canvas.width;
-        const canvasHeight = ctx.canvas.height;
+        const sceneContentDimensions = this.logicManager.getCurrentSceneContentDimensions();
+        const contentWidth = sceneContentDimensions.width;
+        const contentHeight = sceneContentDimensions.height;
 
-        // 1. 배틀 스테이지의 실제 크기와 위치는 이제 캔버스 전체입니다 (논리 2 적용).
-        // 그리드 여백은 MeasureManager에서 가져옵니다.
         const stagePadding = this.measureManager.get('battleStage.padding');
 
-        // 2. 그리드가 그려질 수 있는 유효 영역 계산 (캔버스 전체에서 패딩을 제외)
-        const gridDrawableWidth = canvasWidth - 2 * stagePadding;
-        const gridDrawableHeight = canvasHeight - 2 * stagePadding;
+        const gridDrawableWidth = contentWidth - 2 * stagePadding;
+        const gridDrawableHeight = contentHeight - 2 * stagePadding;
 
         // 3. 15x10 그리드가 이 유효 영역에 딱 맞도록 유효 타일 크기 계산
         const effectiveTileSize = Math.min(
