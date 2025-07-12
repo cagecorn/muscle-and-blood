@@ -180,8 +180,6 @@ export class GameEngine {
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
 
         this.battleSimulationManager.addUnit({ ...warriorData, currentHp: warriorData.baseStats.hp }, warriorImage, 7, 4);
-        // 아군은 왼쪽에서 시작하므로 전사 유닛을 좀 더 왼쪽에 배치합니다.
-        this.battleSimulationManager.addUnit({ ...warriorData, currentHp: warriorData.baseStats.hp }, warriorImage, 5, 4);
 
         const mockEnemyUnitData = {
             id: 'unit_skeleton_001',
@@ -192,14 +190,11 @@ export class GameEngine {
             spriteId: 'sprite_skeleton_default'
         };
         await this.idManager.addOrUpdateId(mockEnemyUnitData.id, mockEnemyUnitData);
-        // 업로드된 skeleton.png 이미지를 사용합니다.
-        await this.assetLoaderManager.loadImage(mockEnemyUnitData.spriteId, 'assets/images/skeleton.png');
+        await this.assetLoaderManager.loadImage(mockEnemyUnitData.spriteId, 'assets/images/archer.png');
 
         const enemyData = await this.idManager.get(mockEnemyUnitData.id);
         const enemyImage = this.assetLoaderManager.getImage(mockEnemyUnitData.spriteId);
         this.battleSimulationManager.addUnit({ ...enemyData, currentHp: enemyData.baseStats.hp }, enemyImage, 5, 4);
-        // 적 유닛은 아군보다 오른쪽에 배치합니다.
-        this.battleSimulationManager.addUnit({ ...enemyData, currentHp: enemyData.baseStats.hp }, enemyImage, 7, 4);
     }
 
     _update(deltaTime) {
