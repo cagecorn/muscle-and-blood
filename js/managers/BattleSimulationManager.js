@@ -26,6 +26,7 @@ export class BattleSimulationManager {
             name: fullUnitData.name,
             spriteId: fullUnitData.spriteId,
             image: unitImage, // ✨ 로드된 이미지 객체를 직접 저장합니다.
+            classId: fullUnitData.classId,
             gridX,
             gridY,
             // 필요한 경우 다른 데이터도 여기에 추가할 수 있습니다.
