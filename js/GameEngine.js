@@ -18,6 +18,7 @@ import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
 import { VFXManager } from './managers/VFXManager.js';
 import { BindingManager } from './managers/BindingManager.js';
 import { BattleCalculationManager } from './managers/BattleCalculationManager.js';
+import { MercenaryPanelManager } from './managers/MercenaryPanelManager.js'; // ✨ 새롭게 추가
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -86,6 +87,13 @@ export class GameEngine {
         this.bindingManager = new BindingManager();
         this.battleCalculationManager = new BattleCalculationManager(this.eventManager, this.battleSimulationManager);
 
+        // ✨ MercenaryPanelManager 초기화
+        this.mercenaryPanelManager = new MercenaryPanelManager(
+            'mercenaryPanelCanvas',
+            this.measureManager,
+            this.battleSimulationManager
+        );
+
         this.sceneEngine.registerScene('territoryScene', [this.territoryManager]);
         this.sceneEngine.registerScene('battleScene', [
             this.battleStageManager,
@@ -103,6 +111,11 @@ export class GameEngine {
         this.layerEngine.registerLayer('uiLayer', (ctx) => {
             this.uiEngine.draw(ctx);
         }, 100);
+
+        // ✨ 용병 패널 레이어 등록 (UI 레이어보다 높은 zIndex로 최상단에 표시)
+        this.layerEngine.registerLayer('mercenaryPanelLayer', (ctx) => {
+            this.mercenaryPanelManager.draw(ctx);
+        }, 110);
 
         this._update = this._update.bind(this);
         this._draw = this._draw.bind(this);
@@ -228,5 +241,6 @@ export class GameEngine {
     getAssetLoaderManager() { return this.assetLoaderManager; }
     getBattleSimulationManager() { return this.battleSimulationManager; }
     getBattleCalculationManager() { return this.battleCalculationManager; }
+    getMercenaryPanelManager() { return this.mercenaryPanelManager; }
     getBindingManager() { return this.bindingManager; }
 }
