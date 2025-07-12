@@ -85,6 +85,9 @@
         <button id="injectCompatibilityManagerFaultsBtn" class="fault-btn">CompatibilityManager 결함 주입</button>
         <h4>이벤트 발생 시뮬레이션</h4>
         <button id="simulateEventsBtn">이벤트 시뮬레이션 시작/정지</button>
+
+        <h4>전투 계산 테스트</h4>
+        <button id="testDamageCalculationBtn">대미지 계산 테스트 (전사 -> 해골)</button>
     </div>
     <canvas id="gameCanvas"></canvas>
     <script type="module">
@@ -129,6 +132,7 @@
             const sceneEngine = gameEngine.getSceneEngine();
             const logicManager = gameEngine.getLogicManager();
             const compatibilityManager = gameEngine.getCompatibilityManager();
+            const battleCalculationManager = gameEngine.getBattleCalculationManager();
 
 
             // 테스트용 EventManager 구독 (debug.html에서만 필요)
@@ -211,6 +215,22 @@
             });
             document.getElementById('injectCompatibilityManagerFaultsBtn').addEventListener('click', () => {
                 injectCompatibilityManagerFaults(compatibilityManager);
+            });
+
+            document.getElementById('testDamageCalculationBtn').addEventListener('click', () => {
+                gameEngine.getSceneEngine().setCurrentScene('battleScene');
+                gameEngine.getUIEngine().setUIState('combatScreen');
+                gameEngine.getCameraEngine().reset();
+
+                setTimeout(() => {
+                    console.log("[Debug Main] Requesting damage calculation: WARRIOR attacks SKELETON");
+                    battleCalculationManager.requestDamageCalculation('unit_warrior_001', 'unit_skeleton_001');
+                }, 2000);
+
+                setTimeout(() => {
+                    console.log("[Debug Main] Requesting damage calculation again: WARRIOR attacks SKELETON");
+                    battleCalculationManager.requestDamageCalculation('unit_warrior_001', 'unit_skeleton_001');
+                }, 4000);
             });
 
             let isSimulatingEvents = false;

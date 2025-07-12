@@ -30,7 +30,9 @@ export class BattleSimulationManager {
             gridY,
             // 필요한 경우 다른 데이터도 여기에 추가할 수 있습니다.
             baseStats: fullUnitData.baseStats,
-            type: fullUnitData.type
+            type: fullUnitData.type,
+            fullUnitData: fullUnitData,
+            currentHp: fullUnitData.currentHp !== undefined ? fullUnitData.currentHp : fullUnitData.baseStats.hp
         };
         this.unitsOnGrid.push(unitInstance);
         console.log(`[BattleSimulationManager] Added unit '${unitInstance.id}' at (${gridX}, ${gridY}).`);
