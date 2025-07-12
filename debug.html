@@ -262,6 +262,11 @@
                     gameEngine.mercenaryPanelManager.draw(gameEngine.mercenaryPanelManager.ctx);
                 }
 
+                // ✨ 전투 로그 패널 그리기 호출 추가
+                if (gameEngine.battleLogManager) {
+                    gameEngine.battleLogManager.draw(gameEngine.battleLogManager.ctx);
+                }
+
                 // FPS 카운터 업데이트
                 frameCount++;
                 const currentTime = performance.now();
