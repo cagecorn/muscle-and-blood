@@ -1,10 +1,10 @@
 // js/managers/LayerEngine.js
 
 export class LayerEngine {
-    constructor(renderer, uiEngine) { // uiEngine을 생성자로 받도록 수정
-        console.log("\uD83C\uDCC3 LayerEngine initialized. Ready to manage rendering layers. \uD83C\uDCC3");
+    constructor(renderer, cameraEngine) {
+        console.log("\ud83c\udcc3 LayerEngine initialized. Ready to manage rendering layers. \ud83c\udcc3");
         this.renderer = renderer;
-        this.uiEngine = uiEngine; // UIEngine 저장
+        this.cameraEngine = cameraEngine;
         this.layers = [];
     }
 
@@ -25,8 +25,14 @@ export class LayerEngine {
         this.renderer.drawBackground();
 
         for (const layer of this.layers) {
-            // 각 레이어의 drawFunction에 ctx와 uiEngine을 함께 전달
-            layer.drawFunction(this.renderer.ctx, this.uiEngine);
+            this.renderer.ctx.save();
+
+            if (layer.name === 'sceneLayer' && this.cameraEngine) {
+                this.cameraEngine.applyTransform(this.renderer.ctx);
+            }
+
+            layer.drawFunction(this.renderer.ctx);
+            this.renderer.ctx.restore();
         }
     }
 }
