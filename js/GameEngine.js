@@ -46,7 +46,7 @@ export class GameEngine {
         this.layerEngine = new LayerEngine(this.renderer, this.cameraEngine);
 
         this.territoryManager = new TerritoryManager();
-        this.battleStageManager = new BattleStageManager(this.measureManager);
+        this.battleStageManager = new BattleStageManager(); // measureManager 인수 제거
         this.battleGridManager = new BattleGridManager(this.measureManager);
 
         this.sceneManager.registerScene('territoryScene', [this.territoryManager]);
