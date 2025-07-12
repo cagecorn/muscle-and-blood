@@ -53,6 +53,10 @@ export class BattleSimulationManager {
 
             if (newGridX >= 0 && newGridX < this.gridCols &&
                 newGridY >= 0 && newGridY < this.gridRows) {
+                if (this.isTileOccupied(newGridX, newGridY, unitId)) {
+                    console.warn(`[BattleSimulationManager] Destination tile (${newGridX}, ${newGridY}) is occupied. Move cancelled.`);
+                    return false;
+                }
                 unit.gridX = newGridX;
                 unit.gridY = newGridY;
                 console.log(`[BattleSimulationManager] Unit '${unitId}' moved from (${oldX}, ${oldY}) to (${newGridX}, ${newGridY}).`);
@@ -65,6 +69,22 @@ export class BattleSimulationManager {
             console.warn(`[BattleSimulationManager] Cannot move unit '${unitId}'. Unit not found.`);
             return false;
         }
+    }
+
+    /**
+     * 특정 타일이 다른 유닛에 의해 점유되어 있는지 확인합니다.
+     * @param {number} gridX
+     * @param {number} gridY
+     * @param {string} [ignoreUnitId] - 점유 여부 확인에서 제외할 유닛 ID
+     * @returns {boolean} 타일 점유 여부
+     */
+    isTileOccupied(gridX, gridY, ignoreUnitId = null) {
+        return this.unitsOnGrid.some(u =>
+            u.gridX === gridX &&
+            u.gridY === gridY &&
+            u.id !== ignoreUnitId &&
+            u.currentHp > 0
+        );
     }
 
     /**
