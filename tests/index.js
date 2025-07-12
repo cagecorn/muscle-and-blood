@@ -21,6 +21,7 @@ export { runTurnOrderManagerUnitTests } from './unit/turnOrderManagerUnitTests.j
 export { runBasicAIManagerUnitTests } from './unit/basicAIManagerUnitTests.js';
 export { runClassAIManagerUnitTests } from './unit/classAIManagerUnitTests.js';
 export { runBattleSimulationManagerUnitTests } from './unit/battleSimulationManagerUnitTests.js';
+export { runAnimationManagerUnitTests } from './unit/animationManagerUnitTests.js';
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 

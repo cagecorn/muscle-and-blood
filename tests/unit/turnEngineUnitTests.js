@@ -2,7 +2,7 @@
 
 import { TurnEngine } from '../../js/managers/TurnEngine.js';
 
-export function runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine) {
+export function runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager) {
     console.log("--- TurnEngine Unit Test Start ---");
 
     let testCount = 0;
@@ -17,7 +17,7 @@ export function runTurnEngineUnitTests(eventManager, battleSimulationManager, tu
     // 테스트 1: 초기화 확인
     testCount++;
     try {
-        const turnEngine = new TurnEngine(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
+        const turnEngine = new TurnEngine(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager);
         if (turnEngine.currentTurn === 0 && turnEngine.turnPhaseCallbacks.startOfTurn instanceof Array) {
             console.log("TurnEngine: Initialized correctly. [PASS]");
             passCount++;
@@ -31,7 +31,7 @@ export function runTurnEngineUnitTests(eventManager, battleSimulationManager, tu
     // 테스트 2: initializeTurnOrder 호출
     testCount++;
     try {
-        const turnEngine = new TurnEngine(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
+        const turnEngine = new TurnEngine(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager);
         turnEngine.initializeTurnOrder();
         if (turnEngine.turnOrder.length > 0 && turnEngine.turnOrder[0].id === 'u1') {
             console.log("TurnEngine: initializeTurnOrder called TurnOrderManager. [PASS]");
@@ -46,7 +46,7 @@ export function runTurnEngineUnitTests(eventManager, battleSimulationManager, tu
     // 테스트 3: 턴 단계 콜백 등록
     testCount++;
     try {
-        const turnEngine = new TurnEngine(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
+        const turnEngine = new TurnEngine(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager);
         let callbackCalled = false;
         const testCallback = async () => { callbackCalled = true; };
         turnEngine.addTurnPhaseCallback('startOfTurn', testCallback);
@@ -66,7 +66,7 @@ export function runTurnEngineUnitTests(eventManager, battleSimulationManager, tu
     window.setTimeout = (fn, delay) => fn();
 
     try {
-        const turnEngine = new TurnEngine(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
+        const turnEngine = new TurnEngine(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager);
         classAIManager.getBasicClassAction = async (unit, allUnits) => {
             if (unit.id === 'u1') return { actionType: 'attack', targetId: 'u2' };
             if (unit.id === 'u2') return { actionType: 'attack', targetId: 'u1' };

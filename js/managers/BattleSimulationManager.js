@@ -1,12 +1,13 @@
 // js/managers/BattleSimulationManager.js
 
 export class BattleSimulationManager {
-    constructor(measureManager, assetLoaderManager, idManager, logicManager) {
+    constructor(measureManager, assetLoaderManager, idManager, logicManager, animationManager) {
         console.log("\u2694\ufe0f BattleSimulationManager initialized. Preparing units for battle. \u2694\ufe0f");
         this.measureManager = measureManager;
         this.assetLoaderManager = assetLoaderManager;
         this.idManager = idManager; // Keep for other potential uses, though not directly in draw
         this.logicManager = logicManager;
+        this.animationManager = animationManager;
         this.unitsOnGrid = [];
         this.gridRows = 10; // BattleGridManager와 동일한 그리드 차원
         this.gridCols = 15;
@@ -114,15 +115,20 @@ export class BattleSimulationManager {
         const gridOffsetY = stagePadding + (gridDrawableHeight - totalGridHeight) / 2;
 
         for (const unit of this.unitsOnGrid) {
-            // ✨ 이제 unit 객체에 이미지 자체가 포함되어 있으므로 비동기 호출 없이 바로 사용합니다.
             const image = unit.image;
             if (!image) {
                 console.warn(`[BattleSimulationManager] Image not available for unit '${unit.id}'. Skipping draw.`);
                 continue;
             }
 
-            const drawX = gridOffsetX + unit.gridX * effectiveTileSize;
-            const drawY = gridOffsetY + unit.gridY * effectiveTileSize;
+            const { drawX, drawY } = this.animationManager.getRenderPosition(
+                unit.id,
+                unit.gridX,
+                unit.gridY,
+                effectiveTileSize,
+                gridOffsetX,
+                gridOffsetY
+            );
 
             const imageSize = effectiveTileSize;
             const imgOffsetX = (effectiveTileSize - imageSize) / 2;

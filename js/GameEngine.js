@@ -15,6 +15,7 @@ import { CompatibilityManager } from './managers/CompatibilityManager.js';
 import { IdManager } from './managers/IdManager.js';
 import { AssetLoaderManager } from './managers/AssetLoaderManager.js';
 import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
+import { AnimationManager } from './managers/AnimationManager.js';
 import { VFXManager } from './managers/VFXManager.js';
 import { BindingManager } from './managers/BindingManager.js';
 import { BattleCalculationManager } from './managers/BattleCalculationManager.js';
@@ -62,13 +63,19 @@ export class GameEngine {
         this.idManager = new IdManager();
         this.assetLoaderManager = new AssetLoaderManager();
 
-        // 전투 시뮬레이션 매니저는 패널 및 로그 매니저가 필요하므로 먼저 초기화합니다.
+        // AnimationManager는 BattleSimulationManager의 렌더링에 사용됩니다.
+        this.animationManager = new AnimationManager(this.measureManager);
+
+        // 전투 시뮬레이션 매니저 초기화
         this.battleSimulationManager = new BattleSimulationManager(
             this.measureManager,
             this.assetLoaderManager,
             this.idManager,
-            this.logicManager
+            this.logicManager,
+            this.animationManager
         );
+        // 생성 후 상호 참조 설정
+        this.animationManager.battleSimulationManager = this.battleSimulationManager;
 
         // 패널과 로그 캔버스 요소 준비 및 매니저 초기화
         const mercenaryPanelCanvasElement = document.getElementById('mercenaryPanelCanvas');
@@ -151,7 +158,8 @@ export class GameEngine {
             this.turnOrderManager,
             this.classAIManager,
             this.delayEngine,
-            this.timingEngine
+            this.timingEngine,
+            this.animationManager
         );
 
         this.sceneEngine.registerScene('territoryScene', [this.territoryManager]);
@@ -275,6 +283,7 @@ export class GameEngine {
 
     _update(deltaTime) {
         this.sceneEngine.update(deltaTime);
+        this.animationManager.update(deltaTime);
     }
 
     _draw() {
@@ -322,4 +331,5 @@ export class GameEngine {
     getTurnOrderManager() { return this.turnOrderManager; }
     getBasicAIManager() { return this.basicAIManager; }
     getClassAIManager() { return this.classAIManager; }
+    getAnimationManager() { return this.animationManager; }
 }
