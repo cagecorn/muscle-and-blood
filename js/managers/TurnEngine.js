@@ -1,7 +1,7 @@
 // js/managers/TurnEngine.js
 
 export class TurnEngine {
-    constructor(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine) {
+    constructor(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager) {
         console.log("\uD83D\uDD01 TurnEngine initialized. Ready to manage game turns. \uD83D\uDD01");
         this.eventManager = eventManager;
         this.battleSimulationManager = battleSimulationManager;
@@ -9,6 +9,7 @@ export class TurnEngine {
         this.classAIManager = classAIManager;
         this.delayEngine = delayEngine;
         this.timingEngine = timingEngine;
+        this.animationManager = animationManager;
 
         this.currentTurn = 0;
         this.activeUnitIndex = -1;
@@ -86,10 +87,19 @@ export class TurnEngine {
             if (action) {
                 this.timingEngine.addTimedAction(async () => {
                     if (action.actionType === 'move' || action.actionType === 'moveAndAttack') {
-                        console.log(`[TurnEngine] Unit ${unit.name} attempts to move to (${action.moveTargetX}, ${action.moveTargetY}).`);
+                        const startGridX = unit.gridX;
+                        const startGridY = unit.gridY;
+                        console.log(`[TurnEngine] Unit ${unit.name} attempts to move from (${startGridX},${startGridY}) to (${action.moveTargetX}, ${action.moveTargetY}).`);
+
                         const moved = this.battleSimulationManager.moveUnit(unit.id, action.moveTargetX, action.moveTargetY);
                         if (moved) {
-                            await this.delayEngine.waitFor(300);
+                            await this.animationManager.queueMoveAnimation(
+                                unit.id,
+                                startGridX,
+                                startGridY,
+                                action.moveTargetX,
+                                action.moveTargetY
+                            );
                         }
                     }
 

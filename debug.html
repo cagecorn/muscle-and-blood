@@ -153,6 +153,7 @@
             const timingEngine = gameEngine.getTimingEngine();
             const idManager = gameEngine.getIdManager();
             const basicAIManager = gameEngine.getBasicAIManager();
+            const animationManager = gameEngine.getAnimationManager();
 
 
             // 테스트용 EventManager 구독 (debug.html에서만 필요)
@@ -182,7 +183,7 @@
                 runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager);
                 runPanelEngineUnitTests();
                 runBattleLogManagerUnitTests(eventManager, measureManager);
-                runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
+                runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager);
                 runDelayEngineUnitTests();
                 runTimingEngineUnitTests();
                 runRuleManagerUnitTests();
@@ -340,7 +341,7 @@
             runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager);
             runPanelEngineUnitTests();
             runBattleLogManagerUnitTests(eventManager, measureManager);
-            runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
+            runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager);
             runDelayEngineUnitTests();
             runTimingEngineUnitTests();
             runRuleManagerUnitTests();
