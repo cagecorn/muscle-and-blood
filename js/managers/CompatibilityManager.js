@@ -1,13 +1,15 @@
 // js/managers/CompatibilityManager.js
 
 export class CompatibilityManager {
-    constructor(measureManager, renderer, uiEngine, mapManager, logicManager) {
+    constructor(measureManager, renderer, uiEngine, mapManager, logicManager, mercenaryPanelManager, battleLogManager) { // ✨ 새 매니저들 추가
         console.log("\ud83d\udcf1 CompatibilityManager initialized. Adapting to screen changes. \ud83d\udcf1");
         this.measureManager = measureManager;
-        this.renderer = renderer;
+        this.renderer = renderer; // Main game canvas renderer
         this.uiEngine = uiEngine;
         this.mapManager = mapManager;
         this.logicManager = logicManager;
+        this.mercenaryPanelManager = mercenaryPanelManager; // ✨ 용병 패널 매니저
+        this.battleLogManager = battleLogManager;     // ✨ 전투 로그 매니저
 
         this.baseGameWidth = this.measureManager.get('gameResolution.width');
         this.baseGameHeight = this.measureManager.get('gameResolution.height');
@@ -38,6 +40,28 @@ export class CompatibilityManager {
             this.measureManager.updateGameResolution(minRes.minWidth, minRes.minHeight);
             this.renderer.canvas.width = minRes.minWidth;
             this.renderer.canvas.height = minRes.minHeight;
+            // 다른 캔버스들도 최소값으로 설정 (필요하다면)
+            if (this.mercenaryPanelManager && this.mercenaryPanelManager.canvas) {
+                this.mercenaryPanelManager.canvas.width = minRes.minWidth;
+                this.mercenaryPanelManager.canvas.height = minRes.minWidth * this.measureManager.get('mercenaryPanel.heightRatio'); // 대략적인 비율
+            }
+            if (this.battleLogManager && this.battleLogManager.canvas) {
+                this.battleLogManager.canvas.width = minRes.minWidth;
+                this.battleLogManager.canvas.height = minRes.minWidth * this.measureManager.get('combatLog.heightRatio'); // 대략적인 비율
+            }
+            // 매니저들의 내부 치수 재계산 호출
+            if (this.uiEngine && this.uiEngine.recalculateUIDimensions) {
+                this.uiEngine.recalculateUIDimensions();
+            }
+            if (this.mapManager && this.mapManager.recalculateMapDimensions) {
+                this.mapManager.recalculateMapDimensions();
+            }
+            if (this.mercenaryPanelManager && this.mercenaryPanelManager.recalculatePanelDimensions) {
+                this.mercenaryPanelManager.recalculatePanelDimensions();
+            }
+            if (this.battleLogManager && this.battleLogManager.recalculateLogDimensions) {
+                this.battleLogManager.recalculateLogDimensions();
+            }
             return;
         }
 
@@ -79,18 +103,42 @@ export class CompatibilityManager {
             newGameHeight = Math.max(newGameHeight, minRequiredResolution.minHeight);
         }
 
+        // 1. 메인 게임 캔버스 해상도 업데이트
         this.measureManager.updateGameResolution(newGameWidth, newGameHeight);
-
         this.renderer.canvas.width = newGameWidth;
         this.renderer.canvas.height = newGameHeight;
+        console.log(`[CompatibilityManager] Main Canvas adjusted to: ${newGameWidth}x${newGameHeight}`);
 
-        console.log(`[CompatibilityManager] Canvas adjusted to: ${newGameWidth}x${newGameHeight}`);
+        // 2. 용병 패널 캔버스 해상도 업데이트
+        if (this.mercenaryPanelManager && this.mercenaryPanelManager.canvas) {
+            const mercenaryPanelHeight = Math.floor(newGameHeight * this.measureManager.get('mercenaryPanel.heightRatio'));
+            this.mercenaryPanelManager.canvas.width = newGameWidth;
+            this.mercenaryPanelManager.canvas.height = mercenaryPanelHeight;
+            console.log(`[CompatibilityManager] Mercenary Panel Canvas adjusted to: ${newGameWidth}x${mercenaryPanelHeight}`);
+        }
 
+        // 3. 전투 로그 캔버스 해상도 업데이트
+        if (this.battleLogManager && this.battleLogManager.canvas) {
+            const combatLogHeight = Math.floor(newGameHeight * this.measureManager.get('combatLog.heightRatio'));
+            this.battleLogManager.canvas.width = newGameWidth;
+            this.battleLogManager.canvas.height = combatLogHeight;
+            console.log(`[CompatibilityManager] Combat Log Canvas adjusted to: ${newGameWidth}x${combatLogHeight}`);
+        }
+
+        // 모든 관련 매니저들의 내부 치수 재계산 호출
         if (this.uiEngine && this.uiEngine.recalculateUIDimensions) {
             this.uiEngine.recalculateUIDimensions();
         }
         if (this.mapManager && this.mapManager.recalculateMapDimensions) {
             this.mapManager.recalculateMapDimensions();
+        }
+        // ✨ 용병 패널 매니저의 내부 재계산 메서드 호출
+        if (this.mercenaryPanelManager && this.mercenaryPanelManager.recalculatePanelDimensions) {
+            this.mercenaryPanelManager.recalculatePanelDimensions();
+        }
+        // ✨ 전투 로그 매니저의 내부 재계산 메서드 호출
+        if (this.battleLogManager && this.battleLogManager.recalculateLogDimensions) {
+            this.battleLogManager.recalculateLogDimensions();
         }
     }
 }

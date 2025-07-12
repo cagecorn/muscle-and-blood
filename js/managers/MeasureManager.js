@@ -27,13 +27,18 @@ export class MeasureManager {
                 heightRatio: 1.0, // 논리적으로 캔버스 전체를 채움
                 padding: 40 // 배틀 스테이지 내부 여백 (그리드가 이 여백 안에 그려짐)
             },
-            // ✨ 새로운 설정: 용병 패널 관련 크기
+            // ✨ 용병 패널 관련 설정 업데이트
             mercenaryPanel: {
-                baseSlotSize: 100, // 각 슬롯의 기본 크기 (픽셀)
-                gridRows: 2, // 2줄
-                gridCols: 6, // 6칸
-                width: 600, // 6칸 * 100px/칸 = 600px
-                height: 200 // 2줄 * 100px/줄 = 200px
+                baseSlotSize: 100, // 각 슬롯의 기본 크기 (UI 계산용)
+                gridRows: 2,
+                gridCols: 6,
+                heightRatio: 0.25 // 메인 캔버스 높이의 25% (예시)
+            },
+            // ✨ 전투 로그 관련 설정 추가
+            combatLog: {
+                heightRatio: 0.15, // 메인 캔버스 높이의 15% (예시)
+                lineHeight: 20, // 한 줄 높이 (px)
+                padding: 10 // 내부 여백 (px)
             }
         };
     }

@@ -17,22 +17,21 @@ export class MercenaryPanelManager {
         this.gridCols = this.measureManager.get('mercenaryPanel.gridCols');
         this.numSlots = this.gridRows * this.gridCols;
 
+        // 초기 패널 치수 재계산 (CompatibilityManager가 캔버스 크기 설정 후 호출할 것임)
         this.recalculatePanelDimensions();
 
-        // ✨ 캔버스 크기가 MeasureManager에 의해 고정되므로, window.resize 이벤트 리스너는 제거합니다.
+        // ✨ window.resize 이벤트 리스너 제거 (CompatibilityManager가 크기 제어)
     }
 
+    /**
+     * 패널의 내부 치수(슬롯 크기 등)를 재계산합니다.
+     * 이 메서드는 CompatibilityManager가 캔버스 크기를 조정한 후 호출해야 합니다.
+     */
     recalculatePanelDimensions() {
-        // ✨ MeasureManager에서 패널의 고정된 너비와 높이를 가져와 캔버스 속성으로 설정
-        const panelWidth = this.measureManager.get('mercenaryPanel.width');
-        const panelHeight = this.measureManager.get('mercenaryPanel.height');
-
-        this.canvas.width = panelWidth; // 캔버스 내부 드로잉 버퍼의 너비 설정
-        this.canvas.height = panelHeight; // 캔버스 내부 드로잉 버퍼의 높이 설정
-
+        // ✨ 캔버스 요소의 현재 크기를 기반으로 내부 슬롯 크기 계산
         this.slotWidth = this.canvas.width / this.gridCols;
         this.slotHeight = this.canvas.height / this.gridRows;
-        console.log(`[MercenaryPanelManager] Panel dimensions recalculated and canvas size set to: ${this.canvas.width}x${this.canvas.height}. Slot size: ${this.slotWidth}x${this.slotHeight}`);
+        console.log(`[MercenaryPanelManager] Panel dimensions recalculated. Canvas size: ${this.canvas.width}x${this.canvas.height}, Slot size: ${this.slotWidth}x${this.slotHeight}`);
     }
 
     /**

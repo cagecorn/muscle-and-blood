@@ -181,7 +181,7 @@
                 runCompatibilityManagerUnitTests(compatibilityManager);
                 runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager);
                 runPanelEngineUnitTests();
-                runBattleLogManagerUnitTests(eventManager);
+                runBattleLogManagerUnitTests(eventManager, measureManager);
                 runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
                 runDelayEngineUnitTests();
                 runTimingEngineUnitTests();
@@ -339,7 +339,7 @@
             runCompatibilityManagerUnitTests(compatibilityManager);
             runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager);
             runPanelEngineUnitTests();
-            runBattleLogManagerUnitTests(eventManager);
+            runBattleLogManagerUnitTests(eventManager, measureManager);
             runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
             runDelayEngineUnitTests();
             runTimingEngineUnitTests();
