@@ -116,6 +116,7 @@
 
             try {
                 gameEngine = new GameEngine('gameCanvas'); // GameEngine 인스턴스 생성
+                gameEngine.eventManager.setGameRunningState(true); // ✨ 디버그 모드에서도 게임 시작 시 상태 설정
                 gameEngine.start(); // 게임 엔진 시작
             } catch (error) {
                 console.error("Fatal Error in Debug Mode: Game Engine failed to start.", error);
@@ -256,9 +257,9 @@
             gameEngine._draw = function() { // GameEngine의 _draw를 오버라이드하여 FPS 로직 추가
                 originalDraw.apply(this, arguments); // 원래 _draw 함수 호출
 
-                // ✨ 용병 패널 캔버스도 그리기
-                if (this.mercenaryPanelManager) {
-                    this.mercenaryPanelManager.draw(this.mercenaryPanelManager.ctx);
+                // ✨ 용병 패널 그리기 호출
+                if (gameEngine.mercenaryPanelManager) {
+                    gameEngine.mercenaryPanelManager.draw(gameEngine.mercenaryPanelManager.ctx);
                 }
 
                 // FPS 카운터 업데이트
