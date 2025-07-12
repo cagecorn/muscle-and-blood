@@ -24,6 +24,7 @@ import { PanelEngine } from './managers/PanelEngine.js'; // ✨ PanelEngine 추�
 import { TurnEngine } from './managers/TurnEngine.js'; // ✨ TurnEngine 추가
 import { DelayEngine } from './managers/DelayEngine.js'; // ✨ DelayEngine 추가
 import { TimingEngine } from './managers/TimingEngine.js'; // ✨ TimingEngine 추가
+import { BattleLogManager } from './managers/BattleLogManager.js'; // ✨ 새롭게 추가
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -111,6 +112,17 @@ export class GameEngine {
         );
         // PanelEngine에 용병 패널 등록
         this.panelEngine.registerPanel('mercenaryPanel', this.mercenaryPanelManager);
+
+        // ✨ 전투 로그 캔버스 요소 가져오기 및 BattleLogManager 초기화
+        const combatLogCanvasElement = document.getElementById('combatLogCanvas');
+        if (!combatLogCanvasElement) {
+            console.error("GameEngine: Combat Log Canvas not found. Game cannot proceed without it.");
+            throw new Error("Combat Log Canvas initialization failed.");
+        }
+        this.battleLogManager = new BattleLogManager(
+            combatLogCanvasElement,
+            this.eventManager
+        );
 
         // ✨ 새로운 엔진들 초기화
         this.delayEngine = new DelayEngine();
@@ -244,6 +256,9 @@ export class GameEngine {
         if (this.panelEngine) {
             this.panelEngine.drawPanel('mercenaryPanel', this.mercenaryPanelManager.ctx);
         }
+        if (this.battleLogManager) {
+            this.battleLogManager.draw(this.battleLogManager.ctx);
+        }
     }
 
     start() {
@@ -268,6 +283,7 @@ export class GameEngine {
     getBattleSimulationManager() { return this.battleSimulationManager; }
     getBattleCalculationManager() { return this.battleCalculationManager; }
     getMercenaryPanelManager() { return this.mercenaryPanelManager; }
+    getBattleLogManager() { return this.battleLogManager; }
     getBindingManager() { return this.bindingManager; }
 
     // 새로운 엔진들에 대한 getter 메서드
