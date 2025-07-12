@@ -17,7 +17,8 @@ export const CLASSES = {
         name: '전사',
         role: CLASS_ROLES.MELEE_DPS,
         description: '강력한 근접 공격과 방어력을 겸비한 병종.',
-        skills: ['skill_melee_attack', 'skill_shield_block']
+        skills: ['skill_melee_attack', 'skill_shield_block'],
+        moveRange: 3 // 전사의 이동 거리
     }
     // 다른 클래스들이 여기에 추가됩니다.
     // MAGE: { id: 'class_mage', ... }

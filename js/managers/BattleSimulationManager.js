@@ -39,6 +39,35 @@ export class BattleSimulationManager {
     }
 
     /**
+     * 유닛의 그리드 위치를 업데이트합니다.
+     * @param {string} unitId - 이동할 유닛의 ID
+     * @param {number} newGridX - 새로운 그리드 X 좌표
+     * @param {number} newGridY - 새로운 그리드 Y 좌표
+     * @returns {boolean} 이동 성공 여부
+     */
+    moveUnit(unitId, newGridX, newGridY) {
+        const unit = this.unitsOnGrid.find(u => u.id === unitId);
+        if (unit) {
+            const oldX = unit.gridX;
+            const oldY = unit.gridY;
+
+            if (newGridX >= 0 && newGridX < this.gridCols &&
+                newGridY >= 0 && newGridY < this.gridRows) {
+                unit.gridX = newGridX;
+                unit.gridY = newGridY;
+                console.log(`[BattleSimulationManager] Unit '${unitId}' moved from (${oldX}, ${oldY}) to (${newGridX}, ${newGridY}).`);
+                return true;
+            } else {
+                console.warn(`[BattleSimulationManager] Unit '${unitId}' attempted to move out of bounds to (${newGridX}, ${newGridY}).`);
+                return false;
+            }
+        } else {
+            console.warn(`[BattleSimulationManager] Cannot move unit '${unitId}'. Unit not found.`);
+            return false;
+        }
+    }
+
+    /**
      * 배틀 그리드에 배치된 모든 유닛을 그립니다.
      * @param {CanvasRenderingContext2D} ctx
      */

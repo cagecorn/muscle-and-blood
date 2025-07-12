@@ -25,6 +25,8 @@ import { TurnEngine } from './managers/TurnEngine.js'; // ✨ TurnEngine 추가
 import { DelayEngine } from './managers/DelayEngine.js'; // ✨ DelayEngine 추가
 import { TimingEngine } from './managers/TimingEngine.js'; // ✨ TimingEngine 추가
 import { BattleLogManager } from './managers/BattleLogManager.js'; // ✨ 새롭게 추가
+import { TurnOrderManager } from './managers/TurnOrderManager.js'; // ✨ 새롭게 추가
+import { ClassAIManager } from './managers/ClassAIManager.js';   // ✨ 새롭게 추가
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -127,7 +129,20 @@ export class GameEngine {
         // ✨ 새로운 엔진들 초기화
         this.delayEngine = new DelayEngine();
         this.timingEngine = new TimingEngine(this.delayEngine);
-        this.turnEngine = new TurnEngine(this.eventManager, this.battleSimulationManager); // BattleSimulationManager를 TurnEngine에 전달
+
+        // ✨ 새로운 매니저 초기화
+        this.turnOrderManager = new TurnOrderManager(this.eventManager, this.battleSimulationManager);
+        this.classAIManager = new ClassAIManager(this.idManager, this.battleSimulationManager, this.measureManager);
+
+        // ✨ TurnEngine에 새로운 의존성 전달
+        this.turnEngine = new TurnEngine(
+            this.eventManager,
+            this.battleSimulationManager,
+            this.turnOrderManager,
+            this.classAIManager,
+            this.delayEngine,
+            this.timingEngine
+        );
 
         this.sceneEngine.registerScene('territoryScene', [this.territoryManager]);
         this.sceneEngine.registerScene('battleScene', [
