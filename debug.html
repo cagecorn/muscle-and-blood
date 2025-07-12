@@ -108,7 +108,18 @@
             runLogicManagerUnitTests,
             injectLogicManagerFaults,
             runCompatibilityManagerUnitTests,
-            injectCompatibilityManagerFaults
+            injectCompatibilityManagerFaults,
+            runMercenaryPanelManagerUnitTests,
+            runPanelEngineUnitTests,
+            runBattleLogManagerUnitTests,
+            runTurnEngineUnitTests,
+            runDelayEngineUnitTests,
+            runTimingEngineUnitTests,
+            runRuleManagerUnitTests,
+            runTurnOrderManagerUnitTests,
+            runBasicAIManagerUnitTests,
+            runClassAIManagerUnitTests,
+            runBattleSimulationManagerUnitTests
         } from './tests/index.js';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -134,6 +145,14 @@
             const logicManager = gameEngine.getLogicManager();
             const compatibilityManager = gameEngine.getCompatibilityManager();
             const battleCalculationManager = gameEngine.getBattleCalculationManager();
+            const measureManager = gameEngine.getMeasureManager();
+            const battleSimulationManager = gameEngine.getBattleSimulationManager();
+            const turnOrderManager = gameEngine.getTurnOrderManager();
+            const classAIManager = gameEngine.getClassAIManager();
+            const delayEngine = gameEngine.getDelayEngine();
+            const timingEngine = gameEngine.getTimingEngine();
+            const idManager = gameEngine.getIdManager();
+            const basicAIManager = gameEngine.getBasicAIManager();
 
 
             // 테스트용 EventManager 구독 (debug.html에서만 필요)
@@ -160,6 +179,17 @@
                 runSceneEngineUnitTests(sceneEngine);
                 runLogicManagerUnitTests(logicManager);
                 runCompatibilityManagerUnitTests(compatibilityManager);
+                runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager);
+                runPanelEngineUnitTests();
+                runBattleLogManagerUnitTests(eventManager);
+                runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
+                runDelayEngineUnitTests();
+                runTimingEngineUnitTests();
+                runRuleManagerUnitTests();
+                runTurnOrderManagerUnitTests(eventManager, battleSimulationManager);
+                runBasicAIManagerUnitTests(battleSimulationManager);
+                runClassAIManagerUnitTests(idManager, battleSimulationManager, measureManager, basicAIManager);
+                runBattleSimulationManagerUnitTests(measureManager, gameEngine.getAssetLoaderManager(), idManager, logicManager);
             });
 
             document.getElementById('runMeasureManagerIntegrationTestBtn').addEventListener('click', () => {
@@ -307,6 +337,17 @@
             runSceneEngineUnitTests(sceneEngine);
             runLogicManagerUnitTests(logicManager);
             runCompatibilityManagerUnitTests(compatibilityManager);
+            runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager);
+            runPanelEngineUnitTests();
+            runBattleLogManagerUnitTests(eventManager);
+            runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine);
+            runDelayEngineUnitTests();
+            runTimingEngineUnitTests();
+            runRuleManagerUnitTests();
+            runTurnOrderManagerUnitTests(eventManager, battleSimulationManager);
+            runBasicAIManagerUnitTests(battleSimulationManager);
+            runClassAIManagerUnitTests(idManager, battleSimulationManager, measureManager, basicAIManager);
+            runBattleSimulationManagerUnitTests(measureManager, gameEngine.getAssetLoaderManager(), idManager, logicManager);
         });
     </script>
 </body>

@@ -302,6 +302,7 @@ export class GameEngine {
     getBattleSimulationManager() { return this.battleSimulationManager; }
     getBattleCalculationManager() { return this.battleCalculationManager; }
     getMercenaryPanelManager() { return this.mercenaryPanelManager; }
+    getPanelEngine() { return this.panelEngine; }
     getBattleLogManager() { return this.battleLogManager; }
     getBindingManager() { return this.bindingManager; }
 
@@ -309,4 +310,7 @@ export class GameEngine {
     getDelayEngine() { return this.delayEngine; }
     getTimingEngine() { return this.timingEngine; }
     getTurnEngine() { return this.turnEngine; }
+    getTurnOrderManager() { return this.turnOrderManager; }
+    getBasicAIManager() { return this.basicAIManager; }
+    getClassAIManager() { return this.classAIManager; }
 }
