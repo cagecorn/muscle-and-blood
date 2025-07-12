@@ -12,11 +12,16 @@ import { CameraEngine } from './managers/CameraEngine.js';
 import { InputManager } from './managers/InputManager.js';
 import { LogicManager } from './managers/LogicManager.js';
 import { CompatibilityManager } from './managers/CompatibilityManager.js';
-import { IdManager } from './managers/IdManager.js'; // IdManager import 추가
+import { IdManager } from './managers/IdManager.js';
+import { AssetLoaderManager } from './managers/AssetLoaderManager.js';
+import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
 import { BattleGridManager } from './managers/BattleGridManager.js';
+
+import { UNITS } from '../data/unit.js';
+import { CLASSES } from '../data/class.js';
 
 export class GameEngine {
     constructor(canvasId) {
@@ -37,8 +42,9 @@ export class GameEngine {
         // LogicManager 초기화
         this.logicManager = new LogicManager(this.measureManager, this.sceneManager);
 
-        // IdManager 초기화
+        // IdManager 및 AssetLoaderManager 초기화
         this.idManager = new IdManager();
+        this.assetLoaderManager = new AssetLoaderManager();
 
         // CompatibilityManager 초기화 (LogicManager를 전달)
         this.compatibilityManager = new CompatibilityManager(
@@ -65,11 +71,20 @@ export class GameEngine {
         this.layerEngine = new LayerEngine(this.renderer, this.cameraEngine);
 
         this.territoryManager = new TerritoryManager();
-        this.battleStageManager = new BattleStageManager(); // measureManager 인수 제거
+        this.battleStageManager = new BattleStageManager();
         this.battleGridManager = new BattleGridManager(this.measureManager);
+        this.battleSimulationManager = new BattleSimulationManager(
+            this.measureManager,
+            this.assetLoaderManager,
+            this.idManager
+        );
 
         this.sceneManager.registerScene('territoryScene', [this.territoryManager]);
-        this.sceneManager.registerScene('battleScene', [this.battleStageManager, this.battleGridManager]);
+        this.sceneManager.registerScene('battleScene', [
+            this.battleStageManager,
+            this.battleGridManager,
+            this.battleSimulationManager
+        ]);
 
         this.sceneManager.setCurrentScene('territoryScene');
 
@@ -138,22 +153,25 @@ export class GameEngine {
     async _initAsyncManagers() {
         await this.idManager.initialize();
 
-        // \uc0d8\ud50c ID \ucd94\uac00
-        await this.idManager.addOrUpdateId(
-            'healing_potion_2d4c',
-            { name: '힐링 포션', type: 'consumable', effect: 'heal_hp', value: 50, sprite: 'potion_red.png' }
-        );
-        await this.idManager.addOrUpdateId(
-            'sword_of_heroes_a1b2',
-            { name: '영웅의 검', type: 'weapon', attack: 25, rarity: 'epic', sprite: 'sword_epic.png' }
+        // 1. IdManager에 전사 유닛과 클래스 ID 등록
+        await this.idManager.addOrUpdateId(UNITS.WARRIOR.id, UNITS.WARRIOR);
+        await this.idManager.addOrUpdateId(CLASSES.WARRIOR.id, CLASSES.WARRIOR);
+
+        // 2. AssetLoaderManager로 전사 스프라이트 로드
+        await this.assetLoaderManager.loadImage(
+            UNITS.WARRIOR.spriteId,
+            'assets/images/warrior.png'
         );
 
-        // \uc0d8\ud50c ID \uc870\ud68c (\ud655\uc778\uc6a9)
-        const potionData = await this.idManager.get('healing_potion_2d4c');
-        console.log("[GameEngine] Retrieved ID 'healing_potion_2d4c':", potionData);
+        console.log(`[GameEngine] Registered unit ID: ${UNITS.WARRIOR.id}`);
+        console.log(`[GameEngine] Loaded warrior sprite: ${UNITS.WARRIOR.spriteId}`);
 
-        const unknownItem = await this.idManager.get('non_existent_item');
-        console.log("[GameEngine] Retrieved ID 'non_existent_item':", unknownItem);
+        // 샘플 ID 조회 (확인용)
+        const warriorData = await this.idManager.get(UNITS.WARRIOR.id);
+        console.log("[GameEngine] Retrieved Warrior Unit Data:", warriorData);
+
+        // 3. 배틀 시뮬레이션 매니저에 전사 유닛 배치
+        this.battleSimulationManager.addUnit(UNITS.WARRIOR.id, 7, 4);
     }
 
     _update(deltaTime) {
@@ -182,4 +200,6 @@ export class GameEngine {
     getLogicManager() { return this.logicManager; }
     getCompatibilityManager() { return this.compatibilityManager; }
     getIdManager() { return this.idManager; }
+    getAssetLoaderManager() { return this.assetLoaderManager; }
+    getBattleSimulationManager() { return this.battleSimulationManager; }
 }
