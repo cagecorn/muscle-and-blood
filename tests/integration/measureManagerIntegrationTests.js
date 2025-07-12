@@ -33,8 +33,8 @@ export function runMeasureManagerIntegrationTest(gameEngine) {
     measureManager.set('mapGrid.cols', newMapGridCols);
     measureManager.set('ui.mapPanelWidthRatio', newMapPanelWidthRatio);
 
-    uiEngine._recalculateUIDimensions();
-    mapManager._recalculateMapDimensions();
+    uiEngine.recalculateUIDimensions();
+    mapManager.recalculateMapDimensions();
 
     const uiNewMapPanelWidth = uiEngine.getMapPanelDimensions().width;
     const mapNewTileSize = mapManager.getTileSize();

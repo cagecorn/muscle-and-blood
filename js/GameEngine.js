@@ -11,6 +11,7 @@ import { SceneManager } from './managers/SceneManager.js';
 import { CameraEngine } from './managers/CameraEngine.js';
 import { InputManager } from './managers/InputManager.js';
 import { LogicManager } from './managers/LogicManager.js';
+import { CompatibilityManager } from './managers/CompatibilityManager.js';
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -29,12 +30,22 @@ export class GameEngine {
         this.guardianManager = new GuardianManager();
         this.measureManager = new MeasureManager();
 
-        this.renderer.canvas.width = this.measureManager.get('gameResolution.width');
-        this.renderer.canvas.height = this.measureManager.get('gameResolution.height');
+        // 화면 크기와 방향을 관리하는 CompatibilityManager 초기화
+        this.compatibilityManager = new CompatibilityManager(
+            this.measureManager,
+            this.renderer,
+            null,
+            null
+        );
 
         this.mapManager = new MapManager(this.measureManager);
 
         this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager);
+
+        // CompatibilityManager에 UIEngine과 MapManager 참조를 전달한 후, 초기 해상도 조정
+        this.compatibilityManager.uiEngine = this.uiEngine;
+        this.compatibilityManager.mapManager = this.mapManager;
+        this.compatibilityManager.adjustResolution();
 
         this.sceneManager = new SceneManager();
 
@@ -131,4 +142,5 @@ export class GameEngine {
     getCameraEngine() { return this.cameraEngine; }
     getInputManager() { return this.inputManager; }
     getLogicManager() { return this.logicManager; }
+    getCompatibilityManager() { return this.compatibilityManager; }
 }

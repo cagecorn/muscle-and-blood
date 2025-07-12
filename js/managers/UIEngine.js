@@ -12,7 +12,7 @@ export class UIEngine {
 
         this._currentUIState = 'mapScreen';
 
-        this._recalculateUIDimensions();
+        this.recalculateUIDimensions();
 
         this.battleStartButton = {
             x: (this.canvas.width - this.buttonWidth) / 2,
@@ -25,7 +25,7 @@ export class UIEngine {
         console.log("[UIEngine] Initialized for overlay UI rendering.");
     }
 
-    _recalculateUIDimensions() {
+    recalculateUIDimensions() {
         console.log("[UIEngine] Recalculating UI dimensions based on MeasureManager...");
         this.mapPanelWidth = this.canvas.width * this.measureManager.get('ui.mapPanelWidthRatio');
         this.mapPanelHeight = this.canvas.height * this.measureManager.get('ui.mapPanelHeightRatio');

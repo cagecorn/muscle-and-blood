@@ -69,4 +69,15 @@ export class MeasureManager {
         console.log(`[MeasureManager] Set '${keyPath}' to ${value}`);
         return true;
     }
+
+    /**
+     * 게임의 해상도(캔버스 크기)를 업데이트합니다.
+     * @param {number} width - 새로운 너비
+     * @param {number} height - 새로운 높이
+     */
+    updateGameResolution(width, height) {
+        this._measurements.gameResolution.width = width;
+        this._measurements.gameResolution.height = height;
+        console.log(`[MeasureManager] Game resolution updated to: ${width}x${height}`);
+    }
 }

@@ -6,7 +6,7 @@ export class MapManager {
         this.measureManager = measureManager;
 
         // 측정값을 기반으로 초기 맵 크기를 계산
-        this._recalculateMapDimensions();
+        this.recalculateMapDimensions();
 
         this.mapData = this._generateRandomMap();
         this.pathfindingEngine = this._createPathfindingEngine();
@@ -18,7 +18,7 @@ export class MapManager {
      * 맵의 그리드 및 타일 크기를 MeasureManager로부터 다시 계산합니다.
      * 측정값이 변경된 경우 호출됩니다.
      */
-    _recalculateMapDimensions() {
+    recalculateMapDimensions() {
         console.log("[MapManager] Recalculating map dimensions based on MeasureManager...");
         this.gridRows = this.measureManager.get('mapGrid.rows');
         this.gridCols = this.measureManager.get('mapGrid.cols');
