@@ -24,8 +24,9 @@ canvas {
 
 /* 용병 패널 캔버스 전용 스타일 */
 #mercenaryPanelCanvas {
-    width: 100%; /* 컨테이너(gameContainer)의 전체 너비 사용 */
-    height: 150px; /* 패널의 고정 높이 */
+    /* ✨ width: 100%; 제거 및 고정 값 설정 */
+    width: 600px; /* MeasureManager에 정의된 고정 너비 */
+    height: 200px; /* MeasureManager에 정의된 고정 높이 */
     margin-bottom: 10px; /* 패널과 메인 게임 캔버스 사이의 간격 */
     border: 2px solid #00f; /* 구분을 위한 다른 테두리 색상 */
 }
