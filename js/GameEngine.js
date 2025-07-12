@@ -15,9 +15,6 @@ import { CompatibilityManager } from './managers/CompatibilityManager.js';
 import { IdManager } from './managers/IdManager.js';
 import { AssetLoaderManager } from './managers/AssetLoaderManager.js';
 import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
-import { VFXManager } from './managers/VFXManager.js';
-import { BindingManager } from './managers/BindingManager.js';
-import { BattleCalculationManager } from './managers/BattleCalculationManager.js';
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -83,16 +80,11 @@ export class GameEngine {
             this.logicManager
         );
 
-        this.vfxManager = new VFXManager(this.renderer, this.measureManager, this.cameraEngine, this.battleSimulationManager);
-        this.bindingManager = new BindingManager();
-        this.battleCalculationManager = new BattleCalculationManager(this.eventManager, this.battleSimulationManager);
-
         this.sceneEngine.registerScene('territoryScene', [this.territoryManager]);
         this.sceneEngine.registerScene('battleScene', [
             this.battleStageManager,
             this.battleGridManager,
-            this.battleSimulationManager,
-            this.vfxManager
+            this.battleSimulationManager
         ]);
 
         this.sceneEngine.setCurrentScene('territoryScene');
@@ -179,22 +171,9 @@ export class GameEngine {
         const warriorData = await this.idManager.get(UNITS.WARRIOR.id);
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
 
-        this.battleSimulationManager.addUnit({ ...warriorData, currentHp: warriorData.baseStats.hp }, warriorImage, 7, 4);
-
-        const mockEnemyUnitData = {
-            id: 'unit_skeleton_001',
-            name: '해골 병사',
-            classId: 'class_skeleton',
-            type: 'enemy',
-            baseStats: { hp: 80, attack: 15, defense: 5, speed: 30 },
-            spriteId: 'sprite_skeleton_default'
-        };
-        await this.idManager.addOrUpdateId(mockEnemyUnitData.id, mockEnemyUnitData);
-        await this.assetLoaderManager.loadImage(mockEnemyUnitData.spriteId, 'assets/images/archer.png');
-
-        const enemyData = await this.idManager.get(mockEnemyUnitData.id);
-        const enemyImage = this.assetLoaderManager.getImage(mockEnemyUnitData.spriteId);
-        this.battleSimulationManager.addUnit({ ...enemyData, currentHp: enemyData.baseStats.hp }, enemyImage, 5, 4);
+        // ✨ 3. 배틀 시뮬레이션 매니저에 전사 유닛 배치 (로드된 데이터와 이미지를 함께 전달)
+        // fullUnitData, unitImage, gridX, gridY 순서로 전달합니다.
+        this.battleSimulationManager.addUnit(warriorData, warriorImage, 7, 4);
     }
 
     _update(deltaTime) {
@@ -225,6 +204,4 @@ export class GameEngine {
     getIdManager() { return this.idManager; }
     getAssetLoaderManager() { return this.assetLoaderManager; }
     getBattleSimulationManager() { return this.battleSimulationManager; }
-    getBindingManager() { return this.bindingManager; }
-    getBattleCalculationManager() { return this.battleCalculationManager; }
 }
