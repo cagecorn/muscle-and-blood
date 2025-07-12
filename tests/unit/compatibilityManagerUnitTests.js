@@ -25,6 +25,11 @@ export function runCompatibilityManagerUnitTests(compatibilityManagerClass) {
         canvas: { width: 0, height: 0 }
     };
 
+    // mock LogicManager with minimum resolution info
+    const mockLogicManager = {
+        getMinGameResolution: () => ({ minWidth: 800, minHeight: 600 })
+    };
+
     // \ubaa8\uc758 UIEngine, MapManager
     const mockUIEngine = {
         recalculateUIDimensionsCalled: false,
@@ -47,7 +52,7 @@ export function runCompatibilityManagerUnitTests(compatibilityManagerClass) {
     // \ud14c\uc2a4\ud2b8 1: \ucd08\uae30\ud654 \ubc0f \ucd08\uae30 \uc870\uc815 \ud655\uc778 (Landscape)
     testCount++;
     setViewport(1920, 1080);
-    const compatibilityManager1 = new compatibilityManagerClass(mockMeasureManager, mockRenderer, mockUIEngine, mockMapManager);
+    const compatibilityManager1 = new compatibilityManagerClass(mockMeasureManager, mockRenderer, mockUIEngine, mockMapManager, mockLogicManager);
     compatibilityManager1.adjustResolution();
 
     if (mockMeasureManager._resolution.width === 1920 && mockMeasureManager._resolution.height === 1080 &&
@@ -111,7 +116,7 @@ export function runCompatibilityManagerUnitTests(compatibilityManagerClass) {
     };
     try {
         compatibilityManager1.adjustResolution();
-        if (mockMeasureManager._resolution.width === 0 && mockMeasureManager._resolution.height === 0 && warnCalled) {
+        if (mockMeasureManager._resolution.width === 800 && mockMeasureManager._resolution.height === 600 && warnCalled) {
             console.log("CompatibilityManager: Handles zero viewport gracefully. [PASS]");
             passCount++;
         } else {

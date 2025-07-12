@@ -90,4 +90,13 @@ export class LogicManager {
 
         return { x: clampedX, y: clampedY };
     }
+
+    /**
+     * 게임이 시작하기 위해 필요한 최소 해상도 요구 사항을 반환합니다.
+     * @returns {{minWidth: number, minHeight: number}} 최소 너비와 높이
+     */
+    getMinGameResolution() {
+        // 이 값은 GuardianManager.js의 규칙과 동기화되어야 합니다.
+        return { minWidth: 800, minHeight: 600 };
+    }
 }

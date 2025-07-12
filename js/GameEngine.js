@@ -30,26 +30,30 @@ export class GameEngine {
         this.guardianManager = new GuardianManager();
         this.measureManager = new MeasureManager();
 
-        // 화면 크기와 방향을 관리하는 CompatibilityManager 초기화
+        // SceneManager 초기화 (LogicManager보다 먼저 초기화되어야 함)
+        this.sceneManager = new SceneManager();
+
+        // LogicManager 초기화
+        this.logicManager = new LogicManager(this.measureManager, this.sceneManager);
+
+        // CompatibilityManager 초기화 (LogicManager를 전달)
         this.compatibilityManager = new CompatibilityManager(
             this.measureManager,
             this.renderer,
-            null,
-            null
+            null, // UIEngine (temp null)
+            null,  // MapManager (temp null)
+            this.logicManager // LogicManager 전달
         );
 
+        // UIEngine과 MapManager 초기화 (CompatibilityManager가 재계산 메서드를 호출할 수 있도록)
         this.mapManager = new MapManager(this.measureManager);
-
         this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager);
 
-        // CompatibilityManager에 UIEngine과 MapManager 참조를 전달한 후, 초기 해상도 조정
+        // CompatibilityManager에 UIEngine과 MapManager 참조 설정 (생성 후)
         this.compatibilityManager.uiEngine = this.uiEngine;
         this.compatibilityManager.mapManager = this.mapManager;
+        // 초기 캔버스 크기 조정 및 다른 매니저 재계산 트리거 (모든 매니저가 초기화된 후 한 번 더 호출)
         this.compatibilityManager.adjustResolution();
-
-        this.sceneManager = new SceneManager();
-
-        this.logicManager = new LogicManager(this.measureManager, this.sceneManager);
 
         this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneManager);
         this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine);
