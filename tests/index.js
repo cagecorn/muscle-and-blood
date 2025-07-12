@@ -10,6 +10,17 @@ export { runUIEngineUnitTests } from './unit/uiEngineUnitTests.js';
 export { runSceneEngineUnitTests } from './unit/sceneEngineUnitTests.js';
 export { runLogicManagerUnitTests } from './unit/logicManagerUnitTests.js';
 export { runCompatibilityManagerUnitTests } from './unit/compatibilityManagerUnitTests.js';
+export { runMercenaryPanelManagerUnitTests } from './unit/mercenaryPanelManagerUnitTests.js';
+export { runPanelEngineUnitTests } from './unit/panelEngineUnitTests.js';
+export { runBattleLogManagerUnitTests } from './unit/battleLogManagerUnitTests.js';
+export { runTurnEngineUnitTests } from './unit/turnEngineUnitTests.js';
+export { runDelayEngineUnitTests } from './unit/delayEngineUnitTests.js';
+export { runTimingEngineUnitTests } from './unit/timingEngineUnitTests.js';
+export { runRuleManagerUnitTests } from './unit/ruleManagerUnitTests.js';
+export { runTurnOrderManagerUnitTests } from './unit/turnOrderManagerUnitTests.js';
+export { runBasicAIManagerUnitTests } from './unit/basicAIManagerUnitTests.js';
+export { runClassAIManagerUnitTests } from './unit/classAIManagerUnitTests.js';
+export { runBattleSimulationManagerUnitTests } from './unit/battleSimulationManagerUnitTests.js';
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 
