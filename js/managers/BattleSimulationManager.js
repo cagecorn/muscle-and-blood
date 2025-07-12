@@ -25,11 +25,11 @@ export class BattleSimulationManager {
             id: fullUnitData.id,
             name: fullUnitData.name,
             spriteId: fullUnitData.spriteId,
-            image: unitImage, // ✨ 로드된 이미지 객체를 직접 저장합니다.
+            image: unitImage,
             gridX,
             gridY,
-            // 필요한 경우 다른 데이터도 여기에 추가할 수 있습니다.
-            baseStats: fullUnitData.baseStats,
+            currentHp: fullUnitData.currentHp !== undefined ? fullUnitData.currentHp : fullUnitData.baseStats.hp,
+            fullUnitData: fullUnitData,
             type: fullUnitData.type
         };
         this.unitsOnGrid.push(unitInstance);
