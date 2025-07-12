@@ -67,12 +67,22 @@
         <button id="runAllEngineTestsBtn">모든 엔진 테스트 실행</button>
         <button id="runMeasureManagerIntegrationTestBtn">측량 매니저 통합 테스트</button>
 
+        <h4>개별 유닛 테스트</h4>
+        <button id="runSceneManagerUnitTestsBtn">SceneManager 유닛 테스트</button>
+        <button id="runLogicManagerUnitTestsBtn">LogicManager 유닛 테스트</button>
+        <button id="runCompatibilityManagerUnitTestsBtn">CompatibilityManager 유닛 테스트</button>
+        <button id="runEventManagerUnitTestsBtn">EventManager 유닛 테스트</button>
+        <button id="runGuardianManagerUnitTestsBtn">GuardianManager 유닛 테스트</button>
+
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
         <button id="injectUpdateFaultBtn" class="fault-btn">Update 함수 결함 주입</button>
         <button id="injectDrawFaultBtn" class="fault-btn">Draw 함수 결함 주입</button>
         <button id="injectEventManagerFaultsBtn" class="fault-btn">이벤트 매니저 결함 주입</button>
         <button id="injectGuardianManagerFaultsBtn" class="fault-btn">가디언 매니저 결함 주입</button>
+        <button id="injectSceneManagerFaultsBtn" class="fault-btn">SceneManager 결함 주입</button>
+        <button id="injectLogicManagerFaultsBtn" class="fault-btn">LogicManager 결함 주입</button>
+        <button id="injectCompatibilityManagerFaultsBtn" class="fault-btn">CompatibilityManager 결함 주입</button>
         <h4>이벤트 발생 시뮬레이션</h4>
         <button id="simulateEventsBtn">이벤트 시뮬레이션 시작/정지</button>
     </div>
@@ -89,7 +99,13 @@
             injectEventManagerFaults,
             runGuardianManagerTests,
             injectGuardianManagerFaults,
-            runMeasureManagerIntegrationTest
+            runMeasureManagerIntegrationTest,
+            runSceneManagerUnitTests,
+            injectSceneManagerFaults,
+            runLogicManagerUnitTests,
+            injectLogicManagerFaults,
+            runCompatibilityManagerUnitTests,
+            injectCompatibilityManagerFaults
         } from './tests/index.js';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -109,6 +125,10 @@
             const eventManager = gameEngine.getEventManager();
             const guardianManager = gameEngine.getGuardianManager();
             const gameLoop = gameEngine.gameLoop; // GameLoop는 GameEngine에서 직접 노출되지 않으므로, GameEngine 내부에 getter를 추가해야 할 수도 있습니다. (현재 예시에서는 gameEngine.gameLoop로 접근)
+            // 새로운 매니저 인스턴스 가져오기
+            const sceneManager = gameEngine.getSceneManager();
+            const logicManager = gameEngine.getLogicManager();
+            const compatibilityManager = gameEngine.getCompatibilityManager();
 
 
             // 테스트용 EventManager 구독 (debug.html에서만 필요)
@@ -131,10 +151,31 @@
                 runEventManagerTests(eventManager);
                 runGuardianManagerTests(guardianManager);
                 runMeasureManagerIntegrationTest(gameEngine);
+                // 모든 유닛 테스트에 새 매니저 추가
+                runSceneManagerUnitTests(sceneManager);
+                runLogicManagerUnitTests(logicManager);
+                runCompatibilityManagerUnitTests(compatibilityManager);
             });
 
             document.getElementById('runMeasureManagerIntegrationTestBtn').addEventListener('click', () => {
                 runMeasureManagerIntegrationTest(gameEngine);
+            });
+
+            // 개별 유닛 테스트 버튼 리스너 추가
+            document.getElementById('runSceneManagerUnitTestsBtn').addEventListener('click', () => {
+                runSceneManagerUnitTests(sceneManager);
+            });
+            document.getElementById('runLogicManagerUnitTestsBtn').addEventListener('click', () => {
+                runLogicManagerUnitTests(logicManager);
+            });
+            document.getElementById('runCompatibilityManagerUnitTestsBtn').addEventListener('click', () => {
+                runCompatibilityManagerUnitTests(compatibilityManager);
+            });
+            document.getElementById('runEventManagerUnitTestsBtn').addEventListener('click', () => {
+                runEventManagerTests(eventManager);
+            });
+            document.getElementById('runGuardianManagerUnitTestsBtn').addEventListener('click', () => {
+                runGuardianManagerTests(guardianManager);
             });
 
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
@@ -160,6 +201,16 @@
             });
             document.getElementById('injectGuardianManagerFaultsBtn').addEventListener('click', () => {
                 injectGuardianManagerFaults(guardianManager);
+            });
+            // 새로운 결함 주입 테스트 버튼 리스너 추가
+            document.getElementById('injectSceneManagerFaultsBtn').addEventListener('click', () => {
+                injectSceneManagerFaults(sceneManager);
+            });
+            document.getElementById('injectLogicManagerFaultsBtn').addEventListener('click', () => {
+                injectLogicManagerFaults(logicManager);
+            });
+            document.getElementById('injectCompatibilityManagerFaultsBtn').addEventListener('click', () => {
+                injectCompatibilityManagerFaults(compatibilityManager);
             });
 
             let isSimulatingEvents = false;
@@ -222,6 +273,9 @@
             runEventManagerTests(eventManager); // EventManager 테스트도 자동 실행
             runGuardianManagerTests(guardianManager); // GuardianManager 테스트도 자동 실행
             runMeasureManagerIntegrationTest(gameEngine); // MeasureManager 통합 테스트도 자동 실행
+            runSceneManagerUnitTests(sceneManager);
+            runLogicManagerUnitTests(logicManager);
+            runCompatibilityManagerUnitTests(compatibilityManager);
         });
     </script>
 </body>
