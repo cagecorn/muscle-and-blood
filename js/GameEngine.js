@@ -27,6 +27,7 @@ import { TimingEngine } from './managers/TimingEngine.js'; // ✨ TimingEngine �
 import { BattleLogManager } from './managers/BattleLogManager.js'; // ✨ 새롭게 추가
 import { TurnOrderManager } from './managers/TurnOrderManager.js'; // ✨ 새롭게 추가
 import { ClassAIManager } from './managers/ClassAIManager.js';   // ✨ 새롭게 추가
+import { BasicAIManager } from './managers/BasicAIManager.js'; // ✨ 새롭게 추가
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -130,9 +131,12 @@ export class GameEngine {
         this.delayEngine = new DelayEngine();
         this.timingEngine = new TimingEngine(this.delayEngine);
 
+        // ✨ BasicAIManager 초기화
+        this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
+
         // ✨ 새로운 매니저 초기화
         this.turnOrderManager = new TurnOrderManager(this.eventManager, this.battleSimulationManager);
-        this.classAIManager = new ClassAIManager(this.idManager, this.battleSimulationManager, this.measureManager);
+        this.classAIManager = new ClassAIManager(this.idManager, this.battleSimulationManager, this.measureManager, this.basicAIManager);
 
         // ✨ TurnEngine에 새로운 의존성 전달
         this.turnEngine = new TurnEngine(

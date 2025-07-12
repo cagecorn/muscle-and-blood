@@ -1,11 +1,12 @@
 // js/managers/ClassAIManager.js
 
 export class ClassAIManager {
-    constructor(idManager, battleSimulationManager, measureManager) {
+    constructor(idManager, battleSimulationManager, measureManager, basicAIManager) {
         console.log("\ud83d\udcbb ClassAIManager initialized. Ready to define class-based AI. \ud83d\udcbb");
         this.idManager = idManager;
         this.battleSimulationManager = battleSimulationManager;
         this.measureManager = measureManager;
+        this.basicAIManager = basicAIManager;
     }
 
     /**
@@ -26,7 +27,9 @@ export class ClassAIManager {
                 return this._getWarriorAction(unit, allUnits, unitClass);
             default:
                 console.warn(`[ClassAIManager] No specific AI defined for class: ${unitClass.name} (${unitClass.id}).`);
-                return null;
+                const defaultMoveRange = unitClass.moveRange || 1;
+                const defaultAttackRange = unitClass.attackRange || 1;
+                return this.basicAIManager.determineMoveAndTarget(unit, allUnits, defaultMoveRange, defaultAttackRange);
         }
     }
 
@@ -38,89 +41,11 @@ export class ClassAIManager {
      * @returns {{actionType: string, targetId?: string, moveTargetX?: number, moveTargetY?: number}}
      */
     _getWarriorAction(warriorUnit, allUnits, warriorClassData) {
-        const enemies = allUnits.filter(u => u.type === 'enemy' && u.currentHp > 0);
-        if (enemies.length === 0) {
-            console.log(`[ClassAIManager] Warrior ${warriorUnit.name}: No enemies to attack.`);
-            return null;
-        }
-
-        let closestEnemy = null;
-        let minDistance = Infinity;
-
-        for (const enemy of enemies) {
-            const dist = Math.abs(warriorUnit.gridX - enemy.gridX) + Math.abs(warriorUnit.gridY - enemy.gridY);
-            if (dist < minDistance) {
-                minDistance = dist;
-                closestEnemy = enemy;
-            }
-        }
-
-        if (!closestEnemy) {
-            return null;
-        }
-
+        const moveRange = warriorClassData.moveRange || 1;
         const attackRange = 1;
-        const dx = Math.abs(warriorUnit.gridX - closestEnemy.gridX);
-        const dy = Math.abs(warriorUnit.gridY - closestEnemy.gridY);
 
-        if (dx <= attackRange && dy <= attackRange && dx + dy <= attackRange * 2) {
-            console.log(`[ClassAIManager] Warrior ${warriorUnit.name}: Enemy ${closestEnemy.name} is in attack range.`);
-            return {
-                actionType: 'attack',
-                targetId: closestEnemy.id
-            };
-        } else {
-            console.log(`[ClassAIManager] Warrior ${warriorUnit.name}: Moving towards ${closestEnemy.name}.`);
-            let targetMoveX = warriorUnit.gridX;
-            let targetMoveY = warriorUnit.gridY;
+        const action = this.basicAIManager.determineMoveAndTarget(warriorUnit, allUnits, moveRange, attackRange);
 
-            const moveRange = warriorClassData.moveRange || 1;
-            let remainingMoves = moveRange;
-
-            while (remainingMoves > 0 && (Math.abs(targetMoveX - closestEnemy.gridX) > 0 || Math.abs(targetMoveY - closestEnemy.gridY) > 0)) {
-                let moved = false;
-                if (targetMoveX < closestEnemy.gridX) {
-                    targetMoveX++;
-                    moved = true;
-                } else if (targetMoveX > closestEnemy.gridX) {
-                    targetMoveX--;
-                    moved = true;
-                }
-
-                if (remainingMoves > 0 && !moved) {
-                    if (targetMoveY < closestEnemy.gridY) {
-                        targetMoveY++;
-                        moved = true;
-                    } else if (targetMoveY > closestEnemy.gridY) {
-                        targetMoveY--;
-                        moved = true;
-                    }
-                }
-
-                if (moved) {
-                    remainingMoves--;
-                    const currentDx = Math.abs(targetMoveX - closestEnemy.gridX);
-                    const currentDy = Math.abs(targetMoveY - closestEnemy.gridY);
-                    if (currentDx <= attackRange && currentDy <= attackRange && currentDx + currentDy <= attackRange * 2) {
-                        console.log(`[ClassAIManager] Warrior ${warriorUnit.name}: Moved to (${targetMoveX},${targetMoveY}) and now in attack range.`);
-                        return {
-                            actionType: 'moveAndAttack',
-                            targetId: closestEnemy.id,
-                            moveTargetX: targetMoveX,
-                            moveTargetY: targetMoveY
-                        };
-                    }
-                } else {
-                    break;
-                }
-            }
-
-            console.log(`[ClassAIManager] Warrior ${warriorUnit.name}: Only moved to (${targetMoveX},${targetMoveY}), not in attack range.`);
-            return {
-                actionType: 'move',
-                moveTargetX: targetMoveX,
-                moveTargetY: targetMoveY
-            };
-        }
+        return action;
     }
 }
