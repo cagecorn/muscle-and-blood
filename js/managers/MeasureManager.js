@@ -2,11 +2,11 @@
 
 export class MeasureManager {
     constructor() {
-        console.log("\ud83d\udccf MeasureManager initialized. Ready to measure all things. \ud83d\udccf");
+        console.log(" 측정 매니저 초기화됨. 모든 것을 측정할 준비 완료. 🎛️");
 
         // 게임의 모든 사이즈 관련 설정을 이곳에 정의
         this._measurements = {
-            tileSize: 512, // 맵 타일의 기본 사이즈
+            tileSize: 512, // 맵 타일의 기본 사이즈 (이 값은 이제 BattleGridManager에서 직접 사용되지 않고, 기본 타일 사이즈의 개념으로 유지)
             mapGrid: { rows: 10, cols: 15 }, // 맵 그리드의 행/열
             gameResolution: {
                 width: 1280,
@@ -19,11 +19,13 @@ export class MeasureManager {
                 buttonWidth: 200,
                 buttonMargin: 10
             },
-            // 새로 추가된 배틀 스테이지 크기와 내부 여백 설정
+            // 새로운 설정: 배틀 스테이지 관련
             battleStage: {
-                widthRatio: 0.9, // 캔버스 너비 대비 배틀 스테이지 너비 비율
-                heightRatio: 0.8, // 캔버스 높이 대비 배틀 스테이지 높이 비율
-                padding: 40 // 배틀 스테이지 내부 여백 (그리드가 이 여백 안에 그려진다)
+                // widthRatio, heightRatio는 이제 LogicManager에서 캔버스 전체로 간주합니다.
+                // 이 값들은 더 이상 BattleStageManager에서 직접 사용되지 않지만, 다른 곳에서 참조될 수 있으므로 유지합니다.
+                widthRatio: 1.0, // 논리적으로 캔버스 전체를 채움
+                heightRatio: 1.0, // 논리적으로 캔버스 전체를 채움
+                padding: 40 // 배틀 스테이지 내부 여백 (그리드가 이 여백 안에 그려짐)
             }
         };
     }

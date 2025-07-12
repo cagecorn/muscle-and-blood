@@ -15,18 +15,14 @@ export class LogicManager {
     getCurrentSceneContentDimensions() {
         const canvasWidth = this.measureManager.get('gameResolution.width');
         const canvasHeight = this.measureManager.get('gameResolution.height');
-        const currentSceneName = this.sceneManager.getCurrentSceneName && this.sceneManager.getCurrentSceneName();
+        const currentSceneName = this.sceneManager.getCurrentSceneName();
 
-        if (currentSceneName === 'territoryScene') {
+        // 논리 2 적용: 영지 화면과 배틀 스테이지 화면은 맵 화면 박스(캔버스)와 똑같게 한다.
+        // 따라서 두 씬 모두 콘텐츠 크기는 캔버스 전체입니다.
+        if (currentSceneName === 'territoryScene' || currentSceneName === 'battleScene') {
             return { width: canvasWidth, height: canvasHeight };
-        } else if (currentSceneName === 'battleScene') {
-            const stageWidthRatio = this.measureManager.get('battleStage.widthRatio');
-            const stageHeightRatio = this.measureManager.get('battleStage.heightRatio');
-            const stageWidth = canvasWidth * stageWidthRatio;
-            const stageHeight = canvasHeight * stageHeightRatio;
-            return { width: stageWidth, height: stageHeight };
         }
-
+        // 기본값 (예외 처리)
         console.warn(`[LogicManager] Unknown scene name '${currentSceneName}'. Returning canvas dimensions as content dimensions.`);
         return { width: canvasWidth, height: canvasHeight };
     }
@@ -41,16 +37,18 @@ export class LogicManager {
         const canvasHeight = this.measureManager.get('gameResolution.height');
         const contentDimensions = this.getCurrentSceneContentDimensions();
 
+        // 콘텐츠가 화면의 어느 한 축이라도 넘치지 않게 하는 최소 줌
         const minZoomX = canvasWidth / contentDimensions.width;
         const minZoomY = canvasHeight / contentDimensions.height;
 
-        const minZoom = Math.min(minZoomX, minZoomY);
-        const forcedMinZoom = Math.max(minZoomX, minZoomY);
-        const finalMinZoom = Math.min(1.0, forcedMinZoom);
+        // 화면에 빈틈이 보이지 않도록, 콘텐츠가 화면을 완전히 덮는 최소 줌을 선택 (둘 중 큰 값)
+        // 콘텐츠 크기가 캔버스 크기와 같아졌으므로, minZoom은 기본적으로 1.0이 됩니다.
+        const minZoom = Math.max(minZoomX, minZoomY); // 콘텐츠가 화면보다 작을 때도 최소 줌 1.0 유지 (빈틈 방지)
 
-        const maxZoom = 3.0;
+        // 최대 줌은 기존 CameraEngine의 maxZoom 값을 유지 (또는 MeasureManager에서 설정 가능)
+        const maxZoom = 3.0; // 임의의 최대 줌 값 (필요에 따라 MeasureManager에서 가져올 수 있음)
 
-        return { minZoom: finalMinZoom, maxZoom: maxZoom };
+        return { minZoom: minZoom, maxZoom: maxZoom };
     }
 
     /**
@@ -72,15 +70,21 @@ export class LogicManager {
         let clampedX = currentX;
         let clampedY = currentY;
 
+        // X축 제약
         if (effectiveContentWidth < canvasWidth) {
+            // 콘텐츠가 화면보다 작으면 중앙 정렬 (이 경우 LogicManager가 캔버스 크기를 콘텐츠로 정의했으므로, 이 조건은 currentZoom < 1.0일 때만 발생)
             clampedX = (canvasWidth - effectiveContentWidth) / 2;
         } else {
+            // 콘텐츠가 화면보다 크면 이동 범위 제한
             clampedX = Math.min(0, Math.max(currentX, canvasWidth - effectiveContentWidth));
         }
 
+        // Y축 제약
         if (effectiveContentHeight < canvasHeight) {
+            // 콘텐츠가 화면보다 작으면 중앙 정렬
             clampedY = (canvasHeight - effectiveContentHeight) / 2;
         } else {
+            // 콘텐츠가 화면보다 크면 이동 범위 제한
             clampedY = Math.min(0, Math.max(currentY, canvasHeight - effectiveContentHeight));
         }
 

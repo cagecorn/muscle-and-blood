@@ -16,19 +16,13 @@ export class BattleGridManager {
         const canvasWidth = ctx.canvas.width;
         const canvasHeight = ctx.canvas.height;
 
-        // 1. 배틀 스테이지의 실제 크기와 위치 계산
-        const stageWidthRatio = this.measureManager.get('battleStage.widthRatio');
-        const stageHeightRatio = this.measureManager.get('battleStage.heightRatio');
+        // 1. 배틀 스테이지의 실제 크기와 위치는 이제 캔버스 전체입니다 (논리 2 적용).
+        // 그리드 여백은 MeasureManager에서 가져옵니다.
         const stagePadding = this.measureManager.get('battleStage.padding');
 
-        const stageWidth = canvasWidth * stageWidthRatio;
-        const stageHeight = canvasHeight * stageHeightRatio;
-        const stageX = (canvasWidth - stageWidth) / 2;
-        const stageY = (canvasHeight - stageHeight) / 2;
-
-        // 2. 그리드가 그려질 수 있는 유효 영역 계산 (스테이지 내부 여백을 제외)
-        const gridDrawableWidth = stageWidth - 2 * stagePadding;
-        const gridDrawableHeight = stageHeight - 2 * stagePadding;
+        // 2. 그리드가 그려질 수 있는 유효 영역 계산 (캔버스 전체에서 패딩을 제외)
+        const gridDrawableWidth = canvasWidth - 2 * stagePadding;
+        const gridDrawableHeight = canvasHeight - 2 * stagePadding;
 
         // 3. 15x10 그리드가 이 유효 영역에 딱 맞도록 유효 타일 크기 계산
         const effectiveTileSize = Math.min(
@@ -39,9 +33,10 @@ export class BattleGridManager {
         const totalGridWidth = this.gridCols * effectiveTileSize;
         const totalGridHeight = this.gridRows * effectiveTileSize;
 
-        // 4. 그리드를 배틀 스테이지의 유효 영역 내 중앙에 배치
-        const gridOffsetX = stageX + stagePadding + (gridDrawableWidth - totalGridWidth) / 2;
-        const gridOffsetY = stageY + stagePadding + (gridDrawableHeight - totalGridHeight) / 2;
+        // 4. 그리드를 캔버스의 유효 영역 내 중앙에 배치
+        // (캔버스 시작점 0,0 + 패딩 + 남은 공간 중앙 정렬)
+        const gridOffsetX = stagePadding + (gridDrawableWidth - totalGridWidth) / 2;
+        const gridOffsetY = stagePadding + (gridDrawableHeight - totalGridHeight) / 2;
 
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.lineWidth = 1;
