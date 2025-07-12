@@ -2,7 +2,7 @@
 
 export class LogicManager {
     constructor(measureManager, sceneManager) {
-        console.log("\ud83e\uddd0 LogicManager initialized. Ready to enforce common sense. \ud83e\uddd0");
+        console.log("\ud0d1\uc815 \ub85c\uc9c1 \ub9c8\ub2c8\uc800 \ucd08\uae30\ud654\ub428. \uc0c1\uc2e4\uc744 \uac15\uc81c\ud560 \uc900\ube44 \ub41c\ub2e4. \ud83d\udd75\ufe0f");
         this.measureManager = measureManager;
         this.sceneManager = sceneManager;
     }
@@ -22,8 +22,12 @@ export class LogicManager {
         if (currentSceneName === 'territoryScene' || currentSceneName === 'battleScene') {
             return { width: canvasWidth, height: canvasHeight };
         }
-        // 기본값 (예외 처리)
-        console.warn(`[LogicManager] Unknown scene name '${currentSceneName}'. Returning canvas dimensions as content dimensions.`);
+        // ✨ 새로운 논리: 용병 패널의 콘텐츠 크기는 패널 캔버스 자체의 크기와 동일합니다.
+        // PanelEngine이 관리하지만, LogicManager는 DOM 요소에 직접 접근하지 않으므로
+        // 현재는 MeasureManager에 등록된 게임 해상도를 기본값으로 사용합니다.
+
+        // 기본값 (예외 처리) - 알 수 없는 씬의 경우 메인 게임 캔버스 치수 반환
+        console.warn(`[LogicManager] Unknown scene name '${currentSceneName}'. Returning main game canvas dimensions as content dimensions.`);
         return { width: canvasWidth, height: canvasHeight };
     }
 
