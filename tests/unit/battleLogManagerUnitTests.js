@@ -2,7 +2,7 @@
 
 import { BattleLogManager } from '../../js/managers/BattleLogManager.js';
 
-export function runBattleLogManagerUnitTests(eventManager) {
+export function runBattleLogManagerUnitTests(eventManager, measureManager) {
     console.log("--- BattleLogManager Unit Test Start ---");
 
     let testCount = 0;
@@ -17,7 +17,7 @@ export function runBattleLogManagerUnitTests(eventManager) {
     // 테스트 1: 초기화 확인
     testCount++;
     try {
-        const logManager = new BattleLogManager(mockCanvas, eventManager);
+        const logManager = new BattleLogManager(mockCanvas, eventManager, measureManager);
         if (logManager.logMessages instanceof Array && logManager.logMessages.length === 0) {
             console.log("BattleLogManager: Initialized correctly. [PASS]");
             passCount++;
@@ -31,7 +31,7 @@ export function runBattleLogManagerUnitTests(eventManager) {
     // 테스트 2: 로그 메시지 추가
     testCount++;
     try {
-        const logManager = new BattleLogManager(mockCanvas, eventManager);
+        const logManager = new BattleLogManager(mockCanvas, eventManager, measureManager);
         logManager.addLog("Test message 1.");
         if (logManager.logMessages.length === 1 && logManager.logMessages[0].includes("Test message 1.")) {
             console.log("BattleLogManager: Added log message successfully. [PASS]");
@@ -46,7 +46,7 @@ export function runBattleLogManagerUnitTests(eventManager) {
     // 테스트 3: 최대 로그 줄 수 초과 시 오래된 메시지 제거
     testCount++;
     try {
-        const logManager = new BattleLogManager(mockCanvas, eventManager);
+        const logManager = new BattleLogManager(mockCanvas, eventManager, measureManager);
         logManager.maxLogLines = 2;
         logManager.addLog("Oldest message.");
         logManager.addLog("Middle message.");
@@ -67,7 +67,7 @@ export function runBattleLogManagerUnitTests(eventManager) {
     // 테스트 4: draw 메서드 호출 시 캔버스에 그리는지 간접 확인
     testCount++;
     try {
-        const logManager = new BattleLogManager(mockCanvas, eventManager);
+        const logManager = new BattleLogManager(mockCanvas, eventManager, measureManager);
         logManager.addLog("Drawing test message.");
 
         const originalFillText = mockCtx.fillText;

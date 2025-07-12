@@ -22,19 +22,16 @@ canvas {
     display: block; /* 캔버스 아래 추가 공간 방지 */
 }
 
-/* 용병 패널 캔버스 전용 스타일 */
+/* 용병 패널 캔버스 전용 스타일 (JS가 크기 제어) */
 #mercenaryPanelCanvas {
-    /* ✨ width: 100%; 제거 및 고정 값 설정 */
-    width: 600px; /* MeasureManager에 정의된 고정 너비 */
-    height: 200px; /* MeasureManager에 정의된 고정 높이 */
+    /* ✨ width, height 속성 제거 */
     margin-bottom: 10px; /* 패널과 메인 게임 캔버스 사이의 간격 */
     border: 2px solid #00f; /* 구분을 위한 다른 테두리 색상 */
 }
 
-/* ✨ 새로운 전투 로그 캔버스 전용 스타일 */
+/* ✨ 전투 로그 캔버스 전용 스타일 (JS가 크기 제어) */
 #combatLogCanvas {
-    width: 600px; /* 용병 패널과 동일한 너비 */
-    height: 120px; /* 고정 높이 (로그 표시 영역) */
+    /* ✨ width, height 속성 제거 */
     margin-top: 10px; /* 메인 게임 캔버스 위쪽 간격 */
     border: 2px solid #f00; /* 구분을 위한 다른 테두리 색상 (빨간색) */
 }

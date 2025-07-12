@@ -62,13 +62,53 @@ export class GameEngine {
         this.idManager = new IdManager();
         this.assetLoaderManager = new AssetLoaderManager();
 
-        // CompatibilityManager 초기화 (LogicManager를 전달)
+        // 전투 시뮬레이션 매니저는 패널 및 로그 매니저가 필요하므로 먼저 초기화합니다.
+        this.battleSimulationManager = new BattleSimulationManager(
+            this.measureManager,
+            this.assetLoaderManager,
+            this.idManager,
+            this.logicManager
+        );
+
+        // 패널과 로그 캔버스 요소 준비 및 매니저 초기화
+        const mercenaryPanelCanvasElement = document.getElementById('mercenaryPanelCanvas');
+        if (!mercenaryPanelCanvasElement) {
+            console.error("GameEngine: Mercenary Panel Canvas not found. Game cannot proceed without it.");
+            throw new Error("Mercenary Panel Canvas initialization failed.");
+        }
+        this.mercenaryPanelManager = new MercenaryPanelManager(
+            mercenaryPanelCanvasElement,
+            this.measureManager,
+            this.battleSimulationManager,
+            this.logicManager
+        );
+
+        const combatLogCanvasElement = document.getElementById('combatLogCanvas');
+        if (!combatLogCanvasElement) {
+            console.error("GameEngine: Combat Log Canvas not found. Game cannot proceed without it.");
+            throw new Error("Combat Log Canvas initialization failed.");
+        }
+        this.battleLogManager = new BattleLogManager(
+            combatLogCanvasElement,
+            this.eventManager,
+            this.measureManager
+        );
+        // 이벤트 리스너는 명시적으로 설정
+        this.battleLogManager._setupEventListeners();
+
+        // PanelEngine 초기화 및 패널 등록
+        this.panelEngine = new PanelEngine();
+        this.panelEngine.registerPanel('mercenaryPanel', this.mercenaryPanelManager);
+
+        // CompatibilityManager 초기화 (LogicManager와 패널, 로그 매니저 전달)
         this.compatibilityManager = new CompatibilityManager(
             this.measureManager,
             this.renderer,
             null, // UIEngine (temp null)
             null,  // MapManager (temp null)
-            this.logicManager // LogicManager 전달
+            this.logicManager,
+            this.mercenaryPanelManager,
+            this.battleLogManager
         );
 
         // UIEngine과 MapManager 초기화 (CompatibilityManager가 재계산 메서드를 호출할 수 있도록)
@@ -89,46 +129,9 @@ export class GameEngine {
         this.territoryManager = new TerritoryManager();
         this.battleStageManager = new BattleStageManager();
         this.battleGridManager = new BattleGridManager(this.measureManager, this.logicManager);
-        this.battleSimulationManager = new BattleSimulationManager(
-            this.measureManager,
-            this.assetLoaderManager,
-            this.idManager,
-            this.logicManager
-        );
         this.vfxManager = new VFXManager(this.renderer, this.measureManager, this.cameraEngine, this.battleSimulationManager);
         this.bindingManager = new BindingManager();
         this.battleCalculationManager = new BattleCalculationManager(this.eventManager, this.battleSimulationManager);
-
-        // ✨ PanelEngine 초기화
-        this.panelEngine = new PanelEngine();
-
-        // 용병 패널 캔버스 요소를 직접 가져옵니다.
-        const mercenaryPanelCanvasElement = document.getElementById('mercenaryPanelCanvas');
-        if (!mercenaryPanelCanvasElement) {
-            console.error("GameEngine: Mercenary Panel Canvas not found. Game cannot proceed without it.");
-            throw new Error("Mercenary Panel Canvas initialization failed.");
-        }
-
-        // MercenaryPanelManager 초기화 시 캔버스 요소와 LogicManager 전달
-        this.mercenaryPanelManager = new MercenaryPanelManager(
-            mercenaryPanelCanvasElement, // ✨ 캔버스 ID 대신 DOM 요소 자체를 전달
-            this.measureManager,
-            this.battleSimulationManager,
-            this.logicManager // ✨ LogicManager도 함께 전달
-        );
-        // PanelEngine에 용병 패널 등록
-        this.panelEngine.registerPanel('mercenaryPanel', this.mercenaryPanelManager);
-
-        // ✨ 전투 로그 캔버스 요소 가져오기 및 BattleLogManager 초기화
-        const combatLogCanvasElement = document.getElementById('combatLogCanvas');
-        if (!combatLogCanvasElement) {
-            console.error("GameEngine: Combat Log Canvas not found. Game cannot proceed without it.");
-            throw new Error("Combat Log Canvas initialization failed.");
-        }
-        this.battleLogManager = new BattleLogManager(
-            combatLogCanvasElement,
-            this.eventManager
-        );
 
         // ✨ 새로운 엔진들 초기화
         this.delayEngine = new DelayEngine();

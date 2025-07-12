@@ -1,38 +1,64 @@
 // js/managers/BattleLogManager.js
 
 export class BattleLogManager {
-    constructor(canvasElement, eventManager) {
+    constructor(canvasElement, eventManager, measureManager) { // ✨ measureManager 추가
         console.log("\uD83D\uDCDC BattleLogManager initialized. Ready to record battle events. \uD83D\uDCDC");
         this.canvas = canvasElement;
         this.ctx = this.canvas.getContext('2d');
         this.eventManager = eventManager;
+        this.measureManager = measureManager; // ✨ measureManager 저장
 
         this.logMessages = [];
-        this.maxLogLines = 5;
-        this.lineHeight = 20;
-        this.padding = 10;
+        
+        // 초기 로그 치수 재계산 (CompatibilityManager가 캔버스 크기 설정 후 호출할 것임)
+        this.recalculateLogDimensions();
 
-        this._setupEventListeners();
+        // ✨ _setupEventListeners는 이제 GameEngine에서 명시적으로 호출됩니다.
+        // this._setupEventListeners();
     }
 
+    /**
+     * ✨ 로그 패널의 내부 치수를 재계산합니다.
+     * 이 메서드는 CompatibilityManager가 캔버스 크기를 조정한 후 호출해야 합니다.
+     */
+    recalculateLogDimensions() {
+        const measuredLineHeight = this.measureManager.get('combatLog.lineHeight');
+        const measuredPadding = this.measureManager.get('combatLog.padding');
+
+        // 캔버스 높이에 따라 표시할 최대 줄 수와 줄 간격 재조정
+        this.padding = measuredPadding;
+        this.lineHeight = measuredLineHeight;
+        this.maxLogLines = Math.floor((this.canvas.height - 2 * this.padding) / this.lineHeight);
+        
+        // 최대 줄 수를 초과하는 오래된 메시지 제거
+        while (this.logMessages.length > this.maxLogLines) {
+            this.logMessages.shift();
+        }
+        console.log(`[BattleLogManager] Log dimensions recalculated. Canvas size: ${this.canvas.width}x${this.canvas.height}, Max lines: ${this.maxLogLines}`);
+    }
+
+    /**
+     * ✨ 이벤트 리스너를 설정하는 메서드. 이제 GameEngine에서 명시적으로 호출됩니다.
+     */
     _setupEventListeners() {
+        // 전투 관련 이벤트를 구독하여 로그에 추가
         this.eventManager.subscribe('unitAttackAttempt', (data) => {
-            this.addLog(`${data.attackerId}\uAC00 ${data.targetId}\uB97C \uACF5\uACA9 \uC2DC\uB3C4!`);
+            this.addLog(`${data.attackerId}가 ${data.targetId}를 공격 시도!`);
         });
-        this.eventManager.subscribe('DAMAGE_CALCULATED', (data) => {
-            this.addLog(`${data.unitId}\uAC00 ${data.damageDealt} \uD53C\uD574\uB97C \uC785\uACE0 HP ${data.newHp}\uAC00 \uB418\uBA74.`);
+        this.eventManager.subscribe('DAMAGE_CALCULATED', (data) => { // BattleCalculationWorker에서 발생
+            this.addLog(`${data.unitId}가 ${data.damageDealt} 피해를 입고 HP ${data.newHp}가 됨.`);
         });
         this.eventManager.subscribe('unitDeath', (data) => {
-            this.addLog(`${data.unitName} (ID: ${data.unitId})\uC774(\uAC00) \uC4F0\uB7EC\uC84C\uC2B5\uB2C8\uB2E4!`);
+            this.addLog(`${data.unitName} (ID: ${data.unitId})이(가) 쓰러졌습니다!`);
         });
         this.eventManager.subscribe('turnStart', (data) => {
-            this.addLog(`--- \uD134 ${data.turn} \uC2DC\uC791 ---`);
+            this.addLog(`--- 턴 ${data.turn} 시작 ---`);
         });
         this.eventManager.subscribe('battleStart', (data) => {
-            this.addLog(`[\uC804\uD22C \uC2DC\uC791] \uB9F5: ${data.mapId}, \uB09C\uC774\uB3C4: ${data.difficulty}`);
+            this.addLog(`[전투 시작] 맵: ${data.mapId}, 난이도: ${data.difficulty}`);
         });
         this.eventManager.subscribe('battleEnd', (data) => {
-            this.addLog(`[\uC804\uD22C \uC885\uB8CC] \uC774\uC720: ${data.reason}`);
+            this.addLog(`[전투 종료] 이유: ${data.reason}`);
         });
     }
 
@@ -51,7 +77,7 @@ export class BattleLogManager {
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         ctx.fillStyle = 'white';
-        ctx.font = '14px Arial';
+        ctx.font = `${Math.floor(this.lineHeight * 0.8)}px Arial`; // ✨ 폰트 크기 동적 조정 (줄 높이의 80%)
         ctx.textBaseline = 'top';
 
         for (let i = 0; i < this.logMessages.length; i++) {
