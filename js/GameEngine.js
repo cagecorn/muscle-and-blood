@@ -167,12 +167,13 @@ export class GameEngine {
         console.log(`[GameEngine] Registered unit ID: ${UNITS.WARRIOR.id}`);
         console.log(`[GameEngine] Loaded warrior sprite: ${UNITS.WARRIOR.spriteId}`);
 
-        // 샘플 ID 조회 (확인용)
+        // 샘플 ID 조회 및 이미지 로드 (동기적 접근을 위해)
         const warriorData = await this.idManager.get(UNITS.WARRIOR.id);
-        console.log("[GameEngine] Retrieved Warrior Unit Data:", warriorData);
+        const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
 
-        // 3. 배틀 시뮬레이션 매니저에 전사 유닛 배치
-        this.battleSimulationManager.addUnit(UNITS.WARRIOR.id, 7, 4);
+        // ✨ 3. 배틀 시뮬레이션 매니저에 전사 유닛 배치 (로드된 데이터와 이미지를 함께 전달)
+        // fullUnitData, unitImage, gridX, gridY 순서로 전달합니다.
+        this.battleSimulationManager.addUnit(warriorData, warriorImage, 7, 4);
     }
 
     _update(deltaTime) {
