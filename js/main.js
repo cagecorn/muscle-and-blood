@@ -4,6 +4,7 @@ import { GameEngine } from './GameEngine.js';
 document.addEventListener('DOMContentLoaded', () => {
     try {
         const gameEngine = new GameEngine('gameCanvas');
+        gameEngine.eventManager.setGameRunningState(true); // ✨ 게임 시작 시 상태 설정
         gameEngine.start();
     } catch (error) {
         console.error("Fatal Error: Game Engine failed to start.", error);

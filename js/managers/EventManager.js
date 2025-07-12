@@ -6,6 +6,7 @@ export class EventManager {
         // '../workers/eventWorker.js' 경로는 이 파일(EventManager.js) 기준으로 workers 폴더 안의 eventWorker.js를 의미합니다.
         this.worker = new Worker('./js/workers/eventWorker.js'); // main.js에서 EventManager를 불러올 때의 상대 경로
         this.subscribers = new Map(); // 메인 스레드에서 이벤트 구독자를 관리할 Map
+        this._isGameRunning = false; // ✨ 게임 실행 상태 플래그 추가
 
         // Web Worker로부터 메시지를 받을 때 실행될 콜백 설정
         this.worker.onmessage = this.handleWorkerMessage.bind(this);
@@ -86,5 +87,21 @@ export class EventManager {
             this.worker.terminate();
             console.log("[EventManager] Web Worker terminated.");
         }
+    }
+
+    /**
+     * ✨ 게임 실행 상태를 설정합니다.
+     * @param {boolean} isRunning
+     */
+    setGameRunningState(isRunning) {
+        this._isGameRunning = isRunning;
+    }
+
+    /**
+     * ✨ 게임 실행 상태를 반환합니다.
+     * @returns {boolean}
+     */
+    getGameRunningState() {
+        return this._isGameRunning;
     }
 }

@@ -18,8 +18,12 @@ import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
 import { VFXManager } from './managers/VFXManager.js';
 import { BindingManager } from './managers/BindingManager.js';
 import { BattleCalculationManager } from './managers/BattleCalculationManager.js';
-import { MercenaryPanelManager } from './managers/MercenaryPanelManager.js'; // ✨ 새롭게 추가
-import { PanelEngine } from './managers/PanelEngine.js'; // ✨ 새롭게 추가
+import { MercenaryPanelManager } from './managers/MercenaryPanelManager.js'; // ✨ MercenaryPanelManager 추가
+import { PanelEngine } from './managers/PanelEngine.js'; // ✨ PanelEngine 추가
+
+import { TurnEngine } from './managers/TurnEngine.js'; // ✨ TurnEngine 추가
+import { DelayEngine } from './managers/DelayEngine.js'; // ✨ DelayEngine 추가
+import { TimingEngine } from './managers/TimingEngine.js'; // ✨ TimingEngine 추가
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -108,6 +112,11 @@ export class GameEngine {
         // PanelEngine에 용병 패널 등록
         this.panelEngine.registerPanel('mercenaryPanel', this.mercenaryPanelManager);
 
+        // ✨ 새로운 엔진들 초기화
+        this.delayEngine = new DelayEngine();
+        this.timingEngine = new TimingEngine(this.delayEngine);
+        this.turnEngine = new TurnEngine(this.eventManager, this.battleSimulationManager); // BattleSimulationManager를 TurnEngine에 전달
+
         this.sceneEngine.registerScene('territoryScene', [this.territoryManager]);
         this.sceneEngine.registerScene('battleScene', [
             this.battleStageManager,
@@ -164,11 +173,14 @@ export class GameEngine {
             this.eventManager.subscribe('skillExecuted', (data) => {
                 console.log(`[GameEngine] Notification: Skill '${data.skillName}' was executed.`);
             });
-            this.eventManager.subscribe('battleStart', (data) => {
+            this.eventManager.subscribe('battleStart', async (data) => {
                 console.log(`[GameEngine] Battle started for map: ${data.mapId}, difficulty: ${data.difficulty}`);
                 this.sceneEngine.setCurrentScene('battleScene');
                 this.uiEngine.setUIState('combatScreen');
                 this.cameraEngine.reset();
+
+                // 전투 시작 후 TurnEngine 구동
+                await this.turnEngine.startBattleTurns();
             });
 
             console.log("\u2699\ufe0f GameEngine initialized successfully. \u2699\ufe0f");
@@ -257,4 +269,9 @@ export class GameEngine {
     getBattleCalculationManager() { return this.battleCalculationManager; }
     getMercenaryPanelManager() { return this.mercenaryPanelManager; }
     getBindingManager() { return this.bindingManager; }
+
+    // 새로운 엔진들에 대한 getter 메서드
+    getDelayEngine() { return this.delayEngine; }
+    getTimingEngine() { return this.timingEngine; }
+    getTurnEngine() { return this.turnEngine; }
 }
