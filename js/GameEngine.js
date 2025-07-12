@@ -178,7 +178,9 @@ export class GameEngine {
         const warriorData = await this.idManager.get(UNITS.WARRIOR.id);
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
 
-        this.battleSimulationManager.addUnit({ ...warriorData, currentHp: warriorData.baseStats.hp }, warriorImage, 7, 4);
+        // ✨ BattleSimulationManager에 유닛 배치 시 currentHp 초기화
+        // 전사를 그리드의 더 왼쪽에 배치 (gridX: 3)
+        this.battleSimulationManager.addUnit({ ...warriorData, currentHp: warriorData.baseStats.hp }, warriorImage, 3, 4);
 
         const mockEnemyUnitData = {
             id: 'unit_skeleton_001',
@@ -193,7 +195,8 @@ export class GameEngine {
 
         const enemyData = await this.idManager.get(mockEnemyUnitData.id);
         const enemyImage = this.assetLoaderManager.getImage(mockEnemyUnitData.spriteId);
-        this.battleSimulationManager.addUnit({ ...enemyData, currentHp: enemyData.baseStats.hp }, enemyImage, 5, 4);
+        // 해골을 그리드의 더 오른쪽에 배치 (gridX: 10)
+        this.battleSimulationManager.addUnit({ ...enemyData, currentHp: enemyData.baseStats.hp }, enemyImage, 10, 4);
     }
 
     _update(deltaTime) {
