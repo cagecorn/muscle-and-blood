@@ -12,6 +12,7 @@ import { CameraEngine } from './managers/CameraEngine.js';
 import { InputManager } from './managers/InputManager.js';
 import { LogicManager } from './managers/LogicManager.js';
 import { CompatibilityManager } from './managers/CompatibilityManager.js';
+import { IdManager } from './managers/IdManager.js'; // IdManager import 추가
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -35,6 +36,9 @@ export class GameEngine {
 
         // LogicManager 초기화
         this.logicManager = new LogicManager(this.measureManager, this.sceneManager);
+
+        // IdManager 초기화
+        this.idManager = new IdManager();
 
         // CompatibilityManager 초기화 (LogicManager를 전달)
         this.compatibilityManager = new CompatibilityManager(
@@ -82,44 +86,74 @@ export class GameEngine {
 
         this.gameLoop = new GameLoop(this._update, this._draw);
 
-        const initialGameData = {
-            units: [
-                { id: 'u1', name: 'Knight', hp: 100 },
-                { id: 'u2', name: 'Archer', hp: 70 }
-            ],
-            config: {
-                resolution: this.measureManager.get('gameResolution'),
-                difficulty: 'normal'
+        // 초기화 과정의 비동기 처리
+        this._initAsyncManagers().then(() => {
+            const initialGameData = {
+                units: [
+                    { id: 'u1', name: 'Knight', hp: 100 },
+                    { id: 'u2', name: 'Archer', hp: 70 }
+                ],
+                config: {
+                    resolution: this.measureManager.get('gameResolution'),
+                    difficulty: 'normal'
+                }
+            };
+
+            try {
+                this.guardianManager.enforceRules(initialGameData);
+                console.log("[GameEngine] Initial game data passed GuardianManager rules. \u2728");
+            } catch (e) {
+                if (e.name === "ImmutableRuleViolationError") {
+                    console.error("[GameEngine] CRITICAL ERROR: Game initialization failed due to immutable rule violation!", e.message);
+                    throw e;
+                } else {
+                    console.error("[GameEngine] An unexpected error occurred during rule enforcement:", e);
+                    throw e;
+                }
             }
-        };
 
-        try {
-            this.guardianManager.enforceRules(initialGameData);
-            console.log("[GameEngine] Initial game data passed GuardianManager rules. \u2728");
-        } catch (e) {
-            if (e.name === 'ImmutableRuleViolationError') {
-                console.error("[GameEngine] CRITICAL ERROR: Game initialization failed due to immutable rule violation!", e.message);
-                throw e;
-            } else {
-                console.error("[GameEngine] An unexpected error occurred during rule enforcement:", e);
-                throw e;
-            }
-        }
+            this.eventManager.subscribe('unitDeath', (data) => {
+                console.log(`[GameEngine] Notification: Unit ${data.unitId} (${data.unitName}) has died.`);
+            });
+            this.eventManager.subscribe('skillExecuted', (data) => {
+                console.log(`[GameEngine] Notification: Skill '${data.skillName}' was executed.`);
+            });
+            this.eventManager.subscribe('battleStart', (data) => {
+                console.log(`[GameEngine] Battle started for map: ${data.mapId}, difficulty: ${data.difficulty}`);
+                this.sceneManager.setCurrentScene('battleScene');
+                this.uiEngine.setUIState('combatScreen');
+                this.cameraEngine.reset();
+            });
 
-        this.eventManager.subscribe('unitDeath', (data) => {
-            console.log(`[GameEngine] Notification: Unit ${data.unitId} (${data.unitName}) has died.`);
+            console.log("\u2699\ufe0f GameEngine initialized successfully. \u2699\ufe0f");
+        }).catch(error => {
+            console.error("Fatal Error: Async manager initialization failed.", error);
+            alert("\uAC8C\uC784 \uC2DC\uC791 \uC911 \uCE58\uBA85\uC801\uC778 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4. \uCF58\uC194\uC744 \uD655\uC778\uD574\uC8FC\uC138\uC694.");
         });
-        this.eventManager.subscribe('skillExecuted', (data) => {
-            console.log(`[GameEngine] Notification: Skill '${data.skillName}' was executed.`);
-        });
-        this.eventManager.subscribe('battleStart', (data) => {
-            console.log(`[GameEngine] Battle started for map: ${data.mapId}, difficulty: ${data.difficulty}`);
-            this.sceneManager.setCurrentScene('battleScene');
-            this.uiEngine.setUIState('combatScreen');
-            this.cameraEngine.reset();
-        });
+    }
 
-        console.log("\u2699\ufe0f GameEngine initialized successfully. \u2699\ufe0f");
+    /**
+     * \ube44\ub3d9\uae30\ub85c \ucd08\uae30\ud654\ub418\uc5b4\uc57c \ud558\ub294 \ub9e4\ub2c8\uc800\ub97c \ucc98\ub9ac\ud569\ub2c8\ub2e4.
+     */
+    async _initAsyncManagers() {
+        await this.idManager.initialize();
+
+        // \uc0d8\ud50c ID \ucd94\uac00
+        await this.idManager.addOrUpdateId(
+            'healing_potion_2d4c',
+            { name: '힐링 포션', type: 'consumable', effect: 'heal_hp', value: 50, sprite: 'potion_red.png' }
+        );
+        await this.idManager.addOrUpdateId(
+            'sword_of_heroes_a1b2',
+            { name: '영웅의 검', type: 'weapon', attack: 25, rarity: 'epic', sprite: 'sword_epic.png' }
+        );
+
+        // \uc0d8\ud50c ID \uc870\ud68c (\ud655\uc778\uc6a9)
+        const potionData = await this.idManager.get('healing_potion_2d4c');
+        console.log("[GameEngine] Retrieved ID 'healing_potion_2d4c':", potionData);
+
+        const unknownItem = await this.idManager.get('non_existent_item');
+        console.log("[GameEngine] Retrieved ID 'non_existent_item':", unknownItem);
     }
 
     _update(deltaTime) {
@@ -147,4 +181,5 @@ export class GameEngine {
     getInputManager() { return this.inputManager; }
     getLogicManager() { return this.logicManager; }
     getCompatibilityManager() { return this.compatibilityManager; }
+    getIdManager() { return this.idManager; }
 }
