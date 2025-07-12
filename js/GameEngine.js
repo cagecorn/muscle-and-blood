@@ -10,6 +10,7 @@ import { LayerEngine } from './managers/LayerEngine.js';
 import { SceneManager } from './managers/SceneManager.js';
 import { CameraEngine } from './managers/CameraEngine.js';
 import { InputManager } from './managers/InputManager.js';
+import { LogicManager } from './managers/LogicManager.js';
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -32,12 +33,16 @@ export class GameEngine {
         this.renderer.canvas.height = this.measureManager.get('gameResolution.height');
 
         this.mapManager = new MapManager(this.measureManager);
+
         this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager);
 
-        this.cameraEngine = new CameraEngine(this.renderer);
+        this.sceneManager = new SceneManager();
+
+        this.logicManager = new LogicManager(this.measureManager, this.sceneManager);
+
+        this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneManager);
         this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine);
 
-        this.sceneManager = new SceneManager();
         this.layerEngine = new LayerEngine(this.renderer, this.cameraEngine);
 
         this.territoryManager = new TerritoryManager();
@@ -125,4 +130,5 @@ export class GameEngine {
     getSceneManager() { return this.sceneManager; }
     getCameraEngine() { return this.cameraEngine; }
     getInputManager() { return this.inputManager; }
+    getLogicManager() { return this.logicManager; }
 }

@@ -42,4 +42,8 @@ export class SceneManager {
             }
         }
     }
+
+    getCurrentSceneName() {
+        return this.currentSceneName;
+    }
 }
