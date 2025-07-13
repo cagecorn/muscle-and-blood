@@ -281,6 +281,9 @@ export class GameEngine {
                 }
             }
 
+            // 초기 카메라 위치와 줌을 설정하여 모든 콘텐츠가 화면에 들어오도록 합니다.
+            this.cameraEngine.reset();
+
             this.eventManager.subscribe('unitDeath', (data) => {
                 console.log(`[GameEngine] Notification: Unit ${data.unitId} (${data.unitName}) has died.`);
             });
