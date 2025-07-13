@@ -1,7 +1,7 @@
 // js/managers/TurnEngine.js
 
 export class TurnEngine {
-    constructor(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager, battleCalculationManager) {
+    constructor(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager, battleCalculationManager, statusEffectManager) {
         console.log("\uD83D\uDD01 TurnEngine initialized. Ready to manage game turns. \uD83D\uDD01");
         this.eventManager = eventManager;
         this.battleSimulationManager = battleSimulationManager;
@@ -11,6 +11,7 @@ export class TurnEngine {
         this.timingEngine = timingEngine;
         this.animationManager = animationManager;
         this.battleCalculationManager = battleCalculationManager;
+        this.statusEffectManager = statusEffectManager;
 
         this.currentTurn = 0;
         this.activeUnitIndex = -1;
@@ -42,6 +43,8 @@ export class TurnEngine {
         console.log("[TurnEngine] Battle turns are starting!");
         this.currentTurn = 0;
         this.initializeTurnOrder();
+        // 전투 시작 시 모든 상태 효과 초기화
+        this.statusEffectManager.turnCountManager.clearAllEffects();
         this.nextTurn();
     }
 
@@ -82,8 +85,16 @@ export class TurnEngine {
             this.activeUnitIndex = i;
             console.log(`[TurnEngine] Processing turn for unit: ${unit.name} (ID: ${unit.id})`);
             this.eventManager.emit('unitTurnStart', { unitId: unit.id, unitName: unit.name });
+            const activeEffects = this.statusEffectManager.getUnitActiveEffects(unit.id);
+            const isStunned = activeEffects && Array.from(activeEffects.values()).some(effect => effect.effectData.id === 'status_stun' && effect.turnsRemaining > 0);
 
-            const action = await this.classAIManager.getBasicClassAction(unit, this.battleSimulationManager.unitsOnGrid);
+            let action = null;
+            if (!isStunned) {
+                action = await this.classAIManager.getBasicClassAction(unit, this.battleSimulationManager.unitsOnGrid);
+            } else {
+                console.log(`[TurnEngine] Unit ${unit.name} is stunned and cannot act this turn.`);
+                await this.delayEngine.waitFor(500);
+            }
 
             if (action) {
                 this.timingEngine.addTimedAction(async () => {
