@@ -23,6 +23,16 @@ export { runClassAIManagerUnitTests } from './unit/classAIManagerUnitTests.js';
 export { runBattleSimulationManagerUnitTests } from './unit/battleSimulationManagerUnitTests.js';
 export { runAnimationManagerUnitTests } from './unit/animationManagerUnitTests.js';
 
+// ✨ 새로 추가되거나 업데이트된 단위 테스트
+export { runValorEngineUnitTests } from './unit/valorEngineUnitTests.js';
+export { runWeightEngineUnitTests } from './unit/weightEngineUnitTests.js';
+export { runStatManagerUnitTests } from './unit/statManagerUnitTests.js';
+export { runVFXManagerUnitTests } from './unit/vfxManagerUnitTests.js';
+export { runCanvasBridgeManagerUnitTests } from './unit/canvasBridgeManagerUnitTests.js';
+export { runMeasureManagerUnitTests as runUpdatedMeasureManagerUnitTests } from './unit/measureManagerUnitTests.js';
+export { runMapManagerUnitTests as runUpdatedMapManagerUnitTests } from './unit/mapManagerUnitTests.js';
+export { runUIEngineUnitTests as runUpdatedUIEngineUnitTests } from './unit/uiEngineUnitTests.js';
+
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 
 export { injectRendererFault } from './fault_injection/rendererFaults.js';
