@@ -30,6 +30,8 @@ import { BattleLogManager } from './managers/BattleLogManager.js'; // ✨ 새롭
 import { TurnOrderManager } from './managers/TurnOrderManager.js'; // ✨ 새롭게 추가
 import { ClassAIManager } from './managers/ClassAIManager.js';   // ✨ 새롭게 추가
 import { BasicAIManager } from './managers/BasicAIManager.js'; // ✨ 새롭게 추가
+import { ValorEngine } from './managers/ValorEngine.js';   // ✨ ValorEngine 추가
+import { WeightEngine } from './managers/WeightEngine.js'; // ✨ WeightEngine 추가
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -150,6 +152,8 @@ export class GameEngine {
         // ✨ 새로운 엔진들 초기화
         this.delayEngine = new DelayEngine();
         this.timingEngine = new TimingEngine(this.delayEngine);
+        this.valorEngine = new ValorEngine();   // ✨ ValorEngine 초기화
+        this.weightEngine = new WeightEngine(); // ✨ WeightEngine 초기화
 
         // ✨ BasicAIManager 초기화
         this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
@@ -334,6 +338,8 @@ export class GameEngine {
     // 새로운 엔진들에 대한 getter 메서드
     getDelayEngine() { return this.delayEngine; }
     getTimingEngine() { return this.timingEngine; }
+    getValorEngine() { return this.valorEngine; }
+    getWeightEngine() { return this.weightEngine; }
     getTurnEngine() { return this.turnEngine; }
     getTurnOrderManager() { return this.turnOrderManager; }
     getBasicAIManager() { return this.basicAIManager; }
