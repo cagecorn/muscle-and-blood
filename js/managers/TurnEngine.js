@@ -85,15 +85,25 @@ export class TurnEngine {
             this.activeUnitIndex = i;
             console.log(`[TurnEngine] Processing turn for unit: ${unit.name} (ID: ${unit.id})`);
             this.eventManager.emit('unitTurnStart', { unitId: unit.id, unitName: unit.name });
+            // ✨ 상태 효과 확인: 유닛의 행동 가능 여부 검사
             const activeEffects = this.statusEffectManager.getUnitActiveEffects(unit.id);
-            const isStunned = activeEffects && Array.from(activeEffects.values()).some(effect => effect.effectData.id === 'status_stun' && effect.turnsRemaining > 0);
+            let canUnitAct = true;
+
+            if (activeEffects) {
+                for (const [effectId, effect] of activeEffects.entries()) {
+                    if (effect.effectData.effect.canAct === false) {
+                        canUnitAct = false;
+                        console.log(`[TurnEngine] Unit ${unit.name} is ${effect.effectData.name} (${effectId}) and cannot act this turn.`);
+                        break;
+                    }
+                }
+            }
 
             let action = null;
-            if (!isStunned) {
-                action = await this.classAIManager.getBasicClassAction(unit, this.battleSimulationManager.unitsOnGrid);
-            } else {
-                console.log(`[TurnEngine] Unit ${unit.name} is stunned and cannot act this turn.`);
+            if (!canUnitAct) {
                 await this.delayEngine.waitFor(500);
+            } else {
+                action = await this.classAIManager.getBasicClassAction(unit, this.battleSimulationManager.unitsOnGrid);
             }
 
             if (action) {

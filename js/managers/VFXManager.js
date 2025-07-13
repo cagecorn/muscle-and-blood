@@ -13,6 +13,11 @@ export class VFXManager {
 
         this.activeDamageNumbers = [];
 
+        // ✨ 무기 드롭 애니메이션 관리
+        this.eventManager.subscribe('weaponDropped', this._onWeaponDropped.bind(this));
+        this.activeWeaponDrops = new Map(); // unitId => animation data
+        console.log("[VFXManager] Subscribed to 'weaponDropped' event.");
+
         // ✨ subscribe to damage display events
         this.eventManager.subscribe('displayDamage', (data) => {
             this.addDamageNumber(data.unitId, data.damage, data.color);
@@ -44,6 +49,67 @@ export class VFXManager {
     }
 
     /**
+     * 'weaponDropped' 이벤트 발생 시 호출됩니다.
+     * @param {{ unitId: string, weaponSpriteId: string }} data
+     */
+    _onWeaponDropped(data) {
+        const unit = this.battleSimulationManager.unitsOnGrid.find(u => u.id === data.unitId);
+        if (!unit) {
+            console.warn(`[VFXManager] Cannot find unit '${data.unitId}' for weapon drop animation.`);
+            return;
+        }
+
+        const weaponImage = this.battleSimulationManager.assetLoaderManager.getImage(data.weaponSpriteId);
+        if (!weaponImage) {
+            console.warn(`[VFXManager] Weapon sprite '${data.weaponSpriteId}' not loaded.`);
+            return;
+        }
+
+        const sceneContentDimensions = this.battleSimulationManager.logicManager.getCurrentSceneContentDimensions();
+        const contentWidth = sceneContentDimensions.width;
+        const contentHeight = sceneContentDimensions.height;
+        const stagePadding = this.measureManager.get('battleStage.padding');
+        const gridDrawableWidth = contentWidth - 2 * stagePadding;
+        const gridDrawableHeight = contentHeight - 2 * stagePadding;
+        const effectiveTileSize = Math.min(
+            gridDrawableWidth / this.battleSimulationManager.gridCols,
+            gridDrawableHeight / this.battleSimulationManager.gridRows
+        );
+        const totalGridWidth = this.battleSimulationManager.gridCols * effectiveTileSize;
+        const totalGridHeight = this.battleSimulationManager.gridRows * effectiveTileSize;
+        const gridOffsetX = stagePadding + (gridDrawableWidth - totalGridWidth) / 2;
+        const gridOffsetY = stagePadding + (gridDrawableHeight - totalGridHeight) / 2;
+
+        const { drawX, drawY } = this.animationManager.getRenderPosition(
+            unit.id,
+            unit.gridX,
+            unit.gridY,
+            effectiveTileSize,
+            gridOffsetX,
+            gridOffsetY
+        );
+
+        const weaponSize = effectiveTileSize * 0.5;
+        const startX = drawX + (effectiveTileSize - weaponSize) / 2;
+        const startY = drawY - effectiveTileSize * 0.5;
+
+        this.activeWeaponDrops.set(data.unitId, {
+            sprite: weaponImage,
+            startX: startX,
+            startY: startY,
+            endY: drawY + effectiveTileSize * 0.8,
+            currentY: startY,
+            opacity: 1,
+            startTime: performance.now(),
+            popDuration: 300,
+            fallDuration: 500,
+            fadeDuration: 500,
+            totalDuration: 1300
+        });
+        console.log(`[VFXManager] Weapon drop animation data added for unit ${data.unitId}.`);
+    }
+
+    /**
      * ✨ 활성 데미지 숫자의 상태를 업데이트합니다.
      * @param {number} deltaTime
      */
@@ -52,6 +118,27 @@ export class VFXManager {
         this.activeDamageNumbers = this.activeDamageNumbers.filter(dmgNum => {
             return currentTime - dmgNum.startTime < dmgNum.duration;
         });
+
+        // 무기 드롭 애니메이션 업데이트
+        for (const [unitId, drop] of this.activeWeaponDrops.entries()) {
+            const elapsed = currentTime - drop.startTime;
+
+            if (elapsed < drop.popDuration) {
+                const progress = elapsed / drop.popDuration;
+                drop.currentY = drop.startY - drop.sprite.height * progress;
+            } else if (elapsed < drop.popDuration + drop.fallDuration) {
+                const fallElapsed = elapsed - drop.popDuration;
+                const progress = fallElapsed / drop.fallDuration;
+                drop.currentY = drop.startY + (drop.endY - drop.startY) * progress;
+            } else if (elapsed < drop.totalDuration) {
+                const fadeElapsed = elapsed - (drop.popDuration + drop.fallDuration);
+                const progress = fadeElapsed / drop.fadeDuration;
+                drop.opacity = Math.max(0, 1 - progress);
+            } else {
+                this.activeWeaponDrops.delete(unitId);
+                console.log(`[VFXManager] Weapon drop animation for unit ${unitId} completed.`);
+            }
+        }
     }
 
     /**
@@ -197,6 +284,18 @@ export class VFXManager {
                 drawX + effectiveTileSize / 2,
                 drawY - currentYOffset - 5
             );
+            ctx.restore();
+        }
+
+        // ✨ 무기 드롭 애니메이션 그리기
+        for (const [unitId, drop] of this.activeWeaponDrops.entries()) {
+            if (!drop.sprite) continue;
+
+            const weaponSize = this.measureManager.get('tileSize') * 0.5;
+
+            ctx.save();
+            ctx.globalAlpha = drop.opacity;
+            ctx.drawImage(drop.sprite, drop.startX, drop.currentY, weaponSize, weaponSize);
             ctx.restore();
         }
     }
