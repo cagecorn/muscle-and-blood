@@ -44,18 +44,17 @@ export class BattleLogManager {
     /**
      * 캔버스 내부의 그리기 버퍼 해상도를 실제 표시 크기와 픽셀 비율에 맞춰 조정합니다.
      */
-    resizeCanvas(displayWidth, displayHeight) {
-        const currentDisplayWidth = displayWidth !== undefined ? displayWidth : this.canvas.clientWidth;
-        const currentDisplayHeight = displayHeight !== undefined ? displayHeight : this.canvas.clientHeight;
+    resizeCanvas() {
+        const displayWidth = this.canvas.clientWidth;
+        const displayHeight = this.canvas.clientHeight;
 
-        if (this.canvas.width !== currentDisplayWidth * this.pixelRatio ||
-            this.canvas.height !== currentDisplayHeight * this.pixelRatio) {
-            this.canvas.width = currentDisplayWidth * this.pixelRatio;
-            this.canvas.height = currentDisplayHeight * this.pixelRatio;
+        if (this.canvas.width !== displayWidth * this.pixelRatio ||
+            this.canvas.height !== displayHeight * this.pixelRatio) {
+            this.canvas.width = displayWidth * this.pixelRatio;
+            this.canvas.height = displayHeight * this.pixelRatio;
             this.ctx = this.canvas.getContext('2d');
-            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.scale(this.pixelRatio, this.pixelRatio);
-            console.log(`[BattleLogManager] Canvas internal resolution set to: ${this.canvas.width}x${this.canvas.height} (Display: ${currentDisplayWidth}x${currentDisplayHeight}, Ratio: ${this.pixelRatio})`);
+            console.log(`[BattleLogManager] Canvas internal resolution set to: ${this.canvas.width}x${this.canvas.height} (Display: ${displayWidth}x${displayHeight}, Ratio: ${this.pixelRatio})`);
         }
     }
 
