@@ -38,6 +38,7 @@ export { runDiceRollManagerUnitTests } from './unit/diceRollManagerUnitTests.js'
 export { runDiceBotManagerUnitTests } from './unit/diceBotManagerUnitTests.js';
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
+export { runBattleSimulationIntegrationTest } from './integration/battleSimulationIntegrationTest.js';
 
 export { injectRendererFault } from './fault_injection/rendererFaults.js';
 export { injectGameLoopFault, getFaultFlags, setFaultFlag } from './fault_injection/gameLoopFaults.js';
