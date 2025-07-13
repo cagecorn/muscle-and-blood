@@ -22,12 +22,14 @@ export class InputManager {
         this.canvas.addEventListener('mouseup', this._onMouseUp.bind(this));
         this.canvas.addEventListener('mouseleave', this._onMouseUp.bind(this));
         this.canvas.addEventListener('wheel', this._onMouseWheel.bind(this), { passive: false });
-        this.canvas.addEventListener('click', this._onClick.bind(this));
+        this.canvas.addEventListener('click', this._onClick.bind(this)); // 클릭 이벤트 리스너
     }
 
     _onMouseDown(event) {
         if (this.uiEngine.getUIState() === 'mapScreen' && this.uiEngine.isClickOnButton(event.clientX, event.clientY)) {
             this.isDragging = false;
+            // ✨ 추가: 마우스 다운 시 버튼 클릭 시도 감지
+            console.log(`[InputManager Debug] MouseDown on Button detected: ClientX=${event.clientX}, ClientY=${event.clientY}`);
             return;
         }
 
@@ -64,8 +66,23 @@ export class InputManager {
     }
 
     _onClick(event) {
-        if (this.uiEngine.isClickOnButton(event.clientX, event.clientY)) {
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left; // 캔버스 내부 논리적 X 좌표
+        const mouseY = event.clientY - rect.top;   // 캔버스 내부 논리적 Y 좌표
+
+        // ✨ 추가: 클릭 이벤트 발생 시 상세 로그
+        console.log(`[InputManager Debug] Click event received: ClientX=${event.clientX}, ClientY=${event.clientY}`);
+        console.log(`[InputManager Debug] Canvas Local Mouse: X=${mouseX}, Y=${mouseY}`);
+        console.log(`[InputManager Debug] Current UI State: ${this.uiEngine.getUIState()}`);
+
+
+        if (this.uiEngine.isClickOnButton(event.clientX, event.clientY)) { // isClickOnButton은 clientX, clientY를 받습니다.
+            // ✨ 추가: isClickOnButton이 true를 반환했는지 확인
+            console.log(`[InputManager Debug] isClickOnButton returned TRUE. Attempting to handle battle start.`);
             this.uiEngine.handleBattleStartClick();
+        } else {
+            // ✨ 추가: isClickOnButton이 false를 반환했는지 확인
+            console.log(`[InputManager Debug] isClickOnButton returned FALSE. Not a button click.`);
         }
     }
 }
