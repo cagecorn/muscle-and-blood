@@ -47,7 +47,9 @@ export class CameraEngine {
     reset() {
         this.x = 0;
         this.y = 0;
-        this.zoom = 1;
+        // 화면에 콘텐츠 전체가 보이도록 최소 줌 값을 가져와 적용합니다.
+        const { minZoom } = this.logicManager.getZoomLimits();
+        this.zoom = minZoom;
         const clampedPos = this.logicManager.applyPanConstraints(this.x, this.y, this.zoom);
         this.x = clampedPos.x;
         this.y = clampedPos.y;
