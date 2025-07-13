@@ -20,7 +20,15 @@ export const UNITS = {
             hp: 100,
             attack: 20,
             defense: 10,
-            speed: 5
+            speed: 5,
+            valor: 50,
+            strength: 25,
+            endurance: 20,
+            agility: 10,
+            intelligence: 5,
+            wisdom: 10,
+            luck: 15,
+            weight: 30
         },
         spriteId: 'sprite_warrior_default'
     }

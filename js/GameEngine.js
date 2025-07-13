@@ -32,6 +32,7 @@ import { ClassAIManager } from './managers/ClassAIManager.js';   // ✨ 새롭�
 import { BasicAIManager } from './managers/BasicAIManager.js'; // ✨ 새롭게 추가
 import { ValorEngine } from './managers/ValorEngine.js';   // ✨ ValorEngine 추가
 import { WeightEngine } from './managers/WeightEngine.js'; // ✨ WeightEngine 추가
+import { StatManager } from './managers/StatManager.js'; // ✨ StatManager 추가
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -154,6 +155,7 @@ export class GameEngine {
         this.timingEngine = new TimingEngine(this.delayEngine);
         this.valorEngine = new ValorEngine();   // ✨ ValorEngine 초기화
         this.weightEngine = new WeightEngine(); // ✨ WeightEngine 초기화
+        this.statManager = new StatManager(this.valorEngine, this.weightEngine); // ✨ StatManager 초기화
 
         // ✨ BasicAIManager 초기화
         this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
@@ -280,7 +282,20 @@ export class GameEngine {
             name: '해골 병사',
             classId: 'class_skeleton',
             type: 'enemy',
-            baseStats: { hp: 80, attack: 15, defense: 5, speed: 30 },
+            baseStats: {
+                hp: 80,
+                attack: 15,
+                defense: 5,
+                speed: 30,
+                valor: 10,
+                strength: 10,
+                endurance: 8,
+                agility: 12,
+                intelligence: 5,
+                wisdom: 5,
+                luck: 15,
+                weight: 10
+            },
             spriteId: 'sprite_skeleton_default'
         };
         await this.idManager.addOrUpdateId(mockEnemyUnitData.id, mockEnemyUnitData);
@@ -340,6 +355,7 @@ export class GameEngine {
     getTimingEngine() { return this.timingEngine; }
     getValorEngine() { return this.valorEngine; }
     getWeightEngine() { return this.weightEngine; }
+    getStatManager() { return this.statManager; }
     getTurnEngine() { return this.turnEngine; }
     getTurnOrderManager() { return this.turnOrderManager; }
     getBasicAIManager() { return this.basicAIManager; }
