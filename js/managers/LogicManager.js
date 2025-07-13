@@ -77,7 +77,7 @@ export class LogicManager {
         const minZoom = Math.max(minZoomX, minZoomY); // 콘텐츠가 화면보다 작을 때도 최소 줌 1.0 유지 (빈틈 방지)
 
         // 최대 줌은 기존 CameraEngine의 maxZoom 값을 유지 (또는 MeasureManager에서 설정 가능)
-        const maxZoom = 10.0; // 임의의 최대 줌 값 (필요에 따라 MeasureManager에서 가져올 수 있음)
+        const maxZoom = 3.0; // 임의의 최대 줌 값 (필요에 따라 MeasureManager에서 가져올 수 있음)
 
         return { minZoom: minZoom, maxZoom: maxZoom };
     }
