@@ -26,7 +26,11 @@ export class InputManager {
     }
 
     _onMouseDown(event) {
-        if (this.uiEngine.getUIState() === 'mapScreen' && this.uiEngine.isClickOnButton(event.clientX, event.clientY)) {
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+
+        if (this.uiEngine.getUIState() === 'mapScreen' && this.uiEngine.isClickOnButton(mouseX, mouseY)) {
             this.isDragging = false;
             // ✨ 추가: 마우스 다운 시 버튼 클릭 시도 감지
             console.log(`[InputManager Debug] MouseDown on Button detected: ClientX=${event.clientX}, ClientY=${event.clientY}`);
@@ -76,7 +80,8 @@ export class InputManager {
         console.log(`[InputManager Debug] Current UI State: ${this.uiEngine.getUIState()}`);
 
 
-        if (this.uiEngine.isClickOnButton(event.clientX, event.clientY)) { // isClickOnButton은 clientX, clientY를 받습니다.
+        // 이미 계산된 캔버스 내부 좌표를 전달하여 중복 계산을 방지합니다.
+        if (this.uiEngine.isClickOnButton(mouseX, mouseY)) {
             // ✨ 추가: isClickOnButton이 true를 반환했는지 확인
             console.log(`[InputManager Debug] isClickOnButton returned TRUE. Attempting to handle battle start.`);
             this.uiEngine.handleBattleStartClick();

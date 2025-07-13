@@ -58,14 +58,12 @@ export class UIEngine {
         console.log(`[UIEngine] Internal UI state updated to: ${newState}`);
     }
 
-    isClickOnButton(clientX, clientY) {
+    // canvas 내부 좌표(mouseX, mouseY)를 직접 받아 버튼 영역과 비교합니다.
+    isClickOnButton(mouseX, mouseY) {
         if (this._currentUIState !== 'mapScreen') {
             return false;
         }
 
-        const rect = this.canvas.getBoundingClientRect();
-        const mouseX = clientX - rect.left;
-        const mouseY = clientY - rect.top;
         const button = this.battleStartButton;
 
         return (
