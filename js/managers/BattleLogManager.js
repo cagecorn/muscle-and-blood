@@ -8,9 +8,12 @@ export class BattleLogManager {
         this.eventManager = eventManager;
         this.measureManager = measureManager; // ✨ measureManager 저장
 
+        this.pixelRatio = window.devicePixelRatio || 1;
+
         this.logMessages = [];
         
-        // 초기 로그 치수 재계산 (CompatibilityManager가 캔버스 크기 설정 후 호출할 것임)
+        // 초기 내부 해상도 설정 후 로그 치수 재계산
+        this.resizeCanvas();
         this.recalculateLogDimensions();
 
         // ✨ _setupEventListeners는 이제 GameEngine에서 명시적으로 호출됩니다.
@@ -28,13 +31,31 @@ export class BattleLogManager {
         // 캔버스 높이에 따라 표시할 최대 줄 수와 줄 간격 재조정
         this.padding = measuredPadding;
         this.lineHeight = measuredLineHeight;
-        this.maxLogLines = Math.floor((this.canvas.height - 2 * this.padding) / this.lineHeight);
+        this.maxLogLines = Math.floor(((this.canvas.height / this.pixelRatio) - 2 * this.padding) / this.lineHeight);
         
         // 최대 줄 수를 초과하는 오래된 메시지 제거
         while (this.logMessages.length > this.maxLogLines) {
             this.logMessages.shift();
         }
         console.log(`[BattleLogManager] Log dimensions recalculated. Canvas size: ${this.canvas.width}x${this.canvas.height}, Max lines: ${this.maxLogLines}`);
+        this.resizeCanvas();
+    }
+
+    /**
+     * 캔버스 내부의 그리기 버퍼 해상도를 실제 표시 크기와 픽셀 비율에 맞춰 조정합니다.
+     */
+    resizeCanvas() {
+        const displayWidth = this.canvas.clientWidth;
+        const displayHeight = this.canvas.clientHeight;
+
+        if (this.canvas.width !== displayWidth * this.pixelRatio ||
+            this.canvas.height !== displayHeight * this.pixelRatio) {
+            this.canvas.width = displayWidth * this.pixelRatio;
+            this.canvas.height = displayHeight * this.pixelRatio;
+            this.ctx = this.canvas.getContext('2d');
+            this.ctx.scale(this.pixelRatio, this.pixelRatio);
+            console.log(`[BattleLogManager] Canvas internal resolution set to: ${this.canvas.width}x${this.canvas.height} (Display: ${displayWidth}x${displayHeight}, Ratio: ${this.pixelRatio})`);
+        }
     }
 
     /**
@@ -72,9 +93,9 @@ export class BattleLogManager {
     }
 
     draw(ctx) {
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.clearRect(0, 0, this.canvas.width / this.pixelRatio, this.canvas.height / this.pixelRatio);
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.fillRect(0, 0, this.canvas.width / this.pixelRatio, this.canvas.height / this.pixelRatio);
 
         ctx.fillStyle = 'white';
         ctx.font = `${Math.floor(this.lineHeight * 0.8)}px Arial`; // ✨ 폰트 크기 동적 조정 (줄 높이의 80%)

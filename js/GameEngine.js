@@ -123,26 +123,20 @@ export class GameEngine {
         this.panelEngine = new PanelEngine();
         this.panelEngine.registerPanel('mercenaryPanel', this.mercenaryPanelManager);
 
-        // CompatibilityManager 초기화 (LogicManager와 패널, 로그 매니저 전달)
+        // UIEngine과 MapManager를 먼저 초기화
+        this.mapManager = new MapManager(this.measureManager);
+        this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager);
+
+        // CompatibilityManager 초기화 (필요 매니저들을 모두 전달)
         this.compatibilityManager = new CompatibilityManager(
             this.measureManager,
             this.renderer,
-            null, // UIEngine (temp null)
-            null,  // MapManager (temp null)
+            this.uiEngine,
+            this.mapManager,
             this.logicManager,
             this.mercenaryPanelManager,
             this.battleLogManager
         );
-
-        // UIEngine과 MapManager 초기화 (CompatibilityManager가 재계산 메서드를 호출할 수 있도록)
-        this.mapManager = new MapManager(this.measureManager);
-        this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager);
-
-        // CompatibilityManager에 UIEngine과 MapManager 참조 설정 (생성 후)
-        this.compatibilityManager.uiEngine = this.uiEngine;
-        this.compatibilityManager.mapManager = this.mapManager;
-        // 초기 캔버스 크기 조정 및 다른 매니저 재계산 트리거 (모든 매니저가 초기화된 후 한 번 더 호출)
-        this.compatibilityManager.adjustResolution();
 
         this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneEngine);
         this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine);
