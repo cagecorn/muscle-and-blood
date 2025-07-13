@@ -71,22 +71,19 @@ export class InputManager {
 
     _onClick(event) {
         const rect = this.canvas.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left; // 캔버스 내부 논리적 X 좌표
-        const mouseY = event.clientY - rect.top;   // 캔버스 내부 논리적 Y 좌표
+        const mouseX = event.clientX - rect.left; // 캔버스 내부 논리적 X 좌표 (이 부분이 올바르게 계산됨)
+        const mouseY = event.clientY - rect.top;   // 캔버스 내부 논리적 Y 좌표 (이 부분이 올바르게 계산됨)
 
-        // ✨ 추가: 클릭 이벤트 발생 시 상세 로그
         console.log(`[InputManager Debug] Click event received: ClientX=${event.clientX}, ClientY=${event.clientY}`);
         console.log(`[InputManager Debug] Canvas Local Mouse: X=${mouseX}, Y=${mouseY}`);
         console.log(`[InputManager Debug] Current UI State: ${this.uiEngine.getUIState()}`);
 
-
-        // 이미 계산된 캔버스 내부 좌표를 전달하여 중복 계산을 방지합니다.
-        if (this.uiEngine.isClickOnButton(mouseX, mouseY)) {
-            // ✨ 추가: isClickOnButton이 true를 반환했는지 확인
+        // ✨ 핵심 수정 부분입니다.
+        // isClickOnButton에 raw event.clientX/Y 대신 계산된 mouseX/Y를 전달합니다.
+        if (this.uiEngine.isClickOnButton(mouseX, mouseY)) { // <--- 여기가 핵심 변경 사항
             console.log(`[InputManager Debug] isClickOnButton returned TRUE. Attempting to handle battle start.`);
             this.uiEngine.handleBattleStartClick();
         } else {
-            // ✨ 추가: isClickOnButton이 false를 반환했는지 확인
             console.log(`[InputManager Debug] isClickOnButton returned FALSE. Not a button click.`);
         }
     }
