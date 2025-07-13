@@ -79,6 +79,7 @@
         <h4>엔진 기본 테스트</h4>
         <button id="runAllEngineTestsBtn">모든 엔진 테스트 실행</button>
         <button id="runMeasureManagerIntegrationTestBtn">측량 매니저 통합 테스트</button>
+        <button id="runBattleSimulationIntegrationTestBtn">전투 시뮬레이션 통합 테스트</button>
 
         <h4>개별 유닛 테스트</h4>
         <button id="runSceneEngineUnitTestsBtn">SceneEngine 유닛 테스트</button>
@@ -131,6 +132,7 @@
             runGuardianManagerTests,
             injectGuardianManagerFaults,
             runMeasureManagerIntegrationTest,
+            runBattleSimulationIntegrationTest,
             runSceneEngineUnitTests,
             injectSceneEngineFaults,
             runLogicManagerUnitTests,
@@ -220,6 +222,7 @@
                 runEventManagerTests(eventManager);
                 runGuardianManagerTests(guardianManager);
                 runMeasureManagerIntegrationTest(gameEngine);
+                runBattleSimulationIntegrationTest(gameEngine);
                 // 모든 유닛 테스트에 새 매니저 추가
                 runSceneEngineUnitTests(sceneEngine);
                 runLogicManagerUnitTests(logicManager);
@@ -251,6 +254,10 @@
 
             document.getElementById('runMeasureManagerIntegrationTestBtn').addEventListener('click', () => {
                 runMeasureManagerIntegrationTest(gameEngine);
+            });
+
+            document.getElementById('runBattleSimulationIntegrationTestBtn').addEventListener('click', () => {
+                runBattleSimulationIntegrationTest(gameEngine);
             });
 
             // 개별 유닛 테스트 버튼 리스너 추가
@@ -431,6 +438,7 @@
             runEventManagerTests(eventManager); // EventManager 테스트도 자동 실행
             runGuardianManagerTests(guardianManager); // GuardianManager 테스트도 자동 실행
             runMeasureManagerIntegrationTest(gameEngine); // MeasureManager 통합 테스트도 자동 실행
+            runBattleSimulationIntegrationTest(gameEngine);
             runSceneEngineUnitTests(sceneEngine);
             runLogicManagerUnitTests(logicManager);
             runCompatibilityManagerUnitTests(compatibilityManager);
