@@ -76,8 +76,10 @@ export function runVFXManagerUnitTests() {
     testCount++;
     try {
         const vfxManager = new VFXManager(mockRenderer, mockMeasureManager, mockCameraEngine, mockBattleSimulationManager, mockAnimationManager, mockEventManager);
-        vfxManager.addDamageNumber(mockUnit.id, 25);
-        if (vfxManager.activeDamageNumbers.length === 1 && vfxManager.activeDamageNumbers[0].damage === 25) {
+        vfxManager.addDamageNumber(mockUnit.id, 25, 'yellow');
+        if (vfxManager.activeDamageNumbers.length === 1 &&
+            vfxManager.activeDamageNumbers[0].damage === 25 &&
+            vfxManager.activeDamageNumbers[0].color === 'yellow') {
             console.log("VFXManager: addDamageNumber added number correctly. [PASS]");
             passCount++;
         } else {
@@ -91,7 +93,7 @@ export function runVFXManagerUnitTests() {
     testCount++;
     try {
         const vfxManager = new VFXManager(mockRenderer, mockMeasureManager, mockCameraEngine, mockBattleSimulationManager, mockAnimationManager, mockEventManager);
-        vfxManager.addDamageNumber(mockUnit.id, 10);
+        vfxManager.addDamageNumber(mockUnit.id, 10, 'red');
         const dmgNum = vfxManager.activeDamageNumbers[0];
         dmgNum.startTime = performance.now() - dmgNum.duration - 100;
         vfxManager.update(16);
@@ -132,7 +134,7 @@ export function runVFXManagerUnitTests() {
     testCount++;
     try {
         const vfxManager = new VFXManager(mockRenderer, mockMeasureManager, mockCameraEngine, mockBattleSimulationManager, mockAnimationManager, mockEventManager);
-        vfxManager.addDamageNumber(mockUnit.id, 50);
+        vfxManager.addDamageNumber(mockUnit.id, 50, 'red');
 
         mockCtx.fillRectCalled = false;
         mockCtx.strokeRectCalled = false;
@@ -159,10 +161,12 @@ export function runVFXManagerUnitTests() {
     try {
         const vfxManager = new VFXManager(mockRenderer, mockMeasureManager, mockCameraEngine, mockBattleSimulationManager, mockAnimationManager, mockEventManager);
         vfxManager.activeDamageNumbers = [];
-        mockEventManager.emit('displayDamage', { unitId: mockUnit.id, damage: 123 });
+        mockEventManager.emit('displayDamage', { unitId: mockUnit.id, damage: 123, color: 'yellow' });
 
         setTimeout(() => {
-            if (vfxManager.activeDamageNumbers.length > 0 && vfxManager.activeDamageNumbers[0].damage === 123) {
+            if (vfxManager.activeDamageNumbers.length > 0 &&
+                vfxManager.activeDamageNumbers[0].damage === 123 &&
+                vfxManager.activeDamageNumbers[0].color === 'yellow') {
                 console.log("VFXManager: Successfully received and added damage number via EventManager. [PASS]");
                 passCount++;
             } else {

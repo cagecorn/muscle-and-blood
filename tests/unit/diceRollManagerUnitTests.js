@@ -3,6 +3,7 @@
 import { DiceRollManager } from '../../js/managers/DiceRollManager.js';
 import { DiceEngine } from '../../js/managers/DiceEngine.js';
 
+
 export function runDiceRollManagerUnitTests() {
     console.log("--- DiceRollManager Unit Test Start ---");
 
@@ -21,10 +22,14 @@ export function runDiceRollManagerUnitTests() {
         getRandomInt: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
     };
 
+    const mockValorEngine = {
+        calculateDamageAmplification: () => 1.0
+    };
+
     // 테스트 1: 초기화 확인
     testCount++;
     try {
-        const drm = new DiceRollManager(mockDiceEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
         if (drm.diceEngine === mockDiceEngine) {
             console.log("DiceRollManager: Initialized correctly. [PASS]");
             passCount++;
@@ -40,7 +45,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [3, 4];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
         const result = drm.rollDice(2, 6);
         if (result === 7) {
             console.log("DiceRollManager: rollDice(2, 6) returned correct sum. [PASS]");
@@ -57,7 +62,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [10, 15];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
         const result = drm.rollWithAdvantage(20);
         if (result === 15) {
             console.log("DiceRollManager: rollWithAdvantage returned correct higher value. [PASS]");
@@ -74,7 +79,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [12, 5];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
         const result = drm.rollWithDisadvantage(20);
         if (result === 5) {
             console.log("DiceRollManager: rollWithDisadvantage returned correct lower value. [PASS]");
@@ -91,10 +96,10 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [6, 6];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine);
-        const attackerStats = { attack: 10 };
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const attackerUnit = { baseStats: { attack: 10 }, currentBarrier: 0, maxBarrier: 0 };
         const skillData = { type: 'physical', dice: { num: 2, sides: 6 } };
-        const result = drm.performDamageRoll(attackerStats, skillData);
+        const result = drm.performDamageRoll(attackerUnit, skillData);
         if (result === 22) {
             console.log("DiceRollManager: performDamageRoll (physical) calculated correctly. [PASS]");
             passCount++;
@@ -110,10 +115,10 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [4];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine);
-        const attackerStats = { magic: 15 };
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const attackerUnit = { baseStats: { magic: 15 }, currentBarrier: 0, maxBarrier: 0 };
         const skillData = { type: 'magic', dice: { num: 1, sides: 8 } };
-        const result = drm.performDamageRoll(attackerStats, skillData);
+        const result = drm.performDamageRoll(attackerUnit, skillData);
         if (result === 19) {
             console.log("DiceRollManager: performDamageRoll (magic) calculated correctly. [PASS]");
             passCount++;
@@ -129,7 +134,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [18];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
         const unitStats = { strength: 3 };
         const difficultyClass = 20;
         const result = drm.performSavingThrow(unitStats, difficultyClass, 'strength');
@@ -148,7 +153,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [5];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
         const unitStats = { agility: 2 };
         const difficultyClass = 10;
         const result = drm.performSavingThrow(unitStats, difficultyClass, 'dexterity');

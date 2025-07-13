@@ -1,9 +1,10 @@
 // js/managers/DiceRollManager.js
 
 export class DiceRollManager {
-    constructor(diceEngine) {
+    constructor(diceEngine, valorEngine) {
         console.log("\u2694\uFE0F DiceRollManager initialized. Ready for D&D-based rolls. \u2694\uFE0F");
         this.diceEngine = diceEngine;
+        this.valorEngine = valorEngine;
     }
 
     /**
@@ -50,11 +51,13 @@ export class DiceRollManager {
     /**
      * D&D 스타일의 공격 대미지 굴림을 수행합니다.
      * (예시: 공격 굴림 + 스킬 효과 + 기타 보너스)
-     * @param {object} attackerStats - 공격자의 스탯 (물리 공격력, 마법 공격력 등)
+     * 공격자의 용맹(배리어)에 따른 데미지 증폭을 적용합니다.
+     * @param {object} attackerUnit - 공격하는 유닛 객체 (fullUnitData, currentBarrier, maxBarrier 필요)
      * @param {object} skillData - 사용된 스킬 데이터 (데미지 주사위, 타입 등)
      * @returns {number} 계산된 순수 데미지 굴림 결과
      */
-    performDamageRoll(attackerStats, skillData = { type: 'physical', dice: { num: 1, sides: 6 } }) {
+    performDamageRoll(attackerUnit, skillData = { type: 'physical', dice: { num: 1, sides: 6 } }) {
+        const attackerStats = attackerUnit.baseStats;
         let damageRoll = 0;
         if (skillData.dice) {
             damageRoll = this.rollDice(skillData.dice.num, skillData.dice.sides);
@@ -62,14 +65,19 @@ export class DiceRollManager {
 
         let attackBonus = 0;
         if (skillData.type === 'physical') {
-            attackBonus = attackerStats.attack; // 물리 공격력 스탯 사용
+            attackBonus = attackerStats.attack;
         } else if (skillData.type === 'magic') {
-            attackBonus = attackerStats.magic; // 마법 공격력 스탯 사용
+            attackBonus = attackerStats.magic;
         }
 
-        const finalDamage = damageRoll + attackBonus;
-        console.log(`[DiceRollManager] Performed damage roll (${skillData.dice.num}d${skillData.dice.sides} + ${attackBonus}): ${finalDamage}`);
-        return finalDamage;
+        const damageAmplification = this.valorEngine.calculateDamageAmplification(
+            attackerUnit.currentBarrier || 0,
+            attackerUnit.maxBarrier || 0
+        );
+
+        const finalDamage = (damageRoll + attackBonus) * damageAmplification;
+        console.log(`[DiceRollManager] Performed damage roll (${skillData.dice.num}d${skillData.dice.sides} + ${attackBonus}) * ${damageAmplification.toFixed(2)} (Amp) = ${finalDamage.toFixed(0)}`);
+        return Math.max(0, Math.floor(finalDamage));
     }
 
     /**
