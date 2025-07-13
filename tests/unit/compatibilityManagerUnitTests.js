@@ -12,8 +12,6 @@ export function runCompatibilityManagerUnitTests(compatibilityManagerClass) {
         get: (keyPath) => {
             if (keyPath === 'gameResolution.width') return mockMeasureManager._resolution.width;
             if (keyPath === 'gameResolution.height') return mockMeasureManager._resolution.height;
-            if (keyPath === 'mercenaryPanel.heightRatio') return 0.25;
-            if (keyPath === 'combatLog.heightRatio') return 0.15;
             return undefined;
         },
         updateGameResolution: function(width, height) {
@@ -51,48 +49,18 @@ export function runCompatibilityManagerUnitTests(compatibilityManagerClass) {
         Object.defineProperty(window, 'innerHeight', { writable: true, value: height });
     }
 
-    function computeExpectedResolution(vw, vh) {
-        const totalPadding = 20;
-        const totalMarginBetweenCanvases = 20;
-        const totalVertical = totalPadding + totalMarginBetweenCanvases;
-        const aspect = mockMeasureManager._resolution.width / mockMeasureManager._resolution.height;
-        const mercenaryPanelHeightRatio = 0.25;
-        const combatLogHeightRatio = 0.15;
-        const maxWidth = vw - totalPadding;
-        const maxHeight = vh - totalVertical;
-        const totalUnits = 1 + mercenaryPanelHeightRatio + combatLogHeightRatio;
-        let heightFromWidth = maxWidth / aspect;
-        let heightFromHeight = maxHeight / totalUnits;
-        let mainHeight = Math.floor(Math.min(heightFromWidth, heightFromHeight));
-        let mainWidth = Math.floor(mainHeight * aspect);
-        if (mainWidth <= 0 || mainHeight <= 0) {
-            mainWidth = 800;
-            mainHeight = 600;
-        }
-        if (mainWidth < 800 || mainHeight < 600) {
-            const scaleW = 800 / mainWidth;
-            const scaleH = 600 / mainHeight;
-            const scale = Math.max(scaleW, scaleH);
-            mainWidth = Math.floor(mainWidth * scale);
-            mainHeight = Math.floor(mainHeight * scale);
-            mainWidth = Math.max(mainWidth, 800);
-            mainHeight = Math.max(mainHeight, 600);
-        }
-        return { width: mainWidth, height: mainHeight };
-    }
-
     // \ud14c\uc2a4\ud2b8 1: \ucd08\uae30\ud654 \ubc0f \ucd08\uae30 \uc870\uc815 \ud655\uc778 (Landscape)
     testCount++;
     setViewport(1920, 1080);
     const compatibilityManager1 = new compatibilityManagerClass(mockMeasureManager, mockRenderer, mockUIEngine, mockMapManager, mockLogicManager);
     compatibilityManager1.adjustResolution();
 
-    const expected1 = computeExpectedResolution(1920, 1080);
-    if (mockMeasureManager._resolution.width === expected1.width && mockMeasureManager._resolution.height === expected1.height) {
+    if (mockMeasureManager._resolution.width === 1920 && mockMeasureManager._resolution.height === 1080 &&
+        mockRenderer.canvas.width === 1920 && mockRenderer.canvas.height === 1080) {
         console.log("CompatibilityManager: Initial adjustment (Landscape) correct. [PASS]");
         passCount++;
     } else {
-        console.error("CompatibilityManager: Initial adjustment (Landscape) failed. [FAIL]", mockMeasureManager._resolution);
+        console.error("CompatibilityManager: Initial adjustment (Landscape) failed. [FAIL]", mockMeasureManager._resolution, mockRenderer.canvas);
     }
     mockUIEngine.recalculateUIDimensionsCalled = false;
     mockMapManager.recalculateMapDimensionsCalled = false;
@@ -102,12 +70,14 @@ export function runCompatibilityManagerUnitTests(compatibilityManagerClass) {
     setViewport(720, 1280);
     compatibilityManager1.adjustResolution();
 
-    const expected2 = computeExpectedResolution(720, 1280);
-    if (mockMeasureManager._resolution.width === expected2.width && mockMeasureManager._resolution.height === expected2.height) {
-        console.log("CompatibilityManager: Adjustment (Portrait) correct. [PASS]");
+    const expectedWidth2 = 720;
+    const expectedHeight2 = Math.floor(expectedWidth2 / compatibilityManager1.baseAspectRatio);
+    if (mockMeasureManager._resolution.width === expectedWidth2 && mockMeasureManager._resolution.height === expectedHeight2 &&
+        mockRenderer.canvas.width === expectedWidth2 && mockRenderer.canvas.height === expectedHeight2) {
+        console.log("CompatibilityManager: Adjustment (Portrait - fit width) correct. [PASS]");
         passCount++;
     } else {
-        console.error("CompatibilityManager: Adjustment (Portrait) failed. [FAIL]", mockMeasureManager._resolution);
+        console.error("CompatibilityManager: Adjustment (Portrait - fit width) failed. [FAIL]", mockMeasureManager._resolution, mockRenderer.canvas);
     }
     if (mockUIEngine.recalculateUIDimensionsCalled && mockMapManager.recalculateMapDimensionsCalled) {
         console.log("CompatibilityManager: UIEngine and MapManager recalculation called. [PASS]");
@@ -123,12 +93,14 @@ export function runCompatibilityManagerUnitTests(compatibilityManagerClass) {
     setViewport(1000, 500);
     compatibilityManager1.adjustResolution();
 
-    const expected3 = computeExpectedResolution(1000, 500);
-    if (mockMeasureManager._resolution.width === expected3.width && mockMeasureManager._resolution.height === expected3.height) {
-        console.log("CompatibilityManager: Adjustment (Landscape small) correct. [PASS]");
+    const expectedHeight3 = 500;
+    const expectedWidth3 = Math.floor(expectedHeight3 * compatibilityManager1.baseAspectRatio);
+    if (mockMeasureManager._resolution.width === expectedWidth3 && mockMeasureManager._resolution.height === expectedHeight3 &&
+        mockRenderer.canvas.width === expectedWidth3 && mockRenderer.canvas.height === expectedHeight3) {
+        console.log("CompatibilityManager: Adjustment (Landscape - fit height) correct. [PASS]");
         passCount++;
     } else {
-        console.error("CompatibilityManager: Adjustment (Landscape small) failed. [FAIL]", mockMeasureManager._resolution);
+        console.error("CompatibilityManager: Adjustment (Landscape - fit height) failed. [FAIL]", mockMeasureManager._resolution, mockRenderer.canvas);
     }
 
     // \ud14c\uc2a4\ud2b8 4: \ubdf0\ud3ec\ud2b8\uac00 0\uc77c \ub54c (\uc608\uc81c \ucc98\ub9ac)
@@ -137,15 +109,14 @@ export function runCompatibilityManagerUnitTests(compatibilityManagerClass) {
     const originalWarn = console.warn;
     let warnCalled = false;
     console.warn = (msg) => {
-        if (msg.includes("Calculated main game resolution is zero or negative")) {
+        if (msg.includes("[CompatibilityManager] Viewport dimensions are zero, cannot adjust resolution.")) {
             warnCalled = true;
         }
         originalWarn(msg);
     };
     try {
         compatibilityManager1.adjustResolution();
-        const expectedZero = computeExpectedResolution(0, 0);
-        if (mockMeasureManager._resolution.width === expectedZero.width && mockMeasureManager._resolution.height === expectedZero.height && warnCalled) {
+        if (mockMeasureManager._resolution.width === 800 && mockMeasureManager._resolution.height === 600 && warnCalled) {
             console.log("CompatibilityManager: Handles zero viewport gracefully. [PASS]");
             passCount++;
         } else {

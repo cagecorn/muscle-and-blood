@@ -37,77 +37,112 @@ export class CompatibilityManager {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        const totalPadding = 20; // #gameContainer padding (10px top + 10px bottom)
-        const totalMarginBetweenCanvases = 20; // 10px below mercenaryPanelCanvas + 10px above combatLogCanvas
-        const totalVerticalSpaceForCanvasElements = totalPadding + totalMarginBetweenCanvases;
+        // 뷰포트가 0이거나 유효하지 않으면 기본 해상도로 돌아가거나 경고
+        if (viewportWidth === 0 || viewportHeight === 0) {
+            console.warn("[CompatibilityManager] Viewport dimensions are zero, cannot adjust resolution.");
+            const minRes = this.logicManager.getMinGameResolution();
+
+            this.measureManager.updateGameResolution(minRes.minWidth, minRes.minHeight);
+            this.renderer.canvas.style.width = `${minRes.minWidth}px`;
+            this.renderer.canvas.style.height = `${minRes.minHeight}px`;
+            this.renderer.resizeCanvas(minRes.minWidth, minRes.minHeight);
+
+            if (this.mercenaryPanelCanvas) {
+                const mHeight = Math.floor(minRes.minWidth * (this.measureManager.get('mercenaryPanel.heightRatio') / (this.baseGameWidth / this.baseGameHeight)));
+                this.mercenaryPanelCanvas.style.width = `${minRes.minWidth}px`;
+                this.mercenaryPanelCanvas.style.height = `${mHeight}px`;
+            }
+            if (this.combatLogCanvas) {
+                const cHeight = Math.floor(minRes.minWidth * (this.measureManager.get('combatLog.heightRatio') / (this.baseGameWidth / this.baseGameHeight)));
+                this.combatLogCanvas.style.width = `${minRes.minWidth}px`;
+                this.combatLogCanvas.style.height = `${cHeight}px`;
+            }
+            this.callRecalculateDimensions();
+            return;
+        }
+        const totalPadding = 20; // container padding
+        const totalMarginBetweenCanvases = 20; // margins
+        const availableHeight = viewportHeight - totalPadding - totalMarginBetweenCanvases;
 
         const mainGameAspectRatio = this.baseGameWidth / this.baseGameHeight;
-        const maxAvailableWidthForCanvases = viewportWidth - totalPadding;
-        const maxAvailableHeightForCanvases = viewportHeight - totalVerticalSpaceForCanvasElements;
+        const maxMainGameCanvasWidth = viewportWidth - totalPadding;
 
-        const mercenaryPanelHeightRatio = this.measureManager.get('mercenaryPanel.heightRatio');
-        const combatLogHeightRatio = this.measureManager.get('combatLog.heightRatio');
+        const mercenaryPanelExpectedHeightRatio = this.measureManager.get('mercenaryPanel.heightRatio');
+        const combatLogExpectedHeightRatio = this.measureManager.get('combatLog.heightRatio');
 
-        const totalRelativeHeightUnits = 1 + mercenaryPanelHeightRatio + combatLogHeightRatio;
+        let mainGameCanvasWidth;
+        let mainGameCanvasHeight;
 
-        let calculatedMainGameCanvasWidth;
-        let calculatedMainGameCanvasHeight;
+        const currentViewportAspectRatio = viewportWidth / viewportHeight;
+        const totalGameAspectRatio = this.baseAspectRatio +
+                                     (this.baseAspectRatio * mercenaryPanelExpectedHeightRatio) +
+                                     (this.baseAspectRatio * combatLogExpectedHeightRatio);
 
-        const possibleMainCanvasHeightFromWidth = maxAvailableWidthForCanvases / mainGameAspectRatio;
-        const possibleMainCanvasHeightFromHeight = maxAvailableHeightForCanvases / totalRelativeHeightUnits;
-
-        calculatedMainGameCanvasHeight = Math.floor(Math.min(possibleMainCanvasHeightFromWidth, possibleMainCanvasHeightFromHeight));
-        calculatedMainGameCanvasWidth = Math.floor(calculatedMainGameCanvasHeight * mainGameAspectRatio);
-
-        if (calculatedMainGameCanvasWidth <= 0 || calculatedMainGameCanvasHeight <= 0) {
-            console.warn("[CompatibilityManager] Calculated main game resolution is zero or negative. Falling back to minimums.");
-            const minRes = this.logicManager.getMinGameResolution();
-            calculatedMainGameCanvasWidth = minRes.minWidth;
-            calculatedMainGameCanvasHeight = minRes.minHeight;
+        if (currentViewportAspectRatio > totalGameAspectRatio) {
+            mainGameCanvasHeight = availableHeight / (1 + mercenaryPanelExpectedHeightRatio + combatLogExpectedHeightRatio);
+            mainGameCanvasWidth = mainGameCanvasHeight * mainGameAspectRatio;
+        } else {
+            mainGameCanvasWidth = maxMainGameCanvasWidth;
+            mainGameCanvasHeight = mainGameCanvasWidth / mainGameAspectRatio;
+            if ((mainGameCanvasHeight + (mainGameCanvasHeight * mercenaryPanelExpectedHeightRatio) + (mainGameCanvasHeight * combatLogExpectedHeightRatio)) > availableHeight) {
+                mainGameCanvasHeight = availableHeight / (1 + mercenaryPanelExpectedHeightRatio + combatLogExpectedHeightRatio);
+                mainGameCanvasWidth = mainGameCanvasHeight * mainGameAspectRatio;
+            }
         }
 
+        // 소수점 제거
+        mainGameCanvasWidth = Math.floor(mainGameCanvasWidth);
+        mainGameCanvasHeight = Math.floor(mainGameCanvasHeight);
+
+        // GuardianManager의 최소 해상도 요구 사항 가져오기
         const minRequiredResolution = this.logicManager.getMinGameResolution();
 
-        if (calculatedMainGameCanvasWidth < minRequiredResolution.minWidth || calculatedMainGameCanvasHeight < minRequiredResolution.minHeight) {
-            console.warn(`[CompatibilityManager] Calculated main game resolution ${calculatedMainGameCanvasWidth}x${calculatedMainGameCanvasHeight} is below minimum requirement ${minRequiredResolution.minWidth}x${minRequiredResolution.minHeight}. Forcing minimums.`);
+        // 계산된 해상도가 최소 요구 사항보다 작을 경우 조정
+        if (mainGameCanvasWidth < minRequiredResolution.minWidth || mainGameCanvasHeight < minRequiredResolution.minHeight) {
+            console.warn(`[CompatibilityManager] Calculated main game resolution ${mainGameCanvasWidth}x${mainGameCanvasHeight} is below minimum requirement ${minRequiredResolution.minWidth}x${minRequiredResolution.minHeight}. Forcing minimums.`);
 
-            const scaleFactorWidth = minRequiredResolution.minWidth / calculatedMainGameCanvasWidth;
-            const scaleFactorHeight = minRequiredResolution.minHeight / calculatedMainGameCanvasHeight;
-            const finalScaleFactor = Math.max(scaleFactorWidth, scaleFactorHeight);
+            const scaleToFitMinWidth = minRequiredResolution.minWidth / mainGameCanvasWidth;
+            const scaleToFitMinHeight = minRequiredResolution.minHeight / mainGameCanvasHeight;
 
-            calculatedMainGameCanvasWidth = Math.floor(calculatedMainGameCanvasWidth * finalScaleFactor);
-            calculatedMainGameCanvasHeight = Math.floor(calculatedMainGameCanvasHeight * finalScaleFactor);
+            const forcedScale = Math.max(scaleToFitMinWidth, scaleToFitMinHeight);
 
-            calculatedMainGameCanvasWidth = Math.max(calculatedMainGameCanvasWidth, minRequiredResolution.minWidth);
-            calculatedMainGameCanvasHeight = Math.max(calculatedMainGameCanvasHeight, minRequiredResolution.minHeight);
+            mainGameCanvasWidth = Math.floor(mainGameCanvasWidth * forcedScale);
+            mainGameCanvasHeight = Math.floor(mainGameCanvasHeight * forcedScale);
+
+            mainGameCanvasWidth = Math.max(mainGameCanvasWidth, minRequiredResolution.minWidth);
+            mainGameCanvasHeight = Math.max(mainGameCanvasHeight, minRequiredResolution.minHeight);
         }
 
-        this.measureManager.updateGameResolution(calculatedMainGameCanvasWidth, calculatedMainGameCanvasHeight);
-        this.renderer.canvas.style.width = `${calculatedMainGameCanvasWidth}px`;
-        this.renderer.canvas.style.height = `${calculatedMainGameCanvasHeight}px`;
-        this.renderer.resizeCanvas(calculatedMainGameCanvasWidth, calculatedMainGameCanvasHeight);
-        console.log(`[CompatibilityManager] Main Canvas adjusted to: ${calculatedMainGameCanvasWidth}x${calculatedMainGameCanvasHeight}`);
+        // 1. 메인 게임 캔버스 CSS 해상도 업데이트
+        this.measureManager.updateGameResolution(mainGameCanvasWidth, mainGameCanvasHeight);
+        this.renderer.canvas.style.width = `${mainGameCanvasWidth}px`;
+        this.renderer.canvas.style.height = `${mainGameCanvasHeight}px`;
+        this.renderer.resizeCanvas(mainGameCanvasWidth, mainGameCanvasHeight);
+        console.log(`[CompatibilityManager] Main Canvas adjusted to: ${mainGameCanvasWidth}x${mainGameCanvasHeight}`);
 
+        // 2. 용병 패널 캔버스 해상도 업데이트
         if (this.mercenaryPanelCanvas) {
-            const mercenaryPanelHeight = Math.floor(calculatedMainGameCanvasHeight * mercenaryPanelHeightRatio);
-            this.mercenaryPanelCanvas.style.width = `${calculatedMainGameCanvasWidth}px`;
+            const mercenaryPanelHeight = Math.floor(mainGameCanvasHeight * mercenaryPanelExpectedHeightRatio);
+            this.mercenaryPanelCanvas.style.width = `${mainGameCanvasWidth}px`;
             this.mercenaryPanelCanvas.style.height = `${mercenaryPanelHeight}px`;
             if (this.mercenaryPanelManager && this.mercenaryPanelManager.resizeCanvas) {
-                this.mercenaryPanelManager.resizeCanvas(calculatedMainGameCanvasWidth, mercenaryPanelHeight);
+                this.mercenaryPanelManager.resizeCanvas();
             }
-            console.log(`[CompatibilityManager] Mercenary Panel Canvas adjusted to: ${calculatedMainGameCanvasWidth}x${mercenaryPanelHeight}`);
+            console.log(`[CompatibilityManager] Mercenary Panel Canvas adjusted to: ${mainGameCanvasWidth}x${mercenaryPanelHeight}`);
         }
 
+        // 3. 전투 로그 캔버스 해상도 업데이트
         if (this.combatLogCanvas) {
-            const combatLogHeight = Math.floor(calculatedMainGameCanvasHeight * combatLogHeightRatio);
-            this.combatLogCanvas.style.width = `${calculatedMainGameCanvasWidth}px`;
+            const combatLogHeight = Math.floor(mainGameCanvasHeight * combatLogExpectedHeightRatio);
+            this.combatLogCanvas.style.width = `${mainGameCanvasWidth}px`;
             this.combatLogCanvas.style.height = `${combatLogHeight}px`;
             if (this.battleLogManager && this.battleLogManager.resizeCanvas) {
-                this.battleLogManager.resizeCanvas(calculatedMainGameCanvasWidth, combatLogHeight);
+                this.battleLogManager.resizeCanvas();
             }
-            console.log(`[CompatibilityManager] Combat Log Canvas adjusted to: ${calculatedMainGameCanvasWidth}x${combatLogHeight}`);
+            console.log(`[CompatibilityManager] Combat Log Canvas adjusted to: ${mainGameCanvasWidth}x${combatLogHeight}`);
         }
 
+        // 모든 관련 매니저들의 내부 치수 재계산 호출
         this.callRecalculateDimensions();
     }
 
