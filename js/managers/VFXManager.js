@@ -247,6 +247,10 @@ export class VFXManager {
         const gridOffsetX = (canvasWidth - totalGridWidth) / 2;
         const gridOffsetY = (canvasHeight - totalGridHeight) / 2;
 
+        // ✨ DEBUG LOG START FOR VFXManager Drawing Parameters
+        console.log(`[VFXManager Debug] Drawing VFX Parameters: \n            Canvas (Logical): ${canvasWidth}x${canvasHeight}\n            Effective Tile Size: ${effectiveTileSize.toFixed(2)}\n            Grid Offset (X, Y): ${gridOffsetX.toFixed(2)}, ${gridOffsetY.toFixed(2)}`);
+        // ✨ DEBUG LOG END FOR VFXManager Drawing Parameters
+
         for (const unit of this.battleSimulationManager.unitsOnGrid) {
             // ✨ AnimationManager를 통해 현재 애니메이션이 적용된 위치를 조회합니다.
             const { drawX, drawY } = this.animationManager.getRenderPosition(
@@ -257,6 +261,8 @@ export class VFXManager {
                 gridOffsetX,
                 gridOffsetY
             );
+            // ✨ 추가: 각 유닛의 HP/배리어 바가 그려지는 최종 위치 로그
+            console.log(`[VFXManager Debug] Unit ${unit.id} (HP/Barrier Bar): drawX=${drawX.toFixed(2)}, drawY=${drawY.toFixed(2)}`);
             this.drawHpBar(ctx, unit, effectiveTileSize, drawX, drawY);
             this.drawBarrierBar(ctx, unit, effectiveTileSize, drawX, drawY); // ✨ 배리어 바 그리기 호출
         }
