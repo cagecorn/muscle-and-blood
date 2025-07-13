@@ -50,8 +50,13 @@ export class CameraEngine {
         // 화면에 콘텐츠 전체가 보이도록 최소 줌 값을 가져와 적용합니다.
         const { minZoom } = this.logicManager.getZoomLimits();
         this.zoom = minZoom;
+        // ✨ 추가: reset 후 Pan Constraints 적용 전 값 확인
+        console.log(`[CameraEngine Debug] Resetting camera: initial X=${this.x}, Y=${this.y}, calculated Zoom=${this.zoom.toFixed(2)}`);
+
         const clampedPos = this.logicManager.applyPanConstraints(this.x, this.y, this.zoom);
         this.x = clampedPos.x;
         this.y = clampedPos.y;
+        // ✨ 추가: reset 후 Pan Constraints 적용 후 값 확인
+        console.log(`[CameraEngine Debug] After clamping: final X=${this.x.toFixed(2)}, Y=${this.y.toFixed(2)}, Zoom=${this.zoom.toFixed(2)}`);
     }
 }

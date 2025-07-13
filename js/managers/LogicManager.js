@@ -17,45 +17,35 @@ export class LogicManager {
         const canvasHeight = this.measureManager.get('gameResolution.height');
         const currentSceneName = this.sceneManager.getCurrentSceneName();
 
-        // 논리 2 적용: 영지 화면은 맵 화면 박스(캔버스)와 똑같게 한다.
+        let contentWidth, contentHeight;
         if (currentSceneName === 'territoryScene') {
-            return { width: canvasWidth, height: canvasHeight };
-        }
-        // ✨ 전투 씬의 경우, 실제 그리드 크기를 컨텐츠 크기로 정의합니다.
-        // BattleGridManager의 gridCols와 gridRows를 기준으로 해야 합니다.
-        else if (currentSceneName === 'battleScene') {
-            const gridCols = 15; // BattleGridManager와 동일한 값 사용
-            const gridRows = 10; // BattleGridManager와 동일한 값 사용
+            // 영지 씬은 캔버스와 동일한 크기를 사용
+            contentWidth = canvasWidth;
+            contentHeight = canvasHeight;
+        } else if (currentSceneName === 'battleScene') {
+            // 전투 씬의 경우 실제 그리드 크기를 계산
+            const gridCols = 15;
+            const gridRows = 10;
             const stagePadding = this.measureManager.get('battleStage.padding');
 
-            // 캔버스 크기에서 패딩을 제외한 실제 그리드를 그릴 수 있는 영역
             const gridDrawableWidth = canvasWidth - 2 * stagePadding;
             const gridDrawableHeight = canvasHeight - 2 * stagePadding;
 
-            // 각 타일이 차지할 수 있는 유효한 크기를 계산 (캔버스에 꽉 차도록)
             const effectiveTileSize = Math.min(
                 gridDrawableWidth / gridCols,
                 gridDrawableHeight / gridRows
             );
 
-            // 그리드 전체의 논리적 크기 (패딩 제외)
-            const contentWidth = gridCols * effectiveTileSize;
-            const contentHeight = gridRows * effectiveTileSize;
-
-            // 이 컨텐츠 크기는 실제 그리드 영역만을 의미하며,
-            // 카메라가 이 영역을 기준으로 줌/팬 제약을 받게 됩니다.
-            // 패딩까지 포함한 전체 캔버스 영역이 컨텐츠로 간주되려면 아래 반환 시 패딩을 다시 더해야 합니다.
-            // 하지만 CameraEngine은 이 contentDimensions를 사용하여 뷰포트 대비 스케일을 계산하므로,
-            // 순수 그리드 크기를 반환하는 것이 맞습니다.
-            return { width: contentWidth, height: contentHeight };
+            contentWidth = gridCols * effectiveTileSize;
+            contentHeight = gridRows * effectiveTileSize;
+        } else {
+            console.warn(`[LogicManager] Unknown scene name '${currentSceneName}'. Returning main game canvas dimensions as content dimensions.`);
+            contentWidth = canvasWidth;
+            contentHeight = canvasHeight;
         }
-        // ✨ 새로운 논리: 용병 패널의 콘텐츠 크기는 패널 캔버스 자체의 크기와 동일합니다.
-        // PanelEngine이 관리하지만, LogicManager는 DOM 요소에 직접 접근하지 않으므로
-        // 현재는 MeasureManager에 등록된 게임 해상도를 기본값으로 사용합니다.
-
-        // 기본값 (예외 처리) - 알 수 없는 씬의 경우 메인 게임 캔버스 치수 반환
-        console.warn(`[LogicManager] Unknown scene name '${currentSceneName}'. Returning main game canvas dimensions as content dimensions.`);
-        return { width: canvasWidth, height: canvasHeight };
+        // ✨ 추가: 계산된 콘텐츠 크기 확인
+        console.log(`[LogicManager Debug] Scene: ${currentSceneName}, Content Dimensions: ${contentWidth}x${contentHeight}`);
+        return { width: contentWidth, height: contentHeight };
     }
 
     /**
@@ -80,6 +70,9 @@ export class LogicManager {
         const minZoom = Math.min(minZoomX, minZoomY); // <--- Math.max를 Math.min으로 변경했습니다.
 
         const maxZoom = 10.0; // 최대 줌 값 (필요에 따라 MeasureManager에서 가져올 수 있음)
+
+        // ✨ 추가: 줌 리미트 계산 값 확인
+        console.log(`[LogicManager Debug] Canvas: ${canvasWidth}x${canvasHeight}, Content: ${contentDimensions.width}x${contentDimensions.height}, minZoomX: ${minZoomX.toFixed(2)}, minZoomY: ${minZoomY.toFixed(2)}, Final minZoom: ${minZoom.toFixed(2)}`);
 
         return { minZoom: minZoom, maxZoom: maxZoom };
     }

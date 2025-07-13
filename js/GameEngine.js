@@ -283,6 +283,8 @@ export class GameEngine {
 
             // 초기 카메라 위치와 줌을 설정하여 모든 콘텐츠가 화면에 들어오도록 합니다.
             this.cameraEngine.reset();
+            // ✨ 추가: 카메라 엔진의 초기 상태 확인
+            console.log(`[GameEngine Debug] Camera Initial State: X=${this.cameraEngine.x}, Y=${this.cameraEngine.y}, Zoom=${this.cameraEngine.zoom}`);
 
             this.eventManager.subscribe('unitDeath', (data) => {
                 console.log(`[GameEngine] Notification: Unit ${data.unitId} (${data.unitName}) has died.`);
