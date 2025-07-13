@@ -6,8 +6,8 @@ export class BattleStageManager {
     }
 
     /**
-     * \uc804\ud22c \uc2a4\ud14c\uc774\uc9c0\ub97c \uadf8\ub9bd\ub2c8\ub2e4.
-     * @param {CanvasRenderingContext2D} ctx - \uce90\ub098\uc2a4 2D \ub80c\ub354\ub9c1 \ucee8\ud14d\uc2a4\ud2b8
+     * 전투 스테이지를 그립니다.
+     * @param {CanvasRenderingContext2D} ctx - 캔버스 2D 렌더링 컨텍스트
      */
     draw(ctx) {
         // 캔버스의 논리적(CSS) 너비와 높이를 가져옵니다.
