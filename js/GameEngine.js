@@ -70,13 +70,17 @@ export class GameEngine {
         // AnimationManager는 BattleSimulationManager의 렌더링에 사용됩니다.
         this.animationManager = new AnimationManager(this.measureManager);
 
+        // ✨ ValorEngine을 먼저 초기화하여 BattleSimulationManager에 전달합니다.
+        this.valorEngine = new ValorEngine();
+
         // 전투 시뮬레이션 매니저 초기화
         this.battleSimulationManager = new BattleSimulationManager(
             this.measureManager,
             this.assetLoaderManager,
             this.idManager,
             this.logicManager,
-            this.animationManager
+            this.animationManager,
+            this.valorEngine // ✨ valorEngine 추가
         );
         // 생성 후 상호 참조 설정
         this.animationManager.battleSimulationManager = this.battleSimulationManager;
@@ -164,7 +168,6 @@ export class GameEngine {
         // ✨ 새로운 엔진들 초기화
         this.delayEngine = new DelayEngine();
         this.timingEngine = new TimingEngine(this.delayEngine);
-        this.valorEngine = new ValorEngine();   // ✨ ValorEngine 초기화
         this.weightEngine = new WeightEngine(); // ✨ WeightEngine 초기화
         this.statManager = new StatManager(this.valorEngine, this.weightEngine); // ✨ StatManager 초기화
 
@@ -172,7 +175,11 @@ export class GameEngine {
         this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
 
         // ✨ 새로운 매니저 초기화
-        this.turnOrderManager = new TurnOrderManager(this.eventManager, this.battleSimulationManager);
+        this.turnOrderManager = new TurnOrderManager(
+            this.eventManager,
+            this.battleSimulationManager,
+            this.weightEngine // ✨ weightEngine 추가
+        );
         this.classAIManager = new ClassAIManager(this.idManager, this.battleSimulationManager, this.measureManager, this.basicAIManager);
 
         // ✨ TurnEngine에 새로운 의존성 전달

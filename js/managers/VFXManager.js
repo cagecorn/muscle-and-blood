@@ -90,6 +90,41 @@ export class VFXManager {
     }
 
     /**
+     * ✨ 특정 유닛의 배리어 바를 그립니다 (HP 바 아래에 노란색 게이지).
+     * @param {CanvasRenderingContext2D} ctx - 캔버스 2D 렌더링 컨텍스트
+     * @param {object} unit - 배리어 바를 그릴 유닛 객체
+     * @param {number} effectiveTileSize - 유닛이 그려지는 타일의 유효 크기
+     * @param {number} actualDrawX - 유닛의 실제 렌더링 x 좌표 (애니메이션이 적용된)
+     * @param {number} actualDrawY - 유닛의 실제 렌더링 y 좌표 (애니메이션이 적용된)
+     */
+    drawBarrierBar(ctx, unit, effectiveTileSize, actualDrawX, actualDrawY) {
+        if (!unit || unit.currentBarrier === undefined || unit.maxBarrier === undefined) {
+            return;
+        }
+
+        const currentBarrier = unit.currentBarrier;
+        const maxBarrier = unit.maxBarrier;
+        const barrierRatio = maxBarrier > 0 ? currentBarrier / maxBarrier : 0;
+
+        const barWidth = effectiveTileSize * 0.8;
+        const barHeight = effectiveTileSize * 0.05;
+        const barOffsetY = effectiveTileSize * 0.1 + 8;
+
+        const barrierBarDrawX = actualDrawX + (effectiveTileSize - barWidth) / 2;
+        const barrierBarDrawY = actualDrawY + barOffsetY;
+
+        ctx.fillStyle = 'rgba(50, 50, 50, 0.8)';
+        ctx.fillRect(barrierBarDrawX, barrierBarDrawY, barWidth, barHeight);
+
+        ctx.fillStyle = '#FFFF00';
+        ctx.fillRect(barrierBarDrawX, barrierBarDrawY, barWidth * barrierRatio, barHeight);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barrierBarDrawX, barrierBarDrawY, barWidth, barHeight);
+    }
+
+    /**
      * 모든 활성 시각 효과를 그립니다. 이 메서드는 LayerEngine에 의해 호출됩니다.
      * @param {CanvasRenderingContext2D} ctx - 캔버스 2D 렌더링 컨텍스트
      */
@@ -125,6 +160,7 @@ export class VFXManager {
                 gridOffsetY
             );
             this.drawHpBar(ctx, unit, effectiveTileSize, drawX, drawY);
+            this.drawBarrierBar(ctx, unit, effectiveTileSize, drawX, drawY); // ✨ 배리어 바 그리기 호출
         }
 
         // ✨ 데미지 숫자 그리기

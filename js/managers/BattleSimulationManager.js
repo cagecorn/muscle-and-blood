@@ -1,13 +1,14 @@
 // js/managers/BattleSimulationManager.js
 
 export class BattleSimulationManager {
-    constructor(measureManager, assetLoaderManager, idManager, logicManager, animationManager) {
+    constructor(measureManager, assetLoaderManager, idManager, logicManager, animationManager, valorEngine) {
         console.log("\u2694\ufe0f BattleSimulationManager initialized. Preparing units for battle. \u2694\ufe0f");
         this.measureManager = measureManager;
         this.assetLoaderManager = assetLoaderManager;
         this.idManager = idManager; // Keep for other potential uses, though not directly in draw
         this.logicManager = logicManager;
         this.animationManager = animationManager;
+        this.valorEngine = valorEngine;
         this.unitsOnGrid = [];
         this.gridRows = 10; // BattleGridManager와 동일한 그리드 차원
         this.gridCols = 15;
@@ -21,7 +22,9 @@ export class BattleSimulationManager {
      * @param {number} gridY
      */
     addUnit(fullUnitData, unitImage, gridX, gridY) {
-        // 유닛의 모든 필요한 데이터를 한 번에 저장합니다.
+        // ✨ 유닛의 용맹 스탯에 기반하여 초기 배리어를 계산합니다.
+        const initialBarrier = this.valorEngine.calculateInitialBarrier(fullUnitData.baseStats.valor || 0);
+
         const unitInstance = {
             id: fullUnitData.id,
             name: fullUnitData.name,
@@ -34,10 +37,12 @@ export class BattleSimulationManager {
             baseStats: fullUnitData.baseStats,
             type: fullUnitData.type,
             fullUnitData: fullUnitData,
-            currentHp: fullUnitData.currentHp !== undefined ? fullUnitData.currentHp : fullUnitData.baseStats.hp
+            currentHp: fullUnitData.currentHp !== undefined ? fullUnitData.currentHp : fullUnitData.baseStats.hp,
+            currentBarrier: initialBarrier, // ✨ 현재 배리어 설정
+            maxBarrier: initialBarrier // ✨ 최대 배리어는 초기 배리어와 동일
         };
         this.unitsOnGrid.push(unitInstance);
-        console.log(`[BattleSimulationManager] Added unit '${unitInstance.id}' at (${gridX}, ${gridY}).`);
+        console.log(`[BattleSimulationManager] Added unit '${unitInstance.id}' at (${gridX}, ${gridY}) with initial barrier ${initialBarrier}.`);
     }
 
     /**

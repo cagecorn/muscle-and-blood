@@ -1,10 +1,11 @@
 // js/managers/TurnOrderManager.js
 
 export class TurnOrderManager {
-    constructor(eventManager, battleSimulationManager) {
+    constructor(eventManager, battleSimulationManager, weightEngine) {
         console.log("\uD83D\uDCDC TurnOrderManager initialized. Ready to compute turn sequences. \uD83D\uDCDC");
         this.eventManager = eventManager;
         this.battleSimulationManager = battleSimulationManager;
+        this.weightEngine = weightEngine;
         this.currentTurnOrder = [];
     }
 
@@ -18,9 +19,20 @@ export class TurnOrderManager {
         this.currentTurnOrder = [...units].sort((a, b) => {
             const speedA = a.baseStats ? a.baseStats.speed : 0;
             const speedB = b.baseStats ? b.baseStats.speed : 0;
-            return speedB - speedA;
+
+            const penaltyA = this.weightEngine.getTurnWeightPenalty(
+                this.weightEngine.calculateTotalWeight(a, [])
+            );
+            const penaltyB = this.weightEngine.getTurnWeightPenalty(
+                this.weightEngine.calculateTotalWeight(b, [])
+            );
+
+            const initiativeA = speedA - penaltyA;
+            const initiativeB = speedB - penaltyB;
+
+            return initiativeB - initiativeA;
         });
-        console.log("[TurnOrderManager] Calculated turn order:", this.currentTurnOrder.map(unit => unit.name));
+        console.log("[TurnOrderManager] Calculated turn order:", this.currentTurnOrder.map(unit => `${unit.name} (Initiative: ${( (unit.baseStats.speed || 0) - this.weightEngine.getTurnWeightPenalty(this.weightEngine.calculateTotalWeight(unit, []))).toFixed(2)})`));
         return this.currentTurnOrder;
     }
 
