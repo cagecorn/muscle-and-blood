@@ -14,9 +14,10 @@ export class UIEngine {
 
         this.recalculateUIDimensions();
 
+        const pixelRatio = window.devicePixelRatio || 1;
         this.battleStartButton = {
-            x: (this.canvas.width - this.buttonWidth) / 2,
-            y: this.canvas.height - this.buttonHeight - this.buttonMargin,
+            x: (this.canvas.width / pixelRatio - this.buttonWidth) / 2,
+            y: (this.canvas.height / pixelRatio) - this.buttonHeight - this.buttonMargin,
             width: this.buttonWidth,
             height: this.buttonHeight,
             text: '전투 시작'
@@ -27,19 +28,25 @@ export class UIEngine {
 
     recalculateUIDimensions() {
         console.log("[UIEngine] Recalculating UI dimensions based on MeasureManager...");
+        // measureManager에서 가져오는 값들이 올바른지 확인합니다.
         this.mapPanelWidth = this.canvas.width * this.measureManager.get('ui.mapPanelWidthRatio');
         this.mapPanelHeight = this.canvas.height * this.measureManager.get('ui.mapPanelHeightRatio');
         this.buttonHeight = this.measureManager.get('ui.buttonHeight');
         this.buttonWidth = this.measureManager.get('ui.buttonWidth');
         this.buttonMargin = this.measureManager.get('ui.buttonMargin');
 
+        const pixelRatio = window.devicePixelRatio || 1;
         this.battleStartButton = {
-            x: (this.canvas.width - this.buttonWidth) / 2,
-            y: this.canvas.height - this.buttonHeight - this.buttonMargin,
+            x: (this.canvas.width / pixelRatio - this.buttonWidth) / 2, // 논리적 캔버스 너비 사용
+            y: (this.canvas.height / pixelRatio) - this.buttonHeight - this.buttonMargin, // 논리적 캔버스 높이 사용
             width: this.buttonWidth,
             height: this.buttonHeight,
             text: '전투 시작'
         };
+
+        // ✨ 추가: 버튼 계산 후 최종 위치 및 크기 로그
+        console.log(`[UIEngine Debug] Battle Start Button: X=${this.battleStartButton.x}, Y=${this.battleStartButton.y}, Width=${this.battleStartButton.width}, Height=${this.battleStartButton.height}`);
+        console.log(`[UIEngine Debug] Canvas Logical Dimensions: ${this.canvas.width / pixelRatio}x${this.canvas.height / pixelRatio}`);
     }
 
     getUIState() {
