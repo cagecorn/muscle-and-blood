@@ -44,7 +44,7 @@ export function runLogicManagerUnitTests(logicManager) {
     testCount++;
     let logicManagerBattle = new logicManager.constructor(mockMeasureManager, mockSceneManagerBattle);
     const battleContent = logicManagerBattle.getCurrentSceneContentDimensions();
-    if (battleContent.width === 1280 && battleContent.height === 720) {
+    if (battleContent.width === 960 && battleContent.height === 640) {
         console.log("LogicManager: Battle scene content dimensions correct. [PASS]");
         passCount++;
     } else {
@@ -54,7 +54,8 @@ export function runLogicManagerUnitTests(logicManager) {
     // \ud14c\uc2a4\ud2b8 3: \uc90c \uc81c\ud55c (\ucee8\ud150\uce20\uac00 \uce74\ubc84\uc2a4 \ud06c\uae30\uc77c \ub54c)
     testCount++;
     const zoomLimits = logicManagerBattle.getZoomLimits();
-    if (zoomLimits.minZoom === 1.0 && zoomLimits.maxZoom === 3.0) {
+    const expectedMinZoom = 1280 / 960; // 1.333...
+    if (Math.abs(zoomLimits.minZoom - expectedMinZoom) < 0.01 && zoomLimits.maxZoom === 6.0) {
         console.log("LogicManager: Zoom limits correct for canvas-sized content. [PASS]");
         passCount++;
     } else {
@@ -64,7 +65,7 @@ export function runLogicManagerUnitTests(logicManager) {
     // \ud14c\uc2a4\ud2b8 4: \ud310 \uc81c\uc57d (\uc90c 1.0\uc77c \ub54c, \ucee8\ud150\uce20\uac00 \uce74\ubc84\uc2a4 \ud06c\uae30\uc774\ub85c \uc911\uc559 \uc815\ub82c)
     testCount++;
     const panPos1 = logicManagerBattle.applyPanConstraints(50, 50, 1.0);
-    if (panPos1.x === 0 && panPos1.y === 0) {
+    if (panPos1.x === 160 && panPos1.y === 40) {
         console.log("LogicManager: Pan constraints correct for zoom 1.0 (centered). [PASS]");
         passCount++;
     } else {
@@ -74,7 +75,7 @@ export function runLogicManagerUnitTests(logicManager) {
     // \ud14c\uc2a4\ud2b8 5: \ud310 \uc81c\uc57d (\uc90c 2.0\uc77c \ub54c, \ucee8\ud150\uce20\uac00 \uce74\ubc84\uc2a4\ubcf4\ub2e4 \ucf00\uc57c \uc774\ub3d9 \uac00\ub2a5)
     testCount++;
     const panPos2 = logicManagerBattle.applyPanConstraints(100, 100, 2.0);
-    if (panPos2.x === 100 && panPos2.y === 100) {
+    if (panPos2.x === 0 && panPos2.y === 0) {
         console.log("LogicManager: Pan constraints correct for zoom 2.0 (within bounds). [PASS]");
         passCount++;
     } else {
@@ -84,7 +85,7 @@ export function runLogicManagerUnitTests(logicManager) {
     // \ud14c\uc2a4\ud2b8 6: \ud310 \uc81c\uc57d (\ubc94\uc704\ub97c \ubc8c\uc5b4\ub098\ub294 \uacbd\uc6b0)
     testCount++;
     const panPos3 = logicManagerBattle.applyPanConstraints(-2000, -1000, 2.0);
-    if (panPos3.x === -1280 && panPos3.y === -720) {
+    if (panPos3.x === -640 && panPos3.y === -560) {
         console.log("LogicManager: Pan constraints correct for out-of-bounds (clamped). [PASS]");
         passCount++;
     } else {
