@@ -41,17 +41,18 @@ export class MercenaryPanelManager {
     /**
      * 캔버스 내부 해상도를 CSS 크기와 pixelRatio에 맞춰 조정합니다.
      */
-    resizeCanvas() {
-        const displayWidth = this.canvas.clientWidth;
-        const displayHeight = this.canvas.clientHeight;
+    resizeCanvas(displayWidth, displayHeight) {
+        const currentDisplayWidth = displayWidth !== undefined ? displayWidth : this.canvas.clientWidth;
+        const currentDisplayHeight = displayHeight !== undefined ? displayHeight : this.canvas.clientHeight;
 
-        if (this.canvas.width !== displayWidth * this.pixelRatio ||
-            this.canvas.height !== displayHeight * this.pixelRatio) {
-            this.canvas.width = displayWidth * this.pixelRatio;
-            this.canvas.height = displayHeight * this.pixelRatio;
+        if (this.canvas.width !== currentDisplayWidth * this.pixelRatio ||
+            this.canvas.height !== currentDisplayHeight * this.pixelRatio) {
+            this.canvas.width = currentDisplayWidth * this.pixelRatio;
+            this.canvas.height = currentDisplayHeight * this.pixelRatio;
             this.ctx = this.canvas.getContext('2d');
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.scale(this.pixelRatio, this.pixelRatio);
-            console.log(`[MercenaryPanelManager] Canvas internal resolution set to: ${this.canvas.width}x${this.canvas.height} (Display: ${displayWidth}x${displayHeight}, Ratio: ${this.pixelRatio})`);
+            console.log(`[MercenaryPanelManager] Canvas internal resolution set to: ${this.canvas.width}x${this.canvas.height} (Display: ${currentDisplayWidth}x${currentDisplayHeight}, Ratio: ${this.pixelRatio})`);
         }
     }
 
