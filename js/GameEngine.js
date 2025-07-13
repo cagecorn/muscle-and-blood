@@ -166,11 +166,6 @@ export class GameEngine {
             this.eventManager // ✨ eventManager 추가
         );
         this.bindingManager = new BindingManager();
-        this.battleCalculationManager = new BattleCalculationManager(
-            this.eventManager,
-            this.battleSimulationManager,
-            this.diceRollManager
-        );
 
         // ✨ 새로운 엔진들 초기화
         this.delayEngine = new DelayEngine();
@@ -182,6 +177,13 @@ export class GameEngine {
         this.diceEngine = new DiceEngine();
         this.diceRollManager = new DiceRollManager(this.diceEngine);
         this.diceBotManager = new DiceBotManager(this.diceEngine);
+
+        // BattleCalculationManager는 DiceRollManager가 준비된 이후에 초기화합니다.
+        this.battleCalculationManager = new BattleCalculationManager(
+            this.eventManager,
+            this.battleSimulationManager,
+            this.diceRollManager
+        );
 
         // ✨ BasicAIManager 초기화
         this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
@@ -202,7 +204,8 @@ export class GameEngine {
             this.classAIManager,
             this.delayEngine,
             this.timingEngine,
-            this.animationManager
+            this.animationManager,
+            this.battleCalculationManager
         );
 
         this.sceneEngine.registerScene('territoryScene', [this.territoryManager]);
