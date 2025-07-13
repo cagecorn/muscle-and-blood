@@ -86,6 +86,14 @@
         <button id="runCompatibilityManagerUnitTestsBtn">CompatibilityManager 유닛 테스트</button>
         <button id="runEventManagerUnitTestsBtn">EventManager 유닛 테스트</button>
         <button id="runGuardianManagerUnitTestsBtn">GuardianManager 유닛 테스트</button>
+        <button id="runValorEngineUnitTestsBtn">ValorEngine 유닛 테스트</button>
+        <button id="runWeightEngineUnitTestsBtn">WeightEngine 유닛 테스트</button>
+        <button id="runStatManagerUnitTestsBtn">StatManager 유닛 테스트</button>
+        <button id="runVFXManagerUnitTestsBtn">VFXManager 유닛 테스트</button>
+        <button id="runCanvasBridgeManagerUnitTestsBtn">CanvasBridgeManager 유닛 테스트</button>
+        <button id="runMeasureManagerUnitTestsBtn">MeasureManager 유닛 테스트</button>
+        <button id="runMapManagerUnitTestsBtn">MapManager 유닛 테스트</button>
+        <button id="runUIEngineUnitTestsBtn">UIEngine 유닛 테스트</button>
 
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
@@ -136,7 +144,16 @@
             runTurnOrderManagerUnitTests,
             runBasicAIManagerUnitTests,
             runClassAIManagerUnitTests,
-            runBattleSimulationManagerUnitTests
+            runBattleSimulationManagerUnitTests,
+            runAnimationManagerUnitTests,
+            runValorEngineUnitTests,
+            runWeightEngineUnitTests,
+            runStatManagerUnitTests,
+            runVFXManagerUnitTests,
+            runCanvasBridgeManagerUnitTests,
+            runMeasureManagerUnitTests,
+            runMapManagerUnitTests,
+            runUIEngineUnitTests
         } from './tests/index.js';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -208,6 +225,15 @@
                 runBasicAIManagerUnitTests(battleSimulationManager);
                 runClassAIManagerUnitTests(idManager, battleSimulationManager, measureManager, basicAIManager);
                 runBattleSimulationManagerUnitTests(measureManager, gameEngine.getAssetLoaderManager(), idManager, logicManager);
+                runAnimationManagerUnitTests();
+                runValorEngineUnitTests();
+                runWeightEngineUnitTests();
+                runStatManagerUnitTests();
+                runVFXManagerUnitTests();
+                runCanvasBridgeManagerUnitTests();
+                runMeasureManagerUnitTests();
+                runMapManagerUnitTests();
+                runUIEngineUnitTests();
             });
 
             document.getElementById('runMeasureManagerIntegrationTestBtn').addEventListener('click', () => {
@@ -229,6 +255,30 @@
             });
             document.getElementById('runGuardianManagerUnitTestsBtn').addEventListener('click', () => {
                 runGuardianManagerTests(guardianManager);
+            });
+            document.getElementById('runValorEngineUnitTestsBtn').addEventListener('click', () => {
+                runValorEngineUnitTests();
+            });
+            document.getElementById('runWeightEngineUnitTestsBtn').addEventListener('click', () => {
+                runWeightEngineUnitTests();
+            });
+            document.getElementById('runStatManagerUnitTestsBtn').addEventListener('click', () => {
+                runStatManagerUnitTests();
+            });
+            document.getElementById('runVFXManagerUnitTestsBtn').addEventListener('click', () => {
+                runVFXManagerUnitTests();
+            });
+            document.getElementById('runCanvasBridgeManagerUnitTestsBtn').addEventListener('click', () => {
+                runCanvasBridgeManagerUnitTests();
+            });
+            document.getElementById('runMeasureManagerUnitTestsBtn').addEventListener('click', () => {
+                runMeasureManagerUnitTests();
+            });
+            document.getElementById('runMapManagerUnitTestsBtn').addEventListener('click', () => {
+                runMapManagerUnitTests();
+            });
+            document.getElementById('runUIEngineUnitTestsBtn').addEventListener('click', () => {
+                runUIEngineUnitTests();
             });
 
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
@@ -366,6 +416,15 @@
             runBasicAIManagerUnitTests(battleSimulationManager);
             runClassAIManagerUnitTests(idManager, battleSimulationManager, measureManager, basicAIManager);
             runBattleSimulationManagerUnitTests(measureManager, gameEngine.getAssetLoaderManager(), idManager, logicManager);
+            runAnimationManagerUnitTests();
+            runValorEngineUnitTests();
+            runWeightEngineUnitTests();
+            runStatManagerUnitTests();
+            runVFXManagerUnitTests();
+            runCanvasBridgeManagerUnitTests();
+            runMeasureManagerUnitTests();
+            runMapManagerUnitTests();
+            runUIEngineUnitTests();
         });
     </script>
 </body>
