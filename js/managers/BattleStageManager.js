@@ -11,15 +11,19 @@ export class BattleStageManager {
      * @param {CanvasRenderingContext2D} ctx - \uce90\ub098\uc2a4 2D \ub80c\ub354\ub9c1 \ucee8\ud14d\uc2a4\ud2b8
      */
     draw(ctx) {
-        // 논리 2 적용: 배틀 스테이지는 맵 화면 박스(캔버스)와 똑같게 한다.
+        // 디바이스 픽셀 비율을 고려하여 논리적인 캔버스 크기를 계산합니다.
+        const pixelRatio = window.devicePixelRatio || 1;
+        const logicalWidth = ctx.canvas.width / pixelRatio;
+        const logicalHeight = ctx.canvas.height / pixelRatio;
+
         ctx.fillStyle = '#6A5ACD'; // 전투 스테이지 배경색 (보라색)
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); // 캔버스 전체를 채움
+        ctx.fillRect(0, 0, logicalWidth, logicalHeight); // 논리 크기로 채움
 
         ctx.fillStyle = 'white';
         ctx.font = '40px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         // 텍스트를 캔버스 중앙에 배치
-        ctx.fillText('전투가 시작됩니다!', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        ctx.fillText('전투가 시작됩니다!', logicalWidth / 2, logicalHeight / 2);
     }
 }
