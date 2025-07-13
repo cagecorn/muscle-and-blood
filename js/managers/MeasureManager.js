@@ -42,7 +42,8 @@ export class MeasureManager {
             },
             // ✨ 새로운 게임 설정 섹션
             gameConfig: {
-                enableDisarmSystem: true // 무장해제 시스템 활성화 여부
+                enableDisarmSystem: true, // 무장해제 시스템 활성화 여부
+                enableCompatibilityManager: false // 호환성 매니저 활성화 여부
             }
         };
     }

@@ -137,6 +137,9 @@ export class GameEngine {
             this.mercenaryPanelManager,
             this.battleLogManager
         );
+        if (!this.measureManager.get('gameConfig.enableCompatibilityManager')) {
+            this.compatibilityManager.disable();
+        }
 
         this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneEngine);
         this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine);
@@ -436,4 +439,13 @@ export class GameEngine {
     getDiceEngine() { return this.diceEngine; }
     getDiceRollManager() { return this.diceRollManager; }
     getDiceBotManager() { return this.diceBotManager; }
+
+    setCompatibilityManagerEnabled(flag) {
+        this.measureManager.set('gameConfig.enableCompatibilityManager', flag);
+        if (flag) {
+            this.compatibilityManager.enable();
+        } else {
+            this.compatibilityManager.disable();
+        }
+    }
 }
