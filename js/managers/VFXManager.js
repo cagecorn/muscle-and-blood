@@ -2,13 +2,54 @@
 
 export class VFXManager {
     // animationManager를 추가로 받아 유닛의 애니메이션 위치를 참조합니다.
-    constructor(renderer, measureManager, cameraEngine, battleSimulationManager, animationManager) {
+    constructor(renderer, measureManager, cameraEngine, battleSimulationManager, animationManager, eventManager) {
         console.log("\u2728 VFXManager initialized. Ready to render visual effects. \u2728");
         this.renderer = renderer;
         this.measureManager = measureManager;
         this.cameraEngine = cameraEngine;
         this.battleSimulationManager = battleSimulationManager; // 유닛 데이터를 가져오기 위함
         this.animationManager = animationManager; // ✨ AnimationManager 저장
+        this.eventManager = eventManager;
+
+        this.activeDamageNumbers = [];
+
+        // ✨ subscribe to damage display events
+        this.eventManager.subscribe('displayDamage', (data) => {
+            this.addDamageNumber(data.unitId, data.damage);
+        });
+    }
+
+    /**
+     * 특정 유닛 위에 데미지 숫자를 표시하도록 큐에 추가합니다.
+     * @param {string} unitId
+     * @param {number} damageAmount
+     */
+    addDamageNumber(unitId, damageAmount) {
+        const unit = this.battleSimulationManager.unitsOnGrid.find(u => u.id === unitId);
+        if (!unit) {
+            console.warn(`[VFXManager] Cannot show damage for unknown unit: ${unitId}`);
+            return;
+        }
+
+        this.activeDamageNumbers.push({
+            unitId: unitId,
+            damage: damageAmount,
+            startTime: performance.now(),
+            duration: 1000,
+            floatSpeed: 0.05
+        });
+        console.log(`[VFXManager] Added damage number: ${damageAmount} for ${unit.name}`);
+    }
+
+    /**
+     * ✨ 활성 데미지 숫자의 상태를 업데이트합니다.
+     * @param {number} deltaTime
+     */
+    update(deltaTime) {
+        const currentTime = performance.now();
+        this.activeDamageNumbers = this.activeDamageNumbers.filter(dmgNum => {
+            return currentTime - dmgNum.startTime < dmgNum.duration;
+        });
     }
 
     /**
@@ -84,6 +125,41 @@ export class VFXManager {
                 gridOffsetY
             );
             this.drawHpBar(ctx, unit, effectiveTileSize, drawX, drawY);
+        }
+
+        // ✨ 데미지 숫자 그리기
+        const currentTime = performance.now();
+        for (const dmgNum of this.activeDamageNumbers) {
+            const unit = this.battleSimulationManager.unitsOnGrid.find(u => u.id === dmgNum.unitId);
+            if (!unit) continue;
+
+            const { drawX, drawY } = this.animationManager.getRenderPosition(
+                unit.id,
+                unit.gridX,
+                unit.gridY,
+                effectiveTileSize,
+                gridOffsetX,
+                gridOffsetY
+            );
+
+            const elapsed = currentTime - dmgNum.startTime;
+            const progress = elapsed / dmgNum.duration;
+
+            const currentYOffset = dmgNum.floatSpeed * elapsed;
+            const alpha = Math.max(0, 1 - progress);
+
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = (dmgNum.damage > 0) ? '#FF4500' : '#ADFF2F';
+            ctx.font = `bold ${20 + (1 - progress) * 5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(
+                dmgNum.damage.toString(),
+                drawX + effectiveTileSize / 2,
+                drawY - currentYOffset - 5
+            );
+            ctx.restore();
         }
     }
 }

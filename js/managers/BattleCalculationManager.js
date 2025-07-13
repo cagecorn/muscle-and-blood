@@ -23,6 +23,9 @@ export class BattleCalculationManager {
             if (unitToUpdate) {
                 unitToUpdate.currentHp = newHp;
 
+                // ✨ Emit event so VFXManager can display floating damage numbers
+                this.eventManager.emit('displayDamage', { unitId: unitId, damage: damageDealt });
+
                 if (newHp <= 0) {
                     this.eventManager.emit('unitDeath', { unitId: unitId, unitName: unitToUpdate.name, unitType: unitToUpdate.type });
                     console.log(`[BattleCalculationManager] Unit '${unitId}' has died.`);

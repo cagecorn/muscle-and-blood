@@ -56,6 +56,19 @@
             border: 2px solid #fff;
             background-color: #000;
         }
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #mercenaryPanelCanvas {
+            margin-bottom: 10px;
+            border: 2px solid #00f;
+        }
+        #combatLogCanvas {
+            margin-top: 10px;
+            border: 2px solid #f00;
+        }
     </style>
 </head>
 <body>
@@ -89,7 +102,11 @@
         <h4>전투 계산 테스트</h4>
         <button id="testDamageCalculationBtn">대미지 계산 테스트 (전사 -> 해골)</button>
     </div>
-    <canvas id="gameCanvas"></canvas>
+    <div id="gameContainer">
+        <canvas id="mercenaryPanelCanvas"></canvas>
+        <canvas id="gameCanvas"></canvas>
+        <canvas id="combatLogCanvas"></canvas>
+    </div>
     <script type="module">
         import { GameEngine } from './js/GameEngine.js'; // <-- GameEngine 불러오기
         import { 
