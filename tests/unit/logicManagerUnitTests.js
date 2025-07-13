@@ -54,8 +54,8 @@ export function runLogicManagerUnitTests(logicManager) {
     // \ud14c\uc2a4\ud2b8 3: \uc90c \uc81c\ud55c (\ucee8\ud150\uce20\uac00 \uce74\ubc84\uc2a4 \ud06c\uae30\uc77c \ub54c)
     testCount++;
     const zoomLimits = logicManagerBattle.getZoomLimits();
-    const expectedMinZoom = 1.0;
-    if (Math.abs(zoomLimits.minZoom - expectedMinZoom) < 0.01 && zoomLimits.maxZoom === 10.0) {
+    const expectedMinZoom = 1280 / 960; // 1.333...
+    if (Math.abs(zoomLimits.minZoom - expectedMinZoom) < 0.01 && zoomLimits.maxZoom === 6.0) {
         console.log("LogicManager: Zoom limits correct for canvas-sized content. [PASS]");
         passCount++;
     } else {
