@@ -37,6 +37,10 @@ import { StatManager } from './managers/StatManager.js'; // ✨ StatManager 추�
 import { DiceEngine } from './managers/DiceEngine.js';
 import { DiceRollManager } from './managers/DiceRollManager.js';
 import { DiceBotManager } from './managers/DiceBotManager.js';
+import { TurnCountManager } from './managers/TurnCountManager.js';
+import { StatusEffectManager } from './managers/StatusEffectManager.js';
+import { WorkflowManager } from './managers/WorkflowManager.js';
+import { STATUS_EFFECTS } from '../data/statusEffects.js';
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -186,6 +190,20 @@ export class GameEngine {
             this.delayEngine
         );
 
+        // Status effect 관련 매니저 초기화
+        this.turnCountManager = new TurnCountManager();
+        this.statusEffectManager = new StatusEffectManager(
+            this.eventManager,
+            this.idManager,
+            this.turnCountManager,
+            this.battleCalculationManager
+        );
+        this.workflowManager = new WorkflowManager(
+            this.eventManager,
+            this.statusEffectManager,
+            this.battleSimulationManager
+        );
+
         // ✨ BasicAIManager 초기화
         this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
 
@@ -206,7 +224,8 @@ export class GameEngine {
             this.delayEngine,
             this.timingEngine,
             this.animationManager,
-            this.battleCalculationManager
+            this.battleCalculationManager,
+            this.statusEffectManager
         );
 
         this.sceneEngine.registerScene('territoryScene', [this.territoryManager]);
@@ -397,6 +416,9 @@ export class GameEngine {
     getClassAIManager() { return this.classAIManager; }
     getAnimationManager() { return this.animationManager; }
     getCanvasBridgeManager() { return this.canvasBridgeManager; }
+    getTurnCountManager() { return this.turnCountManager; }
+    getStatusEffectManager() { return this.statusEffectManager; }
+    getWorkflowManager() { return this.workflowManager; }
 
     // Dice 관련 엔진/매니저에 대한 getter
     getDiceEngine() { return this.diceEngine; }

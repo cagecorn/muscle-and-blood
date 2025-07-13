@@ -36,6 +36,9 @@ export { runUIEngineUnitTests as runUpdatedUIEngineUnitTests } from './unit/uiEn
 export { runDiceEngineUnitTests } from './unit/diceEngineUnitTests.js';
 export { runDiceRollManagerUnitTests } from './unit/diceRollManagerUnitTests.js';
 export { runDiceBotManagerUnitTests } from './unit/diceBotManagerUnitTests.js';
+export { runTurnCountManagerUnitTests } from './unit/turnCountManagerUnitTests.js';
+export { runStatusEffectManagerUnitTests } from './unit/statusEffectManagerUnitTests.js';
+export { runWorkflowManagerUnitTests } from './unit/workflowManagerUnitTests.js';
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 export { runBattleSimulationIntegrationTest } from './integration/battleSimulationIntegrationTest.js';

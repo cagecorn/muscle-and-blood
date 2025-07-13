@@ -99,6 +99,10 @@
         <button id="runDiceRollManagerUnitTestsBtn">DiceRollManager 유닛 테스트</button>
         <button id="runDiceBotManagerUnitTestsBtn">DiceBotManager 유닛 테스트</button>
 
+        <button id="runTurnCountManagerUnitTestsBtn">TurnCountManager 유닛 테스트</button>
+        <button id="runStatusEffectManagerUnitTestsBtn">StatusEffectManager 유닛 테스트</button>
+        <button id="runWorkflowManagerUnitTestsBtn">WorkflowManager 유닛 테스트</button>
+
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
         <button id="injectUpdateFaultBtn" class="fault-btn">Update 함수 결함 주입</button>
@@ -113,6 +117,12 @@
 
         <h4>전투 계산 테스트</h4>
         <button id="testDamageCalculationBtn">대미지 계산 테스트 (전사 -> 해골)</button>
+
+        <h4>상태 이상 테스트</h4>
+        <button id="applyPoisonToSkeletonBtn">해골에 독 적용 (3턴)</button>
+        <button id="applyStunToSkeletonBtn">해골에 기절 적용 (1턴)</button>
+        <button id="applyBerserkToWarriorBtn">전사에 광폭화 적용 (2턴)</button>
+        <button id="clearAllEffectsBtn">모든 효과 제거 (전체)</button>
     </div>
     <div id="gameContainer">
         <canvas id="mercenaryPanelCanvas"></canvas>
@@ -161,8 +171,12 @@
             runUIEngineUnitTests,
             runDiceEngineUnitTests,
             runDiceRollManagerUnitTests,
-            runDiceBotManagerUnitTests
+            runDiceBotManagerUnitTests,
+            runTurnCountManagerUnitTests,
+            runStatusEffectManagerUnitTests,
+            runWorkflowManagerUnitTests
         } from './tests/index.js';
+        import { STATUS_EFFECTS } from './data/statusEffects.js';
 
         document.addEventListener('DOMContentLoaded', () => {
             let gameEngine; // gameEngine 인스턴스를 스코프 밖으로 뺍니다.
@@ -196,6 +210,9 @@
             const idManager = gameEngine.getIdManager();
             const basicAIManager = gameEngine.getBasicAIManager();
             const animationManager = gameEngine.getAnimationManager();
+            const turnCountManager = gameEngine.getTurnCountManager();
+            const statusEffectManager = gameEngine.getStatusEffectManager();
+            const workflowManager = gameEngine.getWorkflowManager();
             // ✨ 다이스 관련 매니저 가져오기
             const diceEngine = gameEngine.getDiceEngine();
             const diceRollManager = gameEngine.getDiceRollManager();
@@ -208,6 +225,19 @@
             });
             eventManager.subscribe('skillExecuted', (data) => {
                 console.log(`[Debug Main] Skill '${data.skillName}' was executed.`);
+            });
+            eventManager.subscribe('statusEffectApplied', ({ unitId, statusEffectId, effectData }) => {
+                const unit = battleSimulationManager.unitsOnGrid.find(u => u.id === unitId);
+                const unitName = unit ? unit.name : unitId;
+                console.log(`[Debug Main] 상태 효과 적용: ${effectData.name} (${statusEffectId}) 이(가) ${unitName}에게 적용됨. 지속 시간: ${effectData.duration}턴.`);
+            });
+            eventManager.subscribe('statusEffectRemoved', ({ unitId, statusEffectId }) => {
+                const unit = battleSimulationManager.unitsOnGrid.find(u => u.id === unitId);
+                const unitName = unit ? unit.name : unitId;
+                console.log(`[Debug Main] 상태 효과 제거: ${statusEffectId} 이(가) ${unitName}에게서 제거됨.`);
+            });
+            eventManager.subscribe('logMessage', ({ message }) => {
+                console.log(`[Debug Main Log] ${message}`);
             });
 
 
@@ -250,6 +280,9 @@
                 runDiceEngineUnitTests();
                 runDiceRollManagerUnitTests();
                 runDiceBotManagerUnitTests();
+                runTurnCountManagerUnitTests();
+                runStatusEffectManagerUnitTests(eventManager, idManager, turnCountManager, battleCalculationManager);
+                runWorkflowManagerUnitTests(eventManager, statusEffectManager, battleSimulationManager);
             });
 
             document.getElementById('runMeasureManagerIntegrationTestBtn').addEventListener('click', () => {
@@ -310,6 +343,15 @@
             document.getElementById('runDiceBotManagerUnitTestsBtn').addEventListener('click', () => {
                 runDiceBotManagerUnitTests();
             });
+            document.getElementById('runTurnCountManagerUnitTestsBtn').addEventListener('click', () => {
+                runTurnCountManagerUnitTests();
+            });
+            document.getElementById('runStatusEffectManagerUnitTestsBtn').addEventListener('click', () => {
+                runStatusEffectManagerUnitTests(eventManager, idManager, turnCountManager, battleCalculationManager);
+            });
+            document.getElementById('runWorkflowManagerUnitTestsBtn').addEventListener('click', () => {
+                runWorkflowManagerUnitTests(eventManager, statusEffectManager, battleSimulationManager);
+            });
 
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
                 injectRendererFault(renderer);
@@ -366,6 +408,20 @@
                         dice: { num: 2, sides: 8 }
                     });
                 }, 4000);
+            });
+
+            document.getElementById('applyPoisonToSkeletonBtn').addEventListener('click', () => {
+                workflowManager.triggerStatusEffectApplication('unit_skeleton_001', STATUS_EFFECTS.POISON.id);
+            });
+            document.getElementById('applyStunToSkeletonBtn').addEventListener('click', () => {
+                workflowManager.triggerStatusEffectApplication('unit_skeleton_001', STATUS_EFFECTS.STUN.id);
+            });
+            document.getElementById('applyBerserkToWarriorBtn').addEventListener('click', () => {
+                workflowManager.triggerStatusEffectApplication('unit_warrior_001', STATUS_EFFECTS.BERSERK.id);
+            });
+            document.getElementById('clearAllEffectsBtn').addEventListener('click', () => {
+                turnCountManager.clearAllEffects();
+                console.log("[Debug Main] 모든 유닛의 모든 효과를 제거했습니다.");
             });
 
             let isSimulatingEvents = false;
@@ -465,6 +521,9 @@
             runDiceEngineUnitTests();
             runDiceRollManagerUnitTests();
             runDiceBotManagerUnitTests();
+            runTurnCountManagerUnitTests();
+            runStatusEffectManagerUnitTests(eventManager, idManager, turnCountManager, battleCalculationManager);
+            runWorkflowManagerUnitTests(eventManager, statusEffectManager, battleSimulationManager);
         });
     </script>
 </body>
