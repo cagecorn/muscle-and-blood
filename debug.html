@@ -94,6 +94,9 @@
         <button id="runMeasureManagerUnitTestsBtn">MeasureManager 유닛 테스트</button>
         <button id="runMapManagerUnitTestsBtn">MapManager 유닛 테스트</button>
         <button id="runUIEngineUnitTestsBtn">UIEngine 유닛 테스트</button>
+        <button id="runDiceEngineUnitTestsBtn">DiceEngine 유닛 테스트</button>
+        <button id="runDiceRollManagerUnitTestsBtn">DiceRollManager 유닛 테스트</button>
+        <button id="runDiceBotManagerUnitTestsBtn">DiceBotManager 유닛 테스트</button>
 
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
@@ -153,7 +156,10 @@
             runCanvasBridgeManagerUnitTests,
             runMeasureManagerUnitTests,
             runMapManagerUnitTests,
-            runUIEngineUnitTests
+            runUIEngineUnitTests,
+            runDiceEngineUnitTests,
+            runDiceRollManagerUnitTests,
+            runDiceBotManagerUnitTests
         } from './tests/index.js';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -188,6 +194,10 @@
             const idManager = gameEngine.getIdManager();
             const basicAIManager = gameEngine.getBasicAIManager();
             const animationManager = gameEngine.getAnimationManager();
+            // ✨ 다이스 관련 매니저 가져오기
+            const diceEngine = gameEngine.getDiceEngine();
+            const diceRollManager = gameEngine.getDiceRollManager();
+            const diceBotManager = gameEngine.getDiceBotManager();
 
 
             // 테스트용 EventManager 구독 (debug.html에서만 필요)
@@ -234,6 +244,9 @@
                 runMeasureManagerUnitTests();
                 runMapManagerUnitTests();
                 runUIEngineUnitTests();
+                runDiceEngineUnitTests();
+                runDiceRollManagerUnitTests();
+                runDiceBotManagerUnitTests();
             });
 
             document.getElementById('runMeasureManagerIntegrationTestBtn').addEventListener('click', () => {
@@ -280,6 +293,16 @@
             document.getElementById('runUIEngineUnitTestsBtn').addEventListener('click', () => {
                 runUIEngineUnitTests();
             });
+            // ✨ 다이스 관련 유닛 테스트 버튼
+            document.getElementById('runDiceEngineUnitTestsBtn').addEventListener('click', () => {
+                runDiceEngineUnitTests();
+            });
+            document.getElementById('runDiceRollManagerUnitTestsBtn').addEventListener('click', () => {
+                runDiceRollManagerUnitTests();
+            });
+            document.getElementById('runDiceBotManagerUnitTestsBtn').addEventListener('click', () => {
+                runDiceBotManagerUnitTests();
+            });
 
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
                 injectRendererFault(renderer);
@@ -323,12 +346,18 @@
 
                 setTimeout(() => {
                     console.log("[Debug Main] Requesting damage calculation: WARRIOR attacks SKELETON");
-                    battleCalculationManager.requestDamageCalculation('unit_warrior_001', 'unit_skeleton_001');
+                    battleCalculationManager.requestDamageCalculation('unit_warrior_001', 'unit_skeleton_001', {
+                        type: 'physical',
+                        dice: { num: 1, sides: 6 }
+                    });
                 }, 2000);
 
                 setTimeout(() => {
                     console.log("[Debug Main] Requesting damage calculation again: WARRIOR attacks SKELETON");
-                    battleCalculationManager.requestDamageCalculation('unit_warrior_001', 'unit_skeleton_001');
+                    battleCalculationManager.requestDamageCalculation('unit_warrior_001', 'unit_skeleton_001', {
+                        type: 'physical',
+                        dice: { num: 2, sides: 8 }
+                    });
                 }, 4000);
             });
 
@@ -425,6 +454,9 @@
             runMeasureManagerUnitTests();
             runMapManagerUnitTests();
             runUIEngineUnitTests();
+            runDiceEngineUnitTests();
+            runDiceRollManagerUnitTests();
+            runDiceBotManagerUnitTests();
         });
     </script>
 </body>

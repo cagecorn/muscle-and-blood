@@ -34,6 +34,9 @@ import { BasicAIManager } from './managers/BasicAIManager.js'; // ✨ 새롭게 
 import { ValorEngine } from './managers/ValorEngine.js';   // ✨ ValorEngine 추가
 import { WeightEngine } from './managers/WeightEngine.js'; // ✨ WeightEngine 추가
 import { StatManager } from './managers/StatManager.js'; // ✨ StatManager 추가
+import { DiceEngine } from './managers/DiceEngine.js';
+import { DiceRollManager } from './managers/DiceRollManager.js';
+import { DiceBotManager } from './managers/DiceBotManager.js';
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
@@ -163,13 +166,22 @@ export class GameEngine {
             this.eventManager // ✨ eventManager 추가
         );
         this.bindingManager = new BindingManager();
-        this.battleCalculationManager = new BattleCalculationManager(this.eventManager, this.battleSimulationManager);
+        this.battleCalculationManager = new BattleCalculationManager(
+            this.eventManager,
+            this.battleSimulationManager,
+            this.diceRollManager
+        );
 
         // ✨ 새로운 엔진들 초기화
         this.delayEngine = new DelayEngine();
         this.timingEngine = new TimingEngine(this.delayEngine);
         this.weightEngine = new WeightEngine(); // ✨ WeightEngine 초기화
         this.statManager = new StatManager(this.valorEngine, this.weightEngine); // ✨ StatManager 초기화
+
+        // ✨ DiceEngine 및 관련 매니저 초기화
+        this.diceEngine = new DiceEngine();
+        this.diceRollManager = new DiceRollManager(this.diceEngine);
+        this.diceBotManager = new DiceBotManager(this.diceEngine);
 
         // ✨ BasicAIManager 초기화
         this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
@@ -381,4 +393,9 @@ export class GameEngine {
     getClassAIManager() { return this.classAIManager; }
     getAnimationManager() { return this.animationManager; }
     getCanvasBridgeManager() { return this.canvasBridgeManager; }
+
+    // Dice 관련 엔진/매니저에 대한 getter
+    getDiceEngine() { return this.diceEngine; }
+    getDiceRollManager() { return this.diceRollManager; }
+    getDiceBotManager() { return this.diceBotManager; }
 }

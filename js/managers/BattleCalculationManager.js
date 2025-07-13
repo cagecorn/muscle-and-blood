@@ -1,10 +1,11 @@
 // js/managers/BattleCalculationManager.js
 
 export class BattleCalculationManager {
-    constructor(eventManager, battleSimulationManager) {
+    constructor(eventManager, battleSimulationManager, diceRollManager) {
         console.log("\ud83d\udcca BattleCalculationManager initialized. Delegating heavy calculations to worker. \ud83d\udcca");
         this.eventManager = eventManager;
         this.battleSimulationManager = battleSimulationManager;
+        this.diceRollManager = diceRollManager;
         this.worker = new Worker('./js/workers/battleCalculationWorker.js');
 
         this.worker.onmessage = this._handleWorkerMessage.bind(this);
@@ -45,12 +46,21 @@ export class BattleCalculationManager {
             return;
         }
 
+        // ✨ DiceRollManager를 사용하여 데미지 굴림 수행
+        const attackerCalculatedStats = attackerUnit.baseStats;
+        const finalDamageRoll = this.diceRollManager.performDamageRoll(
+            attackerCalculatedStats,
+            skillData
+        );
+        console.log(`[BattleCalculationManager] Final damage roll from DiceRollManager: ${finalDamageRoll}`);
+
         const payload = {
             attackerStats: attackerUnit.fullUnitData ? attackerUnit.fullUnitData.baseStats : attackerUnit.baseStats,
             targetStats: targetUnit.fullUnitData ? targetUnit.fullUnitData.baseStats : targetUnit.baseStats,
             currentTargetHp: targetUnit.currentHp,
             skillData: skillData,
-            targetUnitId: targetUnitId
+            targetUnitId: targetUnitId,
+            preCalculatedDamageRoll: finalDamageRoll
         };
 
         this.worker.postMessage({ type: 'CALCULATE_DAMAGE', payload });
