@@ -17,7 +17,10 @@ export class MercenaryPanelManager {
         this.gridCols = this.measureManager.get('mercenaryPanel.gridCols');
         this.numSlots = this.gridRows * this.gridCols;
 
-        // 초기 패널 치수 재계산 (CompatibilityManager가 캔버스 크기 설정 후 호출할 것임)
+        this.pixelRatio = window.devicePixelRatio || 1;
+
+        // 초기 내부 해상도 설정 후 패널 치수 계산
+        this.resizeCanvas();
         this.recalculatePanelDimensions();
 
         // ✨ window.resize 이벤트 리스너 제거 (CompatibilityManager가 크기 제어)
@@ -29,9 +32,27 @@ export class MercenaryPanelManager {
      */
     recalculatePanelDimensions() {
         // ✨ 캔버스 요소의 현재 크기를 기반으로 내부 슬롯 크기 계산
-        this.slotWidth = this.canvas.width / this.gridCols;
-        this.slotHeight = this.canvas.height / this.gridRows;
+        this.slotWidth = (this.canvas.width / this.pixelRatio) / this.gridCols;
+        this.slotHeight = (this.canvas.height / this.pixelRatio) / this.gridRows;
         console.log(`[MercenaryPanelManager] Panel dimensions recalculated. Canvas size: ${this.canvas.width}x${this.canvas.height}, Slot size: ${this.slotWidth}x${this.slotHeight}`);
+        this.resizeCanvas();
+    }
+
+    /**
+     * 캔버스 내부 해상도를 CSS 크기와 pixelRatio에 맞춰 조정합니다.
+     */
+    resizeCanvas() {
+        const displayWidth = this.canvas.clientWidth;
+        const displayHeight = this.canvas.clientHeight;
+
+        if (this.canvas.width !== displayWidth * this.pixelRatio ||
+            this.canvas.height !== displayHeight * this.pixelRatio) {
+            this.canvas.width = displayWidth * this.pixelRatio;
+            this.canvas.height = displayHeight * this.pixelRatio;
+            this.ctx = this.canvas.getContext('2d');
+            this.ctx.scale(this.pixelRatio, this.pixelRatio);
+            console.log(`[MercenaryPanelManager] Canvas internal resolution set to: ${this.canvas.width}x${this.canvas.height} (Display: ${displayWidth}x${displayHeight}, Ratio: ${this.pixelRatio})`);
+        }
     }
 
     /**
@@ -40,9 +61,9 @@ export class MercenaryPanelManager {
      * @param {CanvasRenderingContext2D} ctx - 패널 캔버스의 2D 렌더링 컨텍스트
      */
     draw(ctx) {
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.clearRect(0, 0, this.canvas.width / this.pixelRatio, this.canvas.height / this.pixelRatio);
         ctx.fillStyle = '#1A1A1A';
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.fillRect(0, 0, this.canvas.width / this.pixelRatio, this.canvas.height / this.pixelRatio);
 
         ctx.strokeStyle = '#555';
         ctx.lineWidth = 1;
@@ -50,13 +71,13 @@ export class MercenaryPanelManager {
         for (let i = 0; i <= this.gridCols; i++) {
             ctx.beginPath();
             ctx.moveTo(i * this.slotWidth, 0);
-            ctx.lineTo(i * this.slotWidth, this.canvas.height);
+            ctx.lineTo(i * this.slotWidth, this.canvas.height / this.pixelRatio);
             ctx.stroke();
         }
         for (let i = 0; i <= this.gridRows; i++) {
             ctx.beginPath();
             ctx.moveTo(0, i * this.slotHeight);
-            ctx.lineTo(this.canvas.width, i * this.slotHeight);
+            ctx.lineTo(this.canvas.width / this.pixelRatio, i * this.slotHeight);
             ctx.stroke();
         }
 
