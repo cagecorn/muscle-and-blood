@@ -17,6 +17,7 @@ import { AssetLoaderManager } from './managers/AssetLoaderManager.js';
 import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
 import { AnimationManager } from './managers/AnimationManager.js';
 import { VFXManager } from './managers/VFXManager.js';
+import { CanvasBridgeManager } from './managers/CanvasBridgeManager.js'; // ✨ CanvasBridgeManager 추가
 import { BindingManager } from './managers/BindingManager.js';
 import { BattleCalculationManager } from './managers/BattleCalculationManager.js';
 import { MercenaryPanelManager } from './managers/MercenaryPanelManager.js'; // ✨ MercenaryPanelManager 추가
@@ -134,6 +135,15 @@ export class GameEngine {
         this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneEngine);
         this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine);
 
+        const mainGameCanvasElement = document.getElementById(canvasId);
+        this.canvasBridgeManager = new CanvasBridgeManager(
+            mainGameCanvasElement,
+            mercenaryPanelCanvasElement,
+            combatLogCanvasElement,
+            this.eventManager,
+            this.measureManager
+        );
+
         this.layerEngine = new LayerEngine(this.renderer, this.cameraEngine);
 
         this.territoryManager = new TerritoryManager();
@@ -145,7 +155,8 @@ export class GameEngine {
             this.measureManager,
             this.cameraEngine,
             this.battleSimulationManager,
-            this.animationManager // ✨ AnimationManager 추가
+            this.animationManager,
+            this.eventManager // ✨ eventManager 추가
         );
         this.bindingManager = new BindingManager();
         this.battleCalculationManager = new BattleCalculationManager(this.eventManager, this.battleSimulationManager);
@@ -310,6 +321,7 @@ export class GameEngine {
     _update(deltaTime) {
         this.sceneEngine.update(deltaTime);
         this.animationManager.update(deltaTime);
+        this.vfxManager.update(deltaTime);
     }
 
     _draw() {
@@ -361,4 +373,5 @@ export class GameEngine {
     getBasicAIManager() { return this.basicAIManager; }
     getClassAIManager() { return this.classAIManager; }
     getAnimationManager() { return this.animationManager; }
+    getCanvasBridgeManager() { return this.canvasBridgeManager; }
 }
