@@ -68,14 +68,13 @@ export class LogicManager {
         const canvasHeight = this.measureManager.get('gameResolution.height');
         const contentDimensions = this.getCurrentSceneContentDimensions();
 
-        // 콘텐츠가 화면의 어느 한 축이라도 넘치지 않게 하기 위해 "포함" 방식의 최소 줌을 계산합니다.
+        // 콘텐츠가 화면의 어느 한 축이라도 넘치지 않게 하는 최소 줌
         const minZoomX = canvasWidth / contentDimensions.width;
         const minZoomY = canvasHeight / contentDimensions.height;
 
-        // 두 비율 중 더 작은 값을 사용하면 콘텐츠 전체가 화면 안에 들어오도록 축소할 수 있습니다.
-        // 또한 콘텐츠가 화면보다 작을 경우(비율이 1 이상)에는 확대하지 않고 1.0을 유지합니다.
-        const containZoom = Math.min(minZoomX, minZoomY);
-        const minZoom = Math.min(containZoom, 1.0);
+        // 화면에 빈틈이 보이지 않도록, 콘텐츠가 화면을 완전히 덮는 최소 줌을 선택 (둘 중 큰 값)
+        // 콘텐츠 크기가 캔버스 크기와 같아졌으므로, minZoom은 기본적으로 1.0이 됩니다.
+        const minZoom = Math.max(minZoomX, minZoomY); // 콘텐츠가 화면보다 작을 때도 최소 줌 1.0 유지 (빈틈 방지)
 
         // 최대 줌은 기존 CameraEngine의 maxZoom 값을 유지 (또는 MeasureManager에서 설정 가능)
         const maxZoom = 10.0; // 임의의 최대 줌 값 (필요에 따라 MeasureManager에서 가져올 수 있음)
