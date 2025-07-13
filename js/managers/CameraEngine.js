@@ -13,8 +13,21 @@ export class CameraEngine {
     }
 
     applyTransform(ctx) {
+        // 중요: 여기로 전달되는 컨텍스트(ctx)는 Renderer.js에서 이미 pixelRatio만큼 스케일링되어 있습니다.
+        // 카메라 변환(논리적 픽셀 기반)을 적용하기 전에 이 스케일링을 일시적으로 '취소'하고,
+        // 변환 적용 후 다시 pixelRatio 스케일링을 재적용해야 합니다.
+
+        const pixelRatio = window.devicePixelRatio || 1;
+
+        // 1. pixelRatio 스케일링 되돌리기 (카메라 변환 적용을 위해 잠시 네이티브 픽셀 공간으로 이동)
+        ctx.scale(1 / pixelRatio, 1 / pixelRatio);
+
+        // 2. 카메라 변환 적용 (논리적 픽셀 단위로 계산된 this.x, this.y, this.zoom 사용)
         ctx.translate(this.x, this.y);
         ctx.scale(this.zoom, this.zoom);
+
+        // 3. pixelRatio 스케일링 재적용 (이후의 그리기 명령들이 다시 논리적 픽셀 단위로 작동하도록)
+        ctx.scale(pixelRatio, pixelRatio);
     }
 
     pan(dx, dy) {
