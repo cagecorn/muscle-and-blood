@@ -121,7 +121,6 @@
 
         <h4>시스템 제어</h4>
         <button id="toggleDisarmSystemBtn">무장해제 시스템 활성화/비활성화</button>
-        <button id="toggleCompatibilityManagerBtn">호환성 매니저 활성화/비활성화</button>
 
         <h4>상태 이상 테스트</h4>
         <button id="applyPoisonToSkeletonBtn">해골에 독 적용 (3턴)</button>
@@ -428,15 +427,6 @@
                 measureManager.set('gameConfig.enableDisarmSystem', !currentState);
                 toggleDisarmSystemBtn.textContent = `무장해제 시스템: ${!currentState ? '활성화됨' : '비활성화됨'}`;
                 console.log(`[Debug Main] 무장해제 시스템이 ${!currentState ? '활성화' : '비활성화'}되었습니다.`);
-            });
-
-            const toggleCompatibilityManagerBtn = document.getElementById('toggleCompatibilityManagerBtn');
-            toggleCompatibilityManagerBtn.textContent = `호환성 매니저: ${measureManager.get('gameConfig.enableCompatibilityManager') ? '활성화됨' : '비활성화됨'}`;
-            toggleCompatibilityManagerBtn.addEventListener('click', () => {
-                const currentState = measureManager.get('gameConfig.enableCompatibilityManager');
-                gameEngine.setCompatibilityManagerEnabled(!currentState);
-                toggleCompatibilityManagerBtn.textContent = `호환성 매니저: ${!currentState ? '활성화됨' : '비활성화됨'}`;
-                console.log(`[Debug Main] 호환성 매니저가 ${!currentState ? '활성화' : '비활성화'}되었습니다.`);
             });
 
             document.getElementById('applyPoisonToSkeletonBtn').addEventListener('click', () => {
