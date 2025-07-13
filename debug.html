@@ -207,13 +207,6 @@
             const compatibilityManager = gameEngine.getCompatibilityManager();
             const battleCalculationManager = gameEngine.getBattleCalculationManager();
             const measureManager = gameEngine.getMeasureManager();
-            const mapManager = gameEngine.getMapManager();
-
-            // 게임 해상도는 유지하면서 타일 크기를 94로 설정합니다.
-            measureManager.set('tileSize', 94);
-            mapManager.recalculateMapDimensions();
-            console.log('타일 크기가 94로 조정되었습니다.');
-
             const battleSimulationManager = gameEngine.getBattleSimulationManager();
             const turnOrderManager = gameEngine.getTurnOrderManager();
             const classAIManager = gameEngine.getClassAIManager();
