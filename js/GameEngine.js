@@ -175,14 +175,15 @@ export class GameEngine {
 
         // ✨ DiceEngine 및 관련 매니저 초기화
         this.diceEngine = new DiceEngine();
-        this.diceRollManager = new DiceRollManager(this.diceEngine);
+        this.diceRollManager = new DiceRollManager(this.diceEngine, this.valorEngine);
         this.diceBotManager = new DiceBotManager(this.diceEngine);
 
         // BattleCalculationManager는 DiceRollManager가 준비된 이후에 초기화합니다.
         this.battleCalculationManager = new BattleCalculationManager(
             this.eventManager,
             this.battleSimulationManager,
-            this.diceRollManager
+            this.diceRollManager,
+            this.delayEngine
         );
 
         // ✨ BasicAIManager 초기화

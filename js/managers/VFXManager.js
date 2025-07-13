@@ -15,16 +15,17 @@ export class VFXManager {
 
         // ✨ subscribe to damage display events
         this.eventManager.subscribe('displayDamage', (data) => {
-            this.addDamageNumber(data.unitId, data.damage);
+            this.addDamageNumber(data.unitId, data.damage, data.color);
         });
     }
 
     /**
      * 특정 유닛 위에 데미지 숫자를 표시하도록 큐에 추가합니다.
-     * @param {string} unitId
-     * @param {number} damageAmount
+     * @param {string} unitId - 데미지를 받은 유닛의 ID
+     * @param {number} damageAmount - 표시할 데미지 양
+     * @param {string} [color='red'] - 데미지 숫자의 색상 (예: 'yellow', 'red')
      */
-    addDamageNumber(unitId, damageAmount) {
+    addDamageNumber(unitId, damageAmount, color = 'red') {
         const unit = this.battleSimulationManager.unitsOnGrid.find(u => u.id === unitId);
         if (!unit) {
             console.warn(`[VFXManager] Cannot show damage for unknown unit: ${unitId}`);
@@ -36,9 +37,10 @@ export class VFXManager {
             damage: damageAmount,
             startTime: performance.now(),
             duration: 1000,
-            floatSpeed: 0.05
+            floatSpeed: 0.05,
+            color: color
         });
-        console.log(`[VFXManager] Added damage number: ${damageAmount} for ${unit.name}`);
+        console.log(`[VFXManager] Added damage number: ${damageAmount} (${color}) for ${unit.name}`);
     }
 
     /**
@@ -186,7 +188,7 @@ export class VFXManager {
 
             ctx.save();
             ctx.globalAlpha = alpha;
-            ctx.fillStyle = (dmgNum.damage > 0) ? '#FF4500' : '#ADFF2F';
+            ctx.fillStyle = dmgNum.color || ((dmgNum.damage > 0) ? '#FF4500' : '#ADFF2F');
             ctx.font = `bold ${20 + (1 - progress) * 5}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';

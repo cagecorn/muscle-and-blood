@@ -1,11 +1,13 @@
 // js/managers/BattleCalculationManager.js
+import { DelayEngine } from './DelayEngine.js'; // ✨ DelayEngine 추가
 
 export class BattleCalculationManager {
-    constructor(eventManager, battleSimulationManager, diceRollManager) {
+    constructor(eventManager, battleSimulationManager, diceRollManager, delayEngine) {
         console.log("\ud83d\udcca BattleCalculationManager initialized. Delegating heavy calculations to worker. \ud83d\udcca");
         this.eventManager = eventManager;
         this.battleSimulationManager = battleSimulationManager;
         this.diceRollManager = diceRollManager;
+        this.delayEngine = delayEngine; // ✨ delayEngine 저장
         this.worker = new Worker('./js/workers/battleCalculationWorker.js');
 
         this.worker.onmessage = this._handleWorkerMessage.bind(this);
@@ -14,18 +16,26 @@ export class BattleCalculationManager {
         };
     }
 
-    _handleWorkerMessage(event) {
-        const { type, unitId, newHp, damageDealt } = event.data;
+    async _handleWorkerMessage(event) {
+        const { type, unitId, newHp, newBarrier, hpDamageDealt, barrierDamageDealt } = event.data;
 
         if (type === 'DAMAGE_CALCULATED') {
-            console.log(`[BattleCalculationManager] Received damage calculation result for ${unitId}: New HP = ${newHp}, Damage = ${damageDealt}`);
+            console.log(`[BattleCalculationManager] Received damage calculation result for ${unitId}: New HP = ${newHp}, New Barrier = ${newBarrier}, HP Damage = ${hpDamageDealt}, Barrier Damage = ${barrierDamageDealt}`);
 
             const unitToUpdate = this.battleSimulationManager.unitsOnGrid.find(u => u.id === unitId);
             if (unitToUpdate) {
                 unitToUpdate.currentHp = newHp;
+                unitToUpdate.currentBarrier = newBarrier;
 
-                // ✨ Emit event so VFXManager can display floating damage numbers
-                this.eventManager.emit('displayDamage', { unitId: unitId, damage: damageDealt });
+                if (barrierDamageDealt > 0) {
+                    this.eventManager.emit('displayDamage', { unitId: unitId, damage: barrierDamageDealt, color: 'yellow' });
+                    if (hpDamageDealt > 0) {
+                        await this.delayEngine.waitFor(100);
+                    }
+                }
+                if (hpDamageDealt > 0) {
+                    this.eventManager.emit('displayDamage', { unitId: unitId, damage: hpDamageDealt, color: 'red' });
+                }
 
                 if (newHp <= 0) {
                     this.eventManager.emit('unitDeath', { unitId: unitId, unitName: unitToUpdate.name, unitType: unitToUpdate.type });
@@ -46,10 +56,9 @@ export class BattleCalculationManager {
             return;
         }
 
-        // ✨ DiceRollManager를 사용하여 데미지 굴림 수행
-        const attackerCalculatedStats = attackerUnit.baseStats;
+        // ✨ DiceRollManager를 사용하여 데미지 굴림 수행 (공격자의 현재 배리어 상태를 전달)
         const finalDamageRoll = this.diceRollManager.performDamageRoll(
-            attackerCalculatedStats,
+            attackerUnit,
             skillData
         );
         console.log(`[BattleCalculationManager] Final damage roll from DiceRollManager: ${finalDamageRoll}`);
@@ -57,7 +66,11 @@ export class BattleCalculationManager {
         const payload = {
             attackerStats: attackerUnit.fullUnitData ? attackerUnit.fullUnitData.baseStats : attackerUnit.baseStats,
             targetStats: targetUnit.fullUnitData ? targetUnit.fullUnitData.baseStats : targetUnit.baseStats,
+            attackerStats: attackerUnit.fullUnitData ? attackerUnit.fullUnitData.baseStats : attackerUnit.baseStats,
+            targetStats: targetUnit.fullUnitData ? targetUnit.fullUnitData.baseStats : targetUnit.baseStats,
             currentTargetHp: targetUnit.currentHp,
+            currentTargetBarrier: targetUnit.currentBarrier,
+            maxBarrier: targetUnit.maxBarrier,
             skillData: skillData,
             targetUnitId: targetUnitId,
             preCalculatedDamageRoll: finalDamageRoll
