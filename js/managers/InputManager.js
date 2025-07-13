@@ -27,8 +27,9 @@ export class InputManager {
 
     _onMouseDown(event) {
         const rect = this.canvas.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
+        const pixelRatio = this.renderer.pixelRatio || 1;
+        const mouseX = (event.clientX - rect.left) / pixelRatio;
+        const mouseY = (event.clientY - rect.top) / pixelRatio;
 
         if (this.uiEngine.getUIState() === 'mapScreen' && this.uiEngine.isClickOnButton(mouseX, mouseY)) {
             this.isDragging = false;
@@ -45,8 +46,9 @@ export class InputManager {
 
     _onMouseMove(event) {
         if (this.isDragging) {
-            const dx = event.clientX - this.lastMouseX;
-            const dy = event.clientY - this.lastMouseY;
+            const pixelRatio = this.renderer.pixelRatio || 1;
+            const dx = (event.clientX - this.lastMouseX) / pixelRatio;
+            const dy = (event.clientY - this.lastMouseY) / pixelRatio;
             this.cameraEngine.pan(dx, dy);
             this.lastMouseX = event.clientX;
             this.lastMouseY = event.clientY;
@@ -63,16 +65,18 @@ export class InputManager {
 
         const zoomAmount = event.deltaY > 0 ? -0.1 : 0.1;
         const rect = this.canvas.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
+        const pixelRatio = this.renderer.pixelRatio || 1;
+        const mouseX = (event.clientX - rect.left) / pixelRatio;
+        const mouseY = (event.clientY - rect.top) / pixelRatio;
 
         this.cameraEngine.zoomAt(zoomAmount, mouseX, mouseY);
     }
 
     _onClick(event) {
         const rect = this.canvas.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left; // 캔버스 내부 논리적 X 좌표 (이 부분이 올바르게 계산됨)
-        const mouseY = event.clientY - rect.top;   // 캔버스 내부 논리적 Y 좌표 (이 부분이 올바르게 계산됨)
+        const pixelRatio = this.renderer.pixelRatio || 1;
+        const mouseX = (event.clientX - rect.left) / pixelRatio; // 캔버스 내부 논리적 X 좌표
+        const mouseY = (event.clientY - rect.top) / pixelRatio;   // 캔버스 내부 논리적 Y 좌표
 
         console.log(`[InputManager Debug] Click event received: ClientX=${event.clientX}, ClientY=${event.clientY}`);
         console.log(`[InputManager Debug] Canvas Local Mouse: X=${mouseX}, Y=${mouseY}`);
