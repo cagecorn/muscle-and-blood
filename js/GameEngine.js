@@ -136,7 +136,14 @@ export class GameEngine {
         this.territoryManager = new TerritoryManager();
         this.battleStageManager = new BattleStageManager();
         this.battleGridManager = new BattleGridManager(this.measureManager, this.logicManager);
-        this.vfxManager = new VFXManager(this.renderer, this.measureManager, this.cameraEngine, this.battleSimulationManager);
+        // VFXManager에 AnimationManager를 전달하여 HP 바 위치를 애니메이션과 동기화합니다.
+        this.vfxManager = new VFXManager(
+            this.renderer,
+            this.measureManager,
+            this.cameraEngine,
+            this.battleSimulationManager,
+            this.animationManager // ✨ AnimationManager 추가
+        );
         this.bindingManager = new BindingManager();
         this.battleCalculationManager = new BattleCalculationManager(this.eventManager, this.battleSimulationManager);
 
