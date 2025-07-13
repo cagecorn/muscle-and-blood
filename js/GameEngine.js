@@ -17,6 +17,7 @@ import { AssetLoaderManager } from './managers/AssetLoaderManager.js';
 import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
 import { AnimationManager } from './managers/AnimationManager.js';
 import { VFXManager } from './managers/VFXManager.js';
+import { DisarmManager } from './managers/DisarmManager.js'; // ✨ DisarmManager 임포트
 import { CanvasBridgeManager } from './managers/CanvasBridgeManager.js'; // ✨ CanvasBridgeManager 추가
 import { BindingManager } from './managers/BindingManager.js';
 import { BattleCalculationManager } from './managers/BattleCalculationManager.js';
@@ -204,6 +205,14 @@ export class GameEngine {
             this.battleSimulationManager
         );
 
+        // ✨ DisarmManager 초기화 (StatusEffectManager가 먼저 초기화되어야 함)
+        this.disarmManager = new DisarmManager(
+            this.eventManager,
+            this.statusEffectManager,
+            this.battleSimulationManager,
+            this.measureManager
+        );
+
         // ✨ BasicAIManager 초기화
         this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
 
@@ -331,9 +340,9 @@ export class GameEngine {
         this.battleSimulationManager.addUnit({ ...warriorData, currentHp: warriorData.baseStats.hp }, warriorImage, 3, 4);
 
         const mockEnemyUnitData = {
-            id: 'unit_skeleton_001',
-            name: '해골 병사',
-            classId: 'class_skeleton',
+            id: 'unit_zombie_001', // ID 변경
+            name: '좀비', // 이름 변경
+            classId: 'class_skeleton', // 기존 해골 클래스 재사용
             type: 'enemy',
             baseStats: {
                 hp: 80,
@@ -349,14 +358,19 @@ export class GameEngine {
                 luck: 15,
                 weight: 10
             },
-            spriteId: 'sprite_skeleton_default'
+            spriteId: 'sprite_zombie_default'
         };
         await this.idManager.addOrUpdateId(mockEnemyUnitData.id, mockEnemyUnitData);
-        await this.assetLoaderManager.loadImage(mockEnemyUnitData.spriteId, 'assets/images/skeleton.png');
+        // ✨ 좀비 기본 이미지 로드
+        await this.assetLoaderManager.loadImage(mockEnemyUnitData.spriteId, 'assets/images/zombie.png');
+        // ✨ 무장해제 상태의 좀비 이미지 로드
+        await this.assetLoaderManager.loadImage('sprite_zombie_empty_default', 'assets/images/zombie-empty.png');
+        // ✨ 좀비 무기 이미지 로드
+        await this.assetLoaderManager.loadImage('sprite_zombie_weapon_default', 'assets/images/zombie-weapon.png');
 
         const enemyData = await this.idManager.get(mockEnemyUnitData.id);
         const enemyImage = this.assetLoaderManager.getImage(mockEnemyUnitData.spriteId);
-        // 해골을 그리드의 더 오른쪽에 배치 (gridX: 10)
+        // 좀비를 그리드의 더 오른쪽에 배치 (gridX: 10)
         this.battleSimulationManager.addUnit({ ...enemyData, currentHp: enemyData.baseStats.hp }, enemyImage, 10, 4);
     }
 
@@ -419,6 +433,7 @@ export class GameEngine {
     getTurnCountManager() { return this.turnCountManager; }
     getStatusEffectManager() { return this.statusEffectManager; }
     getWorkflowManager() { return this.workflowManager; }
+    getDisarmManager() { return this.disarmManager; }
 
     // Dice 관련 엔진/매니저에 대한 getter
     getDiceEngine() { return this.diceEngine; }

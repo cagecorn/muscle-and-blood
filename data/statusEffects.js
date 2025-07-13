@@ -3,7 +3,8 @@
 export const STATUS_EFFECT_TYPES = {
     DEBUFF: 'debuff',
     BUFF: 'buff',
-    CONTROL: 'control'
+    CONTROL: 'control',
+    DISABLED: 'disabled' // 행동 불가 상태를 나타내는 타입 추가
 };
 
 export const STATUS_EFFECTS = {
@@ -46,6 +47,20 @@ export const STATUS_EFFECTS = {
         effect: {
             attackModifier: 1.2,
             defenseModifier: 0.8
+        }
+    },
+
+    // ✨ 새롭게 추가된 '무장해제' 상태 이상
+    DISARMED: {
+        id: 'status_disarmed',
+        name: '무장해제',
+        type: STATUS_EFFECT_TYPES.DISABLED,
+        description: '무기를 잃어 아무런 행동도 할 수 없습니다.',
+        duration: -1, // -1은 영구 지속
+        effect: {
+            canAct: false,
+            canAttack: false,
+            canMove: false
         }
     }
 };

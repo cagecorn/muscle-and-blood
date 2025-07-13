@@ -39,6 +39,7 @@ export { runDiceBotManagerUnitTests } from './unit/diceBotManagerUnitTests.js';
 export { runTurnCountManagerUnitTests } from './unit/turnCountManagerUnitTests.js';
 export { runStatusEffectManagerUnitTests } from './unit/statusEffectManagerUnitTests.js';
 export { runWorkflowManagerUnitTests } from './unit/workflowManagerUnitTests.js';
+export { runDisarmManagerUnitTests } from './unit/disarmManagerUnitTests.js';
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 export { runBattleSimulationIntegrationTest } from './integration/battleSimulationIntegrationTest.js';

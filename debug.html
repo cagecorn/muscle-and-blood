@@ -102,6 +102,7 @@
         <button id="runTurnCountManagerUnitTestsBtn">TurnCountManager 유닛 테스트</button>
         <button id="runStatusEffectManagerUnitTestsBtn">StatusEffectManager 유닛 테스트</button>
         <button id="runWorkflowManagerUnitTestsBtn">WorkflowManager 유닛 테스트</button>
+        <button id="runDisarmManagerUnitTestsBtn">DisarmManager 유닛 테스트</button>
 
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
@@ -117,6 +118,9 @@
 
         <h4>전투 계산 테스트</h4>
         <button id="testDamageCalculationBtn">대미지 계산 테스트 (전사 -> 해골)</button>
+
+        <h4>시스템 제어</h4>
+        <button id="toggleDisarmSystemBtn">무장해제 시스템 활성화/비활성화</button>
 
         <h4>상태 이상 테스트</h4>
         <button id="applyPoisonToSkeletonBtn">해골에 독 적용 (3턴)</button>
@@ -174,7 +178,8 @@
             runDiceBotManagerUnitTests,
             runTurnCountManagerUnitTests,
             runStatusEffectManagerUnitTests,
-            runWorkflowManagerUnitTests
+            runWorkflowManagerUnitTests,
+            runDisarmManagerUnitTests
         } from './tests/index.js';
         import { STATUS_EFFECTS } from './data/statusEffects.js';
 
@@ -283,6 +288,7 @@
                 runTurnCountManagerUnitTests();
                 runStatusEffectManagerUnitTests(eventManager, idManager, turnCountManager, battleCalculationManager);
                 runWorkflowManagerUnitTests(eventManager, statusEffectManager, battleSimulationManager);
+                runDisarmManagerUnitTests(eventManager, measureManager, statusEffectManager, battleSimulationManager);
             });
 
             document.getElementById('runMeasureManagerIntegrationTestBtn').addEventListener('click', () => {
@@ -352,6 +358,9 @@
             document.getElementById('runWorkflowManagerUnitTestsBtn').addEventListener('click', () => {
                 runWorkflowManagerUnitTests(eventManager, statusEffectManager, battleSimulationManager);
             });
+            document.getElementById('runDisarmManagerUnitTestsBtn').addEventListener('click', () => {
+                runDisarmManagerUnitTests(eventManager, measureManager, statusEffectManager, battleSimulationManager);
+            });
 
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
                 injectRendererFault(renderer);
@@ -408,6 +417,16 @@
                         dice: { num: 2, sides: 8 }
                     });
                 }, 4000);
+            });
+
+            // ✨ 무장해제 시스템 활성화/비활성화 토글 버튼
+            const toggleDisarmSystemBtn = document.getElementById('toggleDisarmSystemBtn');
+            toggleDisarmSystemBtn.textContent = `무장해제 시스템: ${measureManager.get('gameConfig.enableDisarmSystem') ? '활성화됨' : '비활성화됨'}`;
+            toggleDisarmSystemBtn.addEventListener('click', () => {
+                const currentState = measureManager.get('gameConfig.enableDisarmSystem');
+                measureManager.set('gameConfig.enableDisarmSystem', !currentState);
+                toggleDisarmSystemBtn.textContent = `무장해제 시스템: ${!currentState ? '활성화됨' : '비활성화됨'}`;
+                console.log(`[Debug Main] 무장해제 시스템이 ${!currentState ? '활성화' : '비활성화'}되었습니다.`);
             });
 
             document.getElementById('applyPoisonToSkeletonBtn').addEventListener('click', () => {
@@ -524,6 +543,7 @@
             runTurnCountManagerUnitTests();
             runStatusEffectManagerUnitTests(eventManager, idManager, turnCountManager, battleCalculationManager);
             runWorkflowManagerUnitTests(eventManager, statusEffectManager, battleSimulationManager);
+            runDisarmManagerUnitTests(eventManager, measureManager, statusEffectManager, battleSimulationManager);
         });
     </script>
 </body>

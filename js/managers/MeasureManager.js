@@ -39,6 +39,10 @@ export class MeasureManager {
                 heightRatio: 0.15, // 메인 캔버스 높이의 15% (예시)
                 lineHeight: 20, // 한 줄 높이 (px)
                 padding: 10 // 내부 여백 (px)
+            },
+            // ✨ 새로운 게임 설정 섹션
+            gameConfig: {
+                enableDisarmSystem: true // 무장해제 시스템 활성화 여부
             }
         };
     }
