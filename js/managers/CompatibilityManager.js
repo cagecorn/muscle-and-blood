@@ -11,6 +11,9 @@ export class CompatibilityManager {
         this.mercenaryPanelManager = mercenaryPanelManager;
         this.battleLogManager = battleLogManager;
 
+        this.enabled = true;
+        this._boundAdjustResolution = this.adjustResolution.bind(this);
+
         // 캔버스 참조 보관
         this.mercenaryPanelCanvas = mercenaryPanelManager ? mercenaryPanelManager.canvas : null;
         this.combatLogCanvas = battleLogManager ? battleLogManager.canvas : null;
@@ -24,8 +27,27 @@ export class CompatibilityManager {
     }
 
     _setupEventListeners() {
-        window.addEventListener('resize', this.adjustResolution.bind(this));
-        console.log("[CompatibilityManager] Listening for window resize events.");
+        if (this.enabled) {
+            window.addEventListener('resize', this._boundAdjustResolution);
+            console.log("[CompatibilityManager] Listening for window resize events.");
+        }
+    }
+
+    enable() {
+        if (!this.enabled) {
+            this.enabled = true;
+            window.addEventListener('resize', this._boundAdjustResolution);
+            this.adjustResolution();
+            console.log('[CompatibilityManager] Enabled.');
+        }
+    }
+
+    disable() {
+        if (this.enabled) {
+            this.enabled = false;
+            window.removeEventListener('resize', this._boundAdjustResolution);
+            console.log('[CompatibilityManager] Disabled.');
+        }
     }
 
     /**
@@ -34,6 +56,7 @@ export class CompatibilityManager {
      * GuardianManager의 최소 해상도 요구 사항을 충족하도록 보장합니다.
      */
     adjustResolution() {
+        if (!this.enabled) return;
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
