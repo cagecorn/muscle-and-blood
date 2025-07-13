@@ -1,23 +1,26 @@
 // js/managers/VFXManager.js
 
 export class VFXManager {
-    constructor(renderer, measureManager, cameraEngine, battleSimulationManager) {
+    // animationManager를 추가로 받아 유닛의 애니메이션 위치를 참조합니다.
+    constructor(renderer, measureManager, cameraEngine, battleSimulationManager, animationManager) {
         console.log("\u2728 VFXManager initialized. Ready to render visual effects. \u2728");
         this.renderer = renderer;
         this.measureManager = measureManager;
         this.cameraEngine = cameraEngine;
         this.battleSimulationManager = battleSimulationManager; // 유닛 데이터를 가져오기 위함
+        this.animationManager = animationManager; // ✨ AnimationManager 저장
     }
 
     /**
      * 특정 유닛의 HP 바를 그립니다.
+     * 실제 그리기 위치는 AnimationManager로 계산된 값을 사용합니다.
      * @param {CanvasRenderingContext2D} ctx - 캔버스 2D 렌더링 컨텍스트
      * @param {object} unit - HP 바를 그릴 유닛 객체
      * @param {number} effectiveTileSize - 유닛이 그려지는 타일의 유효 크기
-     * @param {number} gridOffsetX - 그리드 전체의 x 오프셋
-     * @param {number} gridOffsetY - 그리드 전체의 y 오프셋
+     * @param {number} actualDrawX - 애니메이션이 적용된 x 좌표
+     * @param {number} actualDrawY - 애니메이션이 적용된 y 좌표
      */
-    drawHpBar(ctx, unit, effectiveTileSize, gridOffsetX, gridOffsetY) {
+    drawHpBar(ctx, unit, effectiveTileSize, actualDrawX, actualDrawY) {
         if (!unit || !unit.baseStats) {
             console.warn("[VFXManager] Cannot draw HP bar: unit data is missing.", unit);
             return;
@@ -29,13 +32,10 @@ export class VFXManager {
 
         const barWidth = effectiveTileSize * 0.8;
         const barHeight = effectiveTileSize * 0.1;
-        const barOffsetY = -barHeight - 5;
+        const barOffsetY = -barHeight - 5; // 유닛 이미지 위에 위치
 
-        const drawX = gridOffsetX + unit.gridX * effectiveTileSize;
-        const drawY = gridOffsetY + unit.gridY * effectiveTileSize;
-
-        const hpBarDrawX = drawX + (effectiveTileSize - barWidth) / 2;
-        const hpBarDrawY = drawY + barOffsetY;
+        const hpBarDrawX = actualDrawX + (effectiveTileSize - barWidth) / 2;
+        const hpBarDrawY = actualDrawY + barOffsetY;
 
         ctx.fillStyle = 'rgba(50, 50, 50, 0.8)';
         ctx.fillRect(hpBarDrawX, hpBarDrawY, barWidth, barHeight);
@@ -74,7 +74,16 @@ export class VFXManager {
         const gridOffsetY = stagePadding + (gridDrawableHeight - totalGridHeight) / 2;
 
         for (const unit of this.battleSimulationManager.unitsOnGrid) {
-            this.drawHpBar(ctx, unit, effectiveTileSize, gridOffsetX, gridOffsetY);
+            // ✨ AnimationManager를 통해 현재 애니메이션이 적용된 위치를 조회합니다.
+            const { drawX, drawY } = this.animationManager.getRenderPosition(
+                unit.id,
+                unit.gridX,
+                unit.gridY,
+                effectiveTileSize,
+                gridOffsetX,
+                gridOffsetY
+            );
+            this.drawHpBar(ctx, unit, effectiveTileSize, drawX, drawY);
         }
     }
 }
