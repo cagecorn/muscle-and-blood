@@ -17,10 +17,37 @@ export class LogicManager {
         const canvasHeight = this.measureManager.get('gameResolution.height');
         const currentSceneName = this.sceneManager.getCurrentSceneName();
 
-        // 논리 2 적용: 영지 화면과 배틀 스테이지 화면은 맵 화면 박스(캔버스)와 똑같게 한다.
-        // 따라서 두 씬 모두 콘텐츠 크기는 캔버스 전체입니다.
-        if (currentSceneName === 'territoryScene' || currentSceneName === 'battleScene') {
+        // 논리 2 적용: 영지 화면은 맵 화면 박스(캔버스)와 똑같게 한다.
+        if (currentSceneName === 'territoryScene') {
             return { width: canvasWidth, height: canvasHeight };
+        }
+        // ✨ 전투 씬의 경우, 실제 그리드 크기를 컨텐츠 크기로 정의합니다.
+        // BattleGridManager의 gridCols와 gridRows를 기준으로 해야 합니다.
+        else if (currentSceneName === 'battleScene') {
+            const gridCols = 15; // BattleGridManager와 동일한 값 사용
+            const gridRows = 10; // BattleGridManager와 동일한 값 사용
+            const stagePadding = this.measureManager.get('battleStage.padding');
+
+            // 캔버스 크기에서 패딩을 제외한 실제 그리드를 그릴 수 있는 영역
+            const gridDrawableWidth = canvasWidth - 2 * stagePadding;
+            const gridDrawableHeight = canvasHeight - 2 * stagePadding;
+
+            // 각 타일이 차지할 수 있는 유효한 크기를 계산 (캔버스에 꽉 차도록)
+            const effectiveTileSize = Math.min(
+                gridDrawableWidth / gridCols,
+                gridDrawableHeight / gridRows
+            );
+
+            // 그리드 전체의 논리적 크기 (패딩 제외)
+            const contentWidth = gridCols * effectiveTileSize;
+            const contentHeight = gridRows * effectiveTileSize;
+
+            // 이 컨텐츠 크기는 실제 그리드 영역만을 의미하며,
+            // 카메라가 이 영역을 기준으로 줌/팬 제약을 받게 됩니다.
+            // 패딩까지 포함한 전체 캔버스 영역이 컨텐츠로 간주되려면 아래 반환 시 패딩을 다시 더해야 합니다.
+            // 하지만 CameraEngine은 이 contentDimensions를 사용하여 뷰포트 대비 스케일을 계산하므로,
+            // 순수 그리드 크기를 반환하는 것이 맞습니다.
+            return { width: contentWidth, height: contentHeight };
         }
         // ✨ 새로운 논리: 용병 패널의 콘텐츠 크기는 패널 캔버스 자체의 크기와 동일합니다.
         // PanelEngine이 관리하지만, LogicManager는 DOM 요소에 직접 접근하지 않으므로

@@ -21,19 +21,18 @@ export class AnimationManager {
     queueMoveAnimation(unitId, startGridX, startGridY, endGridX, endGridY) {
         return new Promise(resolve => {
             const sceneContentDimensions = this.battleSimulationManager.logicManager.getCurrentSceneContentDimensions();
-            const contentWidth = sceneContentDimensions.width;
-            const contentHeight = sceneContentDimensions.height;
+            const canvasWidth = this.measureManager.get('gameResolution.width') || sceneContentDimensions.width;
+            const canvasHeight = this.measureManager.get('gameResolution.height') || sceneContentDimensions.height;
             const stagePadding = this.measureManager.get('battleStage.padding');
-            const gridDrawableWidth = contentWidth - 2 * stagePadding;
-            const gridDrawableHeight = contentHeight - 2 * stagePadding;
-            const effectiveTileSize = Math.min(
-                gridDrawableWidth / this.battleSimulationManager.gridCols,
-                gridDrawableHeight / this.battleSimulationManager.gridRows
-            );
-            const totalGridWidth = this.battleSimulationManager.gridCols * effectiveTileSize;
-            const totalGridHeight = this.battleSimulationManager.gridRows * effectiveTileSize;
-            const gridOffsetX = stagePadding + (gridDrawableWidth - totalGridWidth) / 2;
-            const gridOffsetY = stagePadding + (gridDrawableHeight - totalGridHeight) / 2;
+
+            const gridContentWidth = sceneContentDimensions.width;
+            const gridContentHeight = sceneContentDimensions.height;
+
+            const effectiveTileSize = gridContentWidth / this.battleSimulationManager.gridCols;
+            const totalGridWidth = gridContentWidth;
+            const totalGridHeight = gridContentHeight;
+            const gridOffsetX = (canvasWidth - totalGridWidth) / 2;
+            const gridOffsetY = (canvasHeight - totalGridHeight) / 2;
             const startPixelX = gridOffsetX + startGridX * effectiveTileSize;
             const startPixelY = gridOffsetY + startGridY * effectiveTileSize;
             const endPixelX = gridOffsetX + endGridX * effectiveTileSize;

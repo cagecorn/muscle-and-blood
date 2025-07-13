@@ -99,25 +99,27 @@ export class BattleSimulationManager {
      * @param {CanvasRenderingContext2D} ctx
      */
     draw(ctx) {
-        const sceneContentDimensions = this.logicManager.getCurrentSceneContentDimensions();
-        const contentWidth = sceneContentDimensions.width;
-        const contentHeight = sceneContentDimensions.height;
+        const sceneContentDimensions = this.logicManager.getCurrentSceneContentDimensions(); // 이제 순수 그리드 크기를 반환
+        const canvasWidth = this.measureManager.get('gameResolution.width'); // 캔버스 실제 CSS 너비
+        const canvasHeight = this.measureManager.get('gameResolution.height'); // 캔버스 실제 CSS 높이
 
         const stagePadding = this.measureManager.get('battleStage.padding');
 
-        const gridDrawableWidth = contentWidth - 2 * stagePadding;
-        const gridDrawableHeight = contentHeight - 2 * stagePadding;
+        // LogicManager에서 계산된 순수 그리드 컨텐츠 크기 (패딩 제외)
+        const gridContentWidth = sceneContentDimensions.width;
+        const gridContentHeight = sceneContentDimensions.height;
 
-        const effectiveTileSize = Math.min(
-            gridDrawableWidth / this.gridCols,
-            gridDrawableHeight / this.gridRows
-        );
+        // 이 gridContentWidth/Height를 사용하여 effectiveTileSize를 역으로 계산
+        const effectiveTileSize = gridContentWidth / this.gridCols;
 
-        const totalGridWidth = this.gridCols * effectiveTileSize;
-        const totalGridHeight = this.gridRows * effectiveTileSize;
+        // 전체 그리드 크기 (여기서는 gridContentWidth/Height와 동일)
+        const totalGridWidth = gridContentWidth;
+        const totalGridHeight = gridContentHeight;
 
-        const gridOffsetX = stagePadding + (gridDrawableWidth - totalGridWidth) / 2;
-        const gridOffsetY = stagePadding + (gridDrawableHeight - totalGridHeight) / 2;
+        // ✨ 그리드를 캔버스 중앙에 배치하기 위한 오프셋 계산 (패딩 포함)
+        // (캔버스 전체 크기 - 그리드 컨텐츠 크기) / 2 + 패딩
+        const gridOffsetX = (canvasWidth - totalGridWidth) / 2;
+        const gridOffsetY = (canvasHeight - totalGridHeight) / 2;
 
         for (const unit of this.unitsOnGrid) {
             const image = unit.image;
