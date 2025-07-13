@@ -5,13 +5,13 @@ self.onmessage = (event) => {
 
     switch (type) {
         case 'CALCULATE_DAMAGE': {
-            const { attackerStats, targetStats, skillData, currentTargetHp } = payload;
+            const { attackerStats, targetStats, skillData, currentTargetHp, preCalculatedDamageRoll } = payload;
 
-            let damage = attackerStats.attack - targetStats.defense;
+            let damage = preCalculatedDamageRoll - targetStats.defense;
             if (damage < 0) damage = 0;
 
             if (skillData && skillData.type === 'magic') {
-                damage += attackerStats.magic;
+                // 이미 preCalculatedDamageRoll에 마법 공격력이 포함되었다면 추가 처리 불필요
             }
 
             const newTargetHp = Math.max(0, currentTargetHp - damage);

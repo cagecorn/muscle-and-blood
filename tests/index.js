@@ -32,6 +32,10 @@ export { runCanvasBridgeManagerUnitTests } from './unit/canvasBridgeManagerUnitT
 export { runMeasureManagerUnitTests as runUpdatedMeasureManagerUnitTests } from './unit/measureManagerUnitTests.js';
 export { runMapManagerUnitTests as runUpdatedMapManagerUnitTests } from './unit/mapManagerUnitTests.js';
 export { runUIEngineUnitTests as runUpdatedUIEngineUnitTests } from './unit/uiEngineUnitTests.js';
+// ✨ 다이스 관련 테스트 추가
+export { runDiceEngineUnitTests } from './unit/diceEngineUnitTests.js';
+export { runDiceRollManagerUnitTests } from './unit/diceRollManagerUnitTests.js';
+export { runDiceBotManagerUnitTests } from './unit/diceBotManagerUnitTests.js';
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 
