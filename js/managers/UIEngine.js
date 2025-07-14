@@ -1,16 +1,18 @@
 // js/managers/UIEngine.js
 
 export class UIEngine {
-    constructor(renderer, measureManager, eventManager) {
+    constructor(renderer, measureManager, eventManager, mercenaryPanelManager) {
         console.log("\ud83c\udf9b UIEngine initialized. Ready to draw interfaces. \ud83c\udf9b");
         this.renderer = renderer;
         this.measureManager = measureManager;
         this.eventManager = eventManager;
+        this.mercenaryPanelManager = mercenaryPanelManager; // MercenaryPanelManager 인스턴스 저장
 
         this.canvas = renderer.canvas;
         this.ctx = renderer.ctx;
 
         this._currentUIState = 'mapScreen';
+        this.heroPanelVisible = false; // 영웅 패널 가시성 상태
 
         this.recalculateUIDimensions();
 
@@ -58,6 +60,13 @@ export class UIEngine {
         console.log(`[UIEngine] Internal UI state updated to: ${newState}`);
     }
 
+    // 영웅 패널 가시성 토글
+    toggleHeroPanel() {
+        this.heroPanelVisible = !this.heroPanelVisible;
+        console.log(`[UIEngine] Hero Panel Visibility: ${this.heroPanelVisible ? 'Visible' : 'Hidden'}`);
+        // 필요에 따라 UI 상태를 변경할 수 있지만, 오버레이는 현재 UI 상태와 별개로 표시될 수 있습니다.
+    }
+
     // canvas 내부 좌표(mouseX, mouseY)를 직접 받아 버튼 영역과 비교합니다.
     isClickOnButton(mouseX, mouseY) {
         if (this._currentUIState !== 'mapScreen') {
@@ -78,6 +87,7 @@ export class UIEngine {
     }
 
     draw(ctx) {
+        // 현재 UI 상태에 따라 기본 UI 그리기
         if (this._currentUIState === 'mapScreen') {
             ctx.fillStyle = 'darkgreen';
             ctx.fillRect(
@@ -97,6 +107,22 @@ export class UIEngine {
             );
         } else if (this._currentUIState === 'combatScreen') {
             // 전투 화면에서는 현재 별도의 상단 텍스트를 표시하지 않습니다.
+        }
+
+        // 영웅 패널이 활성화되어 있으면 오버레이로 그립니다.
+        if (this.heroPanelVisible && this.mercenaryPanelManager) {
+            // 오버레이 배경 (반투명)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, this.canvas.width / (window.devicePixelRatio || 1), this.canvas.height / (window.devicePixelRatio || 1));
+
+            // 영웅 패널이 그려질 중앙 영역 계산
+            const panelWidth = this.measureManager.get('gameResolution.width') * 0.8; // 캔버스 너비의 80%
+            const panelHeight = this.measureManager.get('gameResolution.height') * 0.7; // 캔버스 높이의 70%
+            const panelX = (this.measureManager.get('gameResolution.width') - panelWidth) / 2;
+            const panelY = (this.measureManager.get('gameResolution.height') - panelHeight) / 2;
+
+            // MercenaryPanelManager의 draw 메서드를 호출하여 메인 캔버스에 그립니다.
+            this.mercenaryPanelManager.draw(ctx, panelX, panelY, panelWidth, panelHeight);
         }
     }
 

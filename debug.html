@@ -61,10 +61,7 @@
             flex-direction: column;
             align-items: center;
         }
-        #mercenaryPanelCanvas {
-            margin-bottom: 10px;
-            border: 2px solid #00f;
-        }
+        /* #mercenaryPanelCanvas 스타일은 이제 필요 없습니다. */
         #combatLogCanvas {
             margin-top: 10px;
             border: 2px solid #f00;
@@ -115,6 +112,7 @@
         <button id="injectCompatibilityManagerFaultsBtn" class="fault-btn">CompatibilityManager 결함 주입</button>
         <h4>이벤트 발생 시뮬레이션</h4>
         <button id="simulateEventsBtn">이벤트 시뮬레이션 시작/정지</button>
+        <button id="toggleHeroPanelBtn">영웅 패널</button>
 
         <h4>전투 계산 테스트</h4>
         <button id="testDamageCalculationBtn">대미지 계산 테스트 (전사 -> 해골)</button>
@@ -129,7 +127,6 @@
         <button id="clearAllEffectsBtn">모든 효과 제거 (전체)</button>
     </div>
     <div id="gameContainer">
-        <canvas id="mercenaryPanelCanvas"></canvas>
         <canvas id="gameCanvas"></canvas>
         <canvas id="combatLogCanvas"></canvas>
     </div>
@@ -262,7 +259,7 @@
                 runSceneEngineUnitTests(sceneEngine);
                 runLogicManagerUnitTests(logicManager);
                 runCompatibilityManagerUnitTests(compatibilityManager);
-                runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager);
+                runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager, eventManager);
                 runPanelEngineUnitTests();
                 runBattleLogManagerUnitTests(eventManager, measureManager);
                 runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager, battleCalculationManager);
@@ -455,6 +452,11 @@
                 }
             });
 
+            // ✨ 영웅 패널 토글 버튼
+            document.getElementById('toggleHeroPanelBtn').addEventListener('click', () => {
+                gameEngine.getUIEngine().toggleHeroPanel();
+            });
+
 
             // 게임 업데이트 함수 정의 (DEBUG ONLY - GameEngine의 _update가 대신함)
             // 이 함수는 더 이상 GameLoop에 직접 전달되지 않습니다.
@@ -466,14 +468,9 @@
             gameEngine._draw = function() { // GameEngine의 _draw를 오버라이드하여 FPS 로직 추가
                 originalDraw.apply(this, arguments); // 원래 _draw 함수 호출
 
-                // ✨ 용병 패널 그리기 호출
-                if (gameEngine.mercenaryPanelManager) {
-                    gameEngine.mercenaryPanelManager.draw(gameEngine.mercenaryPanelManager.ctx);
-                }
-
                 // ✨ 전투 로그 패널 그리기 호출 추가
-                if (gameEngine.battleLogManager) {
-                    gameEngine.battleLogManager.draw(gameEngine.battleLogManager.ctx);
+                if (gameEngine.getPanelEngine()) {
+                    gameEngine.getPanelEngine().drawPanel('combatLog', gameEngine.getBattleLogManager().ctx);
                 }
 
                 // FPS 카운터 업데이트
@@ -517,7 +514,7 @@
             runSceneEngineUnitTests(sceneEngine);
             runLogicManagerUnitTests(logicManager);
             runCompatibilityManagerUnitTests(compatibilityManager);
-            runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager);
+            runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager, eventManager);
             runPanelEngineUnitTests();
             runBattleLogManagerUnitTests(eventManager, measureManager);
             runTurnEngineUnitTests(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager, battleCalculationManager);

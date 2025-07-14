@@ -93,17 +93,12 @@ export class GameEngine {
         // 생성 후 상호 참조 설정
         this.animationManager.battleSimulationManager = this.battleSimulationManager;
 
-        // 패널과 로그 캔버스 요소 준비 및 매니저 초기화
-        const mercenaryPanelCanvasElement = document.getElementById('mercenaryPanelCanvas');
-        if (!mercenaryPanelCanvasElement) {
-            console.error("GameEngine: Mercenary Panel Canvas not found. Game cannot proceed without it.");
-            throw new Error("Mercenary Panel Canvas initialization failed.");
-        }
+        // MercenaryPanelManager는 별도 캔버스를 사용하지 않고 UIEngine을 통해 그려집니다.
         this.mercenaryPanelManager = new MercenaryPanelManager(
-            mercenaryPanelCanvasElement,
             this.measureManager,
             this.battleSimulationManager,
-            this.logicManager
+            this.logicManager,
+            this.eventManager
         );
 
         const combatLogCanvasElement = document.getElementById('combatLogCanvas');
@@ -121,11 +116,13 @@ export class GameEngine {
 
         // PanelEngine 초기화 및 패널 등록
         this.panelEngine = new PanelEngine();
-        this.panelEngine.registerPanel('mercenaryPanel', this.mercenaryPanelManager);
+        // mercenaryPanel은 이제 메인 캔버스 위에 UIEngine이 직접 그릴 것이므로 PanelEngine에 등록하지 않습니다.
+        this.panelEngine.registerPanel('combatLog', this.battleLogManager);
 
         // UIEngine과 MapManager를 먼저 초기화
         this.mapManager = new MapManager(this.measureManager);
-        this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager);
+        // UIEngine 초기화 시 mercenaryPanelManager를 함께 전달
+        this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager, this.mercenaryPanelManager);
 
         // CompatibilityManager 초기화 (필요 매니저들을 모두 전달)
         this.compatibilityManager = new CompatibilityManager(
@@ -134,7 +131,7 @@ export class GameEngine {
             this.uiEngine,
             this.mapManager,
             this.logicManager,
-            this.mercenaryPanelManager,
+            null, // mercenaryPanelManager는 이제 별도 캔버스를 갖지 않으므로 null로 전달
             this.battleLogManager
         );
 
@@ -144,7 +141,7 @@ export class GameEngine {
         const mainGameCanvasElement = document.getElementById(canvasId);
         this.canvasBridgeManager = new CanvasBridgeManager(
             mainGameCanvasElement,
-            mercenaryPanelCanvasElement,
+            null, // mercenaryPanelCanvasElement는 이제 없습니다.
             combatLogCanvasElement,
             this.eventManager,
             this.measureManager
@@ -383,12 +380,10 @@ export class GameEngine {
 
     _draw() {
         this.layerEngine.draw();
-        // 메인 캔버스와는 별도로 관리되는 패널도 그립니다.
+        // mercenaryPanelManager는 이제 UIEngine이 직접 그립니다.
+        // combatLogManager만 PanelEngine을 통해 그립니다.
         if (this.panelEngine) {
-            this.panelEngine.drawPanel('mercenaryPanel', this.mercenaryPanelManager.ctx);
-        }
-        if (this.battleLogManager) {
-            this.battleLogManager.draw(this.battleLogManager.ctx);
+            this.panelEngine.drawPanel('combatLog', this.battleLogManager.ctx);
         }
     }
 
