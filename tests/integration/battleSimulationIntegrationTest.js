@@ -19,7 +19,7 @@ export function runBattleSimulationIntegrationTest(gameEngine) {
 
     function setupTestState() {
         const warrior = battleSimulationManager.unitsOnGrid.find(u => u.id === 'unit_warrior_001');
-        const skeleton = battleSimulationManager.unitsOnGrid.find(u => u.id === 'unit_zombie_001'); // unit_skeleton_001을 unit_zombie_001로 변경
+        const skeleton = battleSimulationManager.unitsOnGrid.find(u => u.id === 'unit_skeleton_001');
 
         if (warrior) {
             warrior.currentHp = warrior.baseStats.hp;
@@ -57,7 +57,7 @@ export function runBattleSimulationIntegrationTest(gameEngine) {
         let allTestsPassed = true;
 
         const warrior = battleSimulationManager.unitsOnGrid.find(u => u.id === 'unit_warrior_001');
-        const skeleton = battleSimulationManager.unitsOnGrid.find(u => u.id === 'unit_zombie_001'); // unit_skeleton_001을 unit_zombie_001로 변경
+        const skeleton = battleSimulationManager.unitsOnGrid.find(u => u.id === 'unit_skeleton_001');
 
         testCount++;
         const warriorTookDamage = warrior && (warrior.currentHp < initialWarriorHp || warrior.currentBarrier < initialWarriorBarrier);
