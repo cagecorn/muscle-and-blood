@@ -1,5 +1,8 @@
 // js/managers/BattleLogManager.js
 
+// ✨ 상수 파일 임포트
+import { GAME_EVENTS } from '../constants.js';
+
 export class BattleLogManager {
     constructor(canvasElement, eventManager, measureManager) { // ✨ measureManager 추가
         console.log("\uD83D\uDCDC BattleLogManager initialized. Ready to record battle events. \uD83D\uDCDC");
@@ -60,22 +63,22 @@ export class BattleLogManager {
      */
     _setupEventListeners() {
         // 전투 관련 이벤트를 구독하여 로그에 추가
-        this.eventManager.subscribe('unitAttackAttempt', (data) => {
+        this.eventManager.subscribe(GAME_EVENTS.UNIT_ATTACK_ATTEMPT, (data) => { // ✨ 상수 사용
             this.addLog(`${data.attackerId}가 ${data.targetId}를 공격 시도!`);
         });
-        this.eventManager.subscribe('DAMAGE_CALCULATED', (data) => { // BattleCalculationWorker에서 발생
-            this.addLog(`${data.unitId}가 ${data.damageDealt} 피해를 입고 HP ${data.newHp}가 됨.`);
+        this.eventManager.subscribe(GAME_EVENTS.DAMAGE_CALCULATED, (data) => { // ✨ 상수 사용
+            this.addLog(`${data.unitId}가 ${data.hpDamageDealt + data.barrierDamageDealt} 피해를 입고 HP ${data.newHp}가 됨.`);
         });
-        this.eventManager.subscribe('unitDeath', (data) => {
+        this.eventManager.subscribe(GAME_EVENTS.UNIT_DEATH, (data) => { // ✨ 상수 사용
             this.addLog(`${data.unitName} (ID: ${data.unitId})이(가) 쓰러졌습니다!`);
         });
-        this.eventManager.subscribe('turnStart', (data) => {
+        this.eventManager.subscribe(GAME_EVENTS.TURN_START, (data) => { // ✨ 상수 사용
             this.addLog(`--- 턴 ${data.turn} 시작 ---`);
         });
-        this.eventManager.subscribe('battleStart', (data) => {
+        this.eventManager.subscribe(GAME_EVENTS.BATTLE_START, (data) => { // ✨ 상수 사용
             this.addLog(`[전투 시작] 맵: ${data.mapId}, 난이도: ${data.difficulty}`);
         });
-        this.eventManager.subscribe('battleEnd', (data) => {
+        this.eventManager.subscribe(GAME_EVENTS.BATTLE_END, (data) => { // ✨ 상수 사용
             this.addLog(`[전투 종료] 이유: ${data.reason}`);
         });
     }

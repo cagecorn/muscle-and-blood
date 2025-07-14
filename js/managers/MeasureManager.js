@@ -49,6 +49,26 @@ export class MeasureManager {
                 // ✨ 줄 높이를 게임 높이 비율로 표현
                 lineHeightRatio: 0.025
             },
+            // ✨ 시각 효과 관련 설정 추가
+            vfx: {
+                hpBarWidthRatio: 0.8,
+                hpBarHeightRatio: 0.1,
+                hpBarVerticalOffset: 5,
+                barrierBarWidthRatio: 0.8,
+                barrierBarHeightRatio: 0.05,
+                barrierBarVerticalOffset: 0.1,
+                damageNumberFloatSpeed: 0.05,
+                damageNumberBaseFontSize: 20,
+                damageNumberScaleFactor: 5,
+                damageNumberVerticalOffset: 5,
+                weaponDropScale: 0.5,
+                weaponDropStartOffsetY: 0.5,
+                weaponDropEndOffsetY: 0.8,
+                weaponDropPopDuration: 300,
+                weaponDropFallDuration: 500,
+                weaponDropFadeDuration: 500,
+                weaponDropTotalDuration: 1300
+            },
             // ✨ 새로운 게임 설정 섹션
             gameConfig: {
                 enableDisarmSystem: true // 무장해제 시스템 활성화 여부

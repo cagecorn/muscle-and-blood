@@ -1,5 +1,8 @@
 // js/managers/InputManager.js
 
+// ✨ 상수 파일 임포트
+import { GAME_EVENTS, UI_STATES } from '../constants.js';
+
 export class InputManager {
     constructor(renderer, cameraEngine, uiEngine, buttonEngine) { // ✨ buttonEngine 추가
         console.log("🎮 InputManager initialized. Ready to process user input. 🎮");
@@ -31,8 +34,9 @@ export class InputManager {
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
 
-        // ✨ ButtonEngine을 통해 버튼 클릭 여부를 판단합니다.
-        if (this.buttonEngine && this.buttonEngine.handleCanvasClick(mouseX, mouseY)) {
+        // ButtonEngine을 사용하여 클릭된 버튼이 있는지 확인
+        // 현재 UI 상태가 'HERO_PANEL_OVERLAY'일 때도 버튼 클릭을 허용
+        if (this.uiEngine.getUIState() !== UI_STATES.COMBAT_SCREEN && this.buttonEngine.handleCanvasClick(mouseX, mouseY)) { // ✨ 상수 사용 및 조건 변경
             this.isDragging = false;
             console.log(`[InputManager Debug] MouseDown on Button detected and handled by ButtonEngine.`);
             return;

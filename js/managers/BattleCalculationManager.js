@@ -1,5 +1,6 @@
 // js/managers/BattleCalculationManager.js
 import { DelayEngine } from './DelayEngine.js'; // ✨ DelayEngine 추가
+import { GAME_EVENTS } from '../constants.js';
 
 export class BattleCalculationManager {
     constructor(eventManager, battleSimulationManager, diceRollManager, delayEngine) {
@@ -19,7 +20,7 @@ export class BattleCalculationManager {
     async _handleWorkerMessage(event) {
         const { type, unitId, newHp, newBarrier, hpDamageDealt, barrierDamageDealt } = event.data;
 
-        if (type === 'DAMAGE_CALCULATED') {
+        if (type === GAME_EVENTS.DAMAGE_CALCULATED) {
             console.log(`[BattleCalculationManager] Received damage calculation result for ${unitId}: New HP = ${newHp}, New Barrier = ${newBarrier}, HP Damage = ${hpDamageDealt}, Barrier Damage = ${barrierDamageDealt}`);
 
             const unitToUpdate = this.battleSimulationManager.unitsOnGrid.find(u => u.id === unitId);
@@ -28,17 +29,17 @@ export class BattleCalculationManager {
                 unitToUpdate.currentBarrier = newBarrier;
 
                 if (barrierDamageDealt > 0) {
-                    this.eventManager.emit('displayDamage', { unitId: unitId, damage: barrierDamageDealt, color: 'yellow' });
+                    this.eventManager.emit(GAME_EVENTS.DISPLAY_DAMAGE, { unitId: unitId, damage: barrierDamageDealt, color: 'yellow' });
                     if (hpDamageDealt > 0) {
                         await this.delayEngine.waitFor(100);
                     }
                 }
                 if (hpDamageDealt > 0) {
-                    this.eventManager.emit('displayDamage', { unitId: unitId, damage: hpDamageDealt, color: 'red' });
+                    this.eventManager.emit(GAME_EVENTS.DISPLAY_DAMAGE, { unitId: unitId, damage: hpDamageDealt, color: 'red' });
                 }
 
                 if (newHp <= 0) {
-                    this.eventManager.emit('unitDeath', { unitId: unitId, unitName: unitToUpdate.name, unitType: unitToUpdate.type });
+                    this.eventManager.emit(GAME_EVENTS.UNIT_DEATH, { unitId: unitId, unitName: unitToUpdate.name, unitType: unitToUpdate.type });
                     console.log(`[BattleCalculationManager] Unit '${unitId}' has died.`);
                 }
             } else {

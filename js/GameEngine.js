@@ -48,6 +48,9 @@ import { BattleStageManager } from './managers/BattleStageManager.js';
 import { BattleGridManager } from './managers/BattleGridManager.js';
 import { ButtonEngine } from './managers/ButtonEngine.js'; // ✨ ButtonEngine 임포트
 
+// ✨ 상수 파일 임포트
+import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES } from './constants.js';
+
 import { UNITS } from '../data/unit.js';
 import { CLASSES } from '../data/class.js';
 
@@ -233,15 +236,17 @@ export class GameEngine {
             this.statusEffectManager
         );
 
-        this.sceneEngine.registerScene('territoryScene', [this.territoryManager]);
-        this.sceneEngine.registerScene('battleScene', [
+        // ✨ sceneEngine에 UI_STATES 상수 사용
+        this.sceneEngine.registerScene(UI_STATES.MAP_SCREEN, [this.territoryManager]);
+        this.sceneEngine.registerScene(UI_STATES.COMBAT_SCREEN, [
             this.battleStageManager,
             this.battleGridManager,
             this.battleSimulationManager,
             this.vfxManager
         ]);
 
-        this.sceneEngine.setCurrentScene('territoryScene');
+        // ✨ sceneEngine 초기 상태 설정에 UI_STATES 상수 사용
+        this.sceneEngine.setCurrentScene(UI_STATES.MAP_SCREEN);
 
         this.layerEngine.registerLayer('sceneLayer', (ctx) => {
             this.sceneEngine.draw(ctx);
@@ -288,16 +293,17 @@ export class GameEngine {
             // ✨ 추가: 카메라 엔진의 초기 상태 확인
             console.log(`[GameEngine Debug] Camera Initial State: X=${this.cameraEngine.x}, Y=${this.cameraEngine.y}, Zoom=${this.cameraEngine.zoom}`);
 
-            this.eventManager.subscribe('unitDeath', (data) => {
+            // ✨ 이벤트 구독에 GAME_EVENTS 상수 사용
+            this.eventManager.subscribe(GAME_EVENTS.UNIT_DEATH, (data) => {
                 console.log(`[GameEngine] Notification: Unit ${data.unitId} (${data.unitName}) has died.`);
             });
-            this.eventManager.subscribe('skillExecuted', (data) => {
+            this.eventManager.subscribe(GAME_EVENTS.SKILL_EXECUTED, (data) => {
                 console.log(`[GameEngine] Notification: Skill '${data.skillName}' was executed.`);
             });
-            this.eventManager.subscribe('battleStart', async (data) => {
+            this.eventManager.subscribe(GAME_EVENTS.BATTLE_START, async (data) => {
                 console.log(`[GameEngine] Battle started for map: ${data.mapId}, difficulty: ${data.difficulty}`);
-                this.sceneEngine.setCurrentScene('battleScene');
-                this.uiEngine.setUIState('combatScreen');
+                this.sceneEngine.setCurrentScene(UI_STATES.COMBAT_SCREEN); // ✨ UI_STATES 상수 사용
+                this.uiEngine.setUIState(UI_STATES.COMBAT_SCREEN); // ✨ UI_STATES 상수 사용
                 this.cameraEngine.reset();
 
                 // 전투 시작 후 TurnEngine 구동
@@ -346,7 +352,7 @@ export class GameEngine {
             id: 'unit_zombie_001', // ID 변경
             name: '좀비', // 이름 변경
             classId: 'class_skeleton', // 기존 해골 클래스 재사용
-            type: 'enemy',
+            type: ATTACK_TYPES.ENEMY, // ✨ ATTACK_TYPES 상수 사용
             baseStats: {
                 hp: 80,
                 attack: 15,

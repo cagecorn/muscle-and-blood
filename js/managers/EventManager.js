@@ -1,5 +1,8 @@
 // js/managers/EventManager.js
 
+// ✨ 상수 파일 임포트
+import { GAME_EVENTS, ATTACK_TYPES } from '../constants.js';
+
 export class EventManager {
     constructor() {
         // Web Worker 인스턴스 생성
@@ -39,8 +42,8 @@ export class EventManager {
             } else if (skillName === '광역 공포') {
                 console.log(`[EventManager] ${sourceUnitId} 사망으로 인한 광역 공포(${radius} 범위) 발동!`);
             }
-            // 이 시점에서 다시 이벤트(예: 'skillExecuted')를 발생시킬 수도 있습니다.
-            this.emit('skillExecuted', { skillName, targetUnitId, amount, sourceUnitId, radius });
+            // 이 시점에서 다시 이벤트를 발생시킬 수도 있습니다.
+            this.emit(GAME_EVENTS.SKILL_EXECUTED, { skillName, targetUnitId, amount, sourceUnitId, radius }); // ✨ 상수 사용
         }
     }
 
