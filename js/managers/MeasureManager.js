@@ -79,10 +79,11 @@ export class MeasureManager {
             // ✨ 파티클 효과 관련 설정 추가
             particle: {
                 baseSize: 4,      // 파티클 기본 크기 (픽셀)
-                count: 10,        // 생성될 파티클 개수
-                duration: 500,    // 파티클 지속 시간 (ms)
-                speedY: 2,        // 파티클 수직 이동 속도 (픽셀/프레임)
-                spread: 10        // 파티클 분산 범위 (x축)
+                count: 15,        // 생성될 파티클 개수 (늘림)
+                duration: 600,    // 파티클 지속 시간 (ms) (늘림)
+                speedY: 3,        // 파티클 수직 이동 속도 (픽셀/프레임) (조금 빠르게)
+                spread: 30,       // 파티클 분산 범위 (x축) (더 넓게)
+                startOffsetY: 0.2 // 유닛 이미지 상단 Y 위치 비율 (타일 높이의 20% 지점)
             },
             // ✨ 새로운 게임 설정 섹션
             gameConfig: {
