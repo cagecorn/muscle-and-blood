@@ -43,8 +43,8 @@ export class VFXManager {
             unitId: unitId,
             damage: damageAmount,
             startTime: performance.now(),
-            duration: 1000,
-            floatSpeed: 0.05,
+            duration: this.measureManager.get('vfx.damageNumberDuration'),
+            floatSpeed: this.measureManager.get('vfx.damageNumberFloatSpeed'),
             color: color
         });
         console.log(`[VFXManager] Added damage number: ${damageAmount} (${color}) for ${unit.name}`);

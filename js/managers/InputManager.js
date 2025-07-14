@@ -1,7 +1,7 @@
 // js/managers/InputManager.js
 
 // ✨ 상수 파일 임포트
-import { GAME_EVENTS, UI_STATES } from '../constants.js';
+import { GAME_EVENTS, UI_STATES, BUTTON_IDS } from '../constants.js';
 
 export class InputManager {
     constructor(renderer, cameraEngine, uiEngine, buttonEngine) { // ✨ buttonEngine 추가

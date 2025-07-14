@@ -15,14 +15,11 @@ export class MeasureManager {
             ui: {
                 mapPanelWidthRatio: 0.7,
                 mapPanelHeightRatio: 0.9,
-                buttonHeight: 50, // 이전 절대값, 하위 비율 설정과 함께 유지
-                buttonWidth: 200,
-                buttonMargin: 10,
-                // ✨ 비율 기반 UI 크기 정의
-                buttonHeightRatio: 0.07,  // 게임 높이의 7%
-                buttonWidthRatio: 0.20,   // 게임 너비의 20%
-                buttonMarginRatio: 0.015, // 게임 높이의 1.5%
-                fontSizeRatio: 0.03       // 폰트 크기 비율 (게임 높이의 3%)
+                // 새로운 UI 비율 정의 (게임 해상도에 대한 비율)
+                buttonHeightRatio: 0.07,
+                buttonWidthRatio: 0.20,
+                buttonMarginRatio: 0.015,
+                fontSizeRatio: 0.03
             },
             // 새로운 설정: 배틀 스테이지 관련
             battleStage: {
@@ -38,8 +35,12 @@ export class MeasureManager {
                 gridRows: 2,
                 gridCols: 6,
                 heightRatio: 0.25,
-                // ✨ 패널 내부 텍스트 크기 비율
-                unitTextFontSizeRatio: 0.04
+                unitTextFontSizeRatio: 0.04,
+                // ✨ 새로운 용병 패널 내부 매직 넘버 상수화
+                unitHpFontSizeScale: 0.8, // HP 폰트 크기 비율 (기본 텍스트 폰트의 80%)
+                unitTextOffsetYScale: 0.8, // 유닛 이름 텍스트 y 오프셋 비율
+                unitImageScale: 0.7, // 유닛 이미지 크기 비율 (슬롯 크기의 70%)
+                unitImageOffsetYScale: 1.5 // 유닛 이미지 y 오프셋 비율
             },
             // ✨ 전투 로그 관련 설정 추가
             combatLog: {
@@ -51,23 +52,29 @@ export class MeasureManager {
             },
             // ✨ 시각 효과 관련 설정 추가
             vfx: {
-                hpBarWidthRatio: 0.8,
-                hpBarHeightRatio: 0.1,
-                hpBarVerticalOffset: 5,
-                barrierBarWidthRatio: 0.8,
-                barrierBarHeightRatio: 0.05,
-                barrierBarVerticalOffset: 0.1,
-                damageNumberFloatSpeed: 0.05,
-                damageNumberBaseFontSize: 20,
-                damageNumberScaleFactor: 5,
-                damageNumberVerticalOffset: 5,
-                weaponDropScale: 0.5,
-                weaponDropStartOffsetY: 0.5,
-                weaponDropEndOffsetY: 0.8,
-                weaponDropPopDuration: 300,
-                weaponDropFallDuration: 500,
-                weaponDropFadeDuration: 500,
-                weaponDropTotalDuration: 1300
+                // HP/Barrier Bar 관련
+                hpBarWidthRatio: 0.8,      // HP 바 너비 (타일 크기의 80%)
+                hpBarHeightRatio: 0.1,     // HP 바 높이 (타일 크기의 10%)
+                hpBarVerticalOffset: 5,    // HP 바 수직 오프셋 (픽셀)
+                barrierBarWidthRatio: 0.8, // 배리어 바 너비 (타일 크기의 80%)
+                barrierBarHeightRatio: 0.05, // 배리어 바 높이 (타일 크기의 5%)
+                barrierBarVerticalOffset: 8, // 배리어 바 수직 오프셋 (픽셀)
+
+                // 데미지 숫자 팝업 관련
+                damageNumberDuration: 1000,     // 데미지 숫자 팝업 지속 시간 (ms)
+                damageNumberFloatSpeed: 0.05,   // 데미지 숫자 부유 속도
+                damageNumberBaseFontSize: 20,   // 데미지 숫자 기본 폰트 크기
+                damageNumberScaleFactor: 5,     // 데미지 숫자 스케일링 팩터
+                damageNumberVerticalOffset: 5,  // 데미지 숫자 수직 오프셋
+
+                // 무기 드롭 애니메이션 관련
+                weaponDropScale: 0.5,           // 드롭된 무기 크기 (타일 크기의 50%)
+                weaponDropStartOffsetY: 0.5,    // 무기 드롭 시작 Y 오프셋 (타일 높이의 50% 위)
+                weaponDropEndOffsetY: 0.8,      // 무기 드롭 끝 Y 오프셋 (타일 높이의 80% 아래)
+                weaponDropPopDuration: 300,     // 무기 튀어 오르는 시간 (ms)
+                weaponDropFallDuration: 500,    // 무기 떨어지는 시간 (ms)
+                weaponDropFadeDuration: 500,    // 무기 사라지는 시간 (ms)
+                weaponDropTotalDuration: 1300   // 무기 애니메이션 총 지속 시간 (ms)
             },
             // ✨ 새로운 게임 설정 섹션
             gameConfig: {

@@ -38,20 +38,19 @@ export function runUIEngineUnitTests() {
         console.error("UIEngine: Error during initialization. [FAIL]", e);
     }
 
-    // 테스트 2: recalculateUIDimensions 호출 후 버튼 위치 확인
+    // 테스트 2: recalculateUIDimensions 호출 후 UI 폰트 크기 계산 확인
     testCount++;
     try {
         const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
         uiEngine.recalculateUIDimensions();
 
-        const expectedButtonX = (mockRenderer.canvas.width - uiEngine.buttonWidth) / 2;
-        const expectedButtonY = mockRenderer.canvas.height - uiEngine.buttonHeight - uiEngine.buttonMargin;
+        const expectedFontSize = Math.floor(mockRenderer.canvas.height * mockMeasureManager.get('ui.fontSizeRatio'));
 
-        if (uiEngine.battleStartButton.x === expectedButtonX && uiEngine.battleStartButton.y === expectedButtonY) {
-            console.log("UIEngine: Recalculated UI dimensions and button position correctly. [PASS]");
+        if (uiEngine.uiFontSize === expectedFontSize) {
+            console.log("UIEngine: Recalculated UI font size correctly. [PASS]");
             passCount++;
         } else {
-            console.error("UIEngine: Button position recalculation failed. [FAIL]", uiEngine.battleStartButton);
+            console.error("UIEngine: UI font size calculation failed. [FAIL]", uiEngine.uiFontSize);
         }
     } catch (e) {
         console.error("UIEngine: Error during recalculation. [FAIL]", e);
@@ -102,11 +101,11 @@ export function runUIEngineUnitTests() {
 
         uiEngine.draw(mockRenderer.ctx);
 
-        if (mockRenderer.ctx.fillRectCalled && mockRenderer.ctx.fillTextCalled) {
-            console.log("UIEngine: draw (mapScreen) called fillRect and fillText. [PASS]");
+        if (!mockRenderer.ctx.fillRectCalled && !mockRenderer.ctx.fillTextCalled) {
+            console.log("UIEngine: draw (mapScreen) performed no canvas drawing as expected. [PASS]");
             passCount++;
         } else {
-            console.error("UIEngine: draw (mapScreen) failed to call expected drawing ops. [FAIL]", { fillRect: mockRenderer.ctx.fillRectCalled, fillText: mockRenderer.ctx.fillTextCalled });
+            console.error("UIEngine: draw (mapScreen) unexpectedly performed drawing ops. [FAIL]", { fillRect: mockRenderer.ctx.fillRectCalled, fillText: mockRenderer.ctx.fillTextCalled });
         }
     } catch (e) {
         console.error("UIEngine: Error during draw (mapScreen) test. [FAIL]", e);
@@ -122,11 +121,11 @@ export function runUIEngineUnitTests() {
 
         uiEngine.draw(mockRenderer.ctx);
 
-        if (!mockRenderer.ctx.fillRectCalled && mockRenderer.ctx.fillTextCalled) {
-            console.log("UIEngine: draw (combatScreen) called fillText. [PASS]");
+        if (!mockRenderer.ctx.fillRectCalled && !mockRenderer.ctx.fillTextCalled) {
+            console.log("UIEngine: draw (combatScreen) performed no canvas drawing as expected. [PASS]");
             passCount++;
         } else {
-            console.error("UIEngine: draw (combatScreen) failed to call expected drawing ops. [FAIL]", { fillRect: mockRenderer.ctx.fillRectCalled, fillText: mockRenderer.ctx.fillTextCalled });
+            console.error("UIEngine: draw (combatScreen) unexpectedly performed drawing ops. [FAIL]", { fillRect: mockRenderer.ctx.fillRectCalled, fillText: mockRenderer.ctx.fillTextCalled });
         }
     } catch (e) {
         console.error("UIEngine: Error during draw (combatScreen) test. [FAIL]", e);

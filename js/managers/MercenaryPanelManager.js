@@ -56,8 +56,8 @@ export class MercenaryPanelManager {
 
         const units = this.battleSimulationManager ? this.battleSimulationManager.unitsOnGrid : [];
         ctx.fillStyle = 'white';
-        const unitNameFontSize = Math.floor(panelHeight * this.measureManager.get('mercenaryPanel.unitTextFontSizeRatio'));
-        const unitHpFontSize = Math.floor(unitNameFontSize * 0.8);
+        const unitTextFontSize = Math.floor(slotHeight * this.measureManager.get('mercenaryPanel.unitTextFontSizeRatio'));
+        const unitHpFontSize = Math.floor(unitTextFontSize * this.measureManager.get('mercenaryPanel.unitHpFontSizeScale'));
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -70,19 +70,19 @@ export class MercenaryPanelManager {
 
             if (units[i]) {
                 const unit = units[i];
-                ctx.font = `${unitNameFontSize}px Arial`;
-                ctx.fillText(`${unit.name}`, x, y - unitNameFontSize * 0.8);
+                ctx.font = `${unitTextFontSize}px Arial`;
+                ctx.fillText(`${unit.name}`, x, y - unitTextFontSize * this.measureManager.get('mercenaryPanel.unitTextOffsetYScale'));
 
                 ctx.font = `${unitHpFontSize}px Arial`;
-                ctx.fillText(`HP: ${unit.currentHp}/${unit.baseStats.hp}`, x, y + unitHpFontSize * 0.8);
+                ctx.fillText(`HP: ${unit.currentHp}/${unit.baseStats.hp}`, x, y + unitHpFontSize * this.measureManager.get('mercenaryPanel.unitTextOffsetYScale'));
                 if (unit.image) {
-                    const imgSize = Math.min(slotWidth, slotHeight) * 0.7;
+                    const imgSize = Math.min(slotWidth, slotHeight) * this.measureManager.get('mercenaryPanel.unitImageScale');
                     const imgX = panelX + col * slotWidth + (slotWidth - imgSize) / 2;
-                    const imgY = panelY + row * slotHeight + (slotHeight - imgSize) / 2 - unitNameFontSize * 1.5;
+                    const imgY = panelY + row * slotHeight + (slotHeight - imgSize) / 2 - unitTextFontSize * this.measureManager.get('mercenaryPanel.unitImageOffsetYScale');
                     ctx.drawImage(unit.image, imgX, imgY, imgSize, imgSize);
                 }
             } else {
-                ctx.font = `${unitNameFontSize}px Arial`;
+                ctx.font = `${unitTextFontSize}px Arial`;
                 ctx.fillText(`Slot ${i + 1}`, x, y);
             }
         }
