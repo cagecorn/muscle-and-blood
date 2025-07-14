@@ -8,11 +8,12 @@ export class CompatibilityManager {
         this.uiEngine = uiEngine;
         this.mapManager = mapManager;
         this.logicManager = logicManager;
-        this.mercenaryPanelManager = mercenaryPanelManager;
+        // mercenaryPanelManager는 이제 독립적인 캔버스를 가지지 않으므로 직접 참조하지 않습니다.
+        // this.mercenaryPanelManager = mercenaryPanelManager;
         this.battleLogManager = battleLogManager;
 
         // 캔버스 참조 보관
-        this.mercenaryPanelCanvas = mercenaryPanelManager ? mercenaryPanelManager.canvas : null;
+        // this.mercenaryPanelCanvas = mercenaryPanelManager ? mercenaryPanelManager.canvas : null; // 이제 필요 없음
         this.combatLogCanvas = battleLogManager ? battleLogManager.canvas : null;
 
         this.baseGameWidth = this.measureManager.get('gameResolution.width');
@@ -47,11 +48,6 @@ export class CompatibilityManager {
             this.renderer.canvas.style.height = `${minRes.minHeight}px`;
             this.renderer.resizeCanvas(minRes.minWidth, minRes.minHeight);
 
-            if (this.mercenaryPanelCanvas) {
-                const mHeight = Math.floor(minRes.minWidth * (this.measureManager.get('mercenaryPanel.heightRatio') / (this.baseGameWidth / this.baseGameHeight)));
-                this.mercenaryPanelCanvas.style.width = `${minRes.minWidth}px`;
-                this.mercenaryPanelCanvas.style.height = `${mHeight}px`;
-            }
             if (this.combatLogCanvas) {
                 const cHeight = Math.floor(minRes.minWidth * (this.measureManager.get('combatLog.heightRatio') / (this.baseGameWidth / this.baseGameHeight)));
                 this.combatLogCanvas.style.width = `${minRes.minWidth}px`;
@@ -67,7 +63,7 @@ export class CompatibilityManager {
         const mainGameAspectRatio = this.baseGameWidth / this.baseGameHeight;
         const maxMainGameCanvasWidth = viewportWidth - totalPadding;
 
-        const mercenaryPanelExpectedHeightRatio = this.measureManager.get('mercenaryPanel.heightRatio');
+        // mercenaryPanelCanvas가 사라졌으므로 해당 비율은 사용하지 않습니다.
         const combatLogExpectedHeightRatio = this.measureManager.get('combatLog.heightRatio');
 
         let mainGameCanvasWidth;
@@ -75,17 +71,16 @@ export class CompatibilityManager {
 
         const currentViewportAspectRatio = viewportWidth / viewportHeight;
         const totalGameAspectRatio = this.baseAspectRatio +
-                                     (this.baseAspectRatio * mercenaryPanelExpectedHeightRatio) +
                                      (this.baseAspectRatio * combatLogExpectedHeightRatio);
 
         if (currentViewportAspectRatio > totalGameAspectRatio) {
-            mainGameCanvasHeight = availableHeight / (1 + mercenaryPanelExpectedHeightRatio + combatLogExpectedHeightRatio);
+            mainGameCanvasHeight = availableHeight / (1 + combatLogExpectedHeightRatio);
             mainGameCanvasWidth = mainGameCanvasHeight * mainGameAspectRatio;
         } else {
             mainGameCanvasWidth = maxMainGameCanvasWidth;
             mainGameCanvasHeight = mainGameCanvasWidth / mainGameAspectRatio;
-            if ((mainGameCanvasHeight + (mainGameCanvasHeight * mercenaryPanelExpectedHeightRatio) + (mainGameCanvasHeight * combatLogExpectedHeightRatio)) > availableHeight) {
-                mainGameCanvasHeight = availableHeight / (1 + mercenaryPanelExpectedHeightRatio + combatLogExpectedHeightRatio);
+            if ((mainGameCanvasHeight + (mainGameCanvasHeight * combatLogExpectedHeightRatio)) > availableHeight) {
+                mainGameCanvasHeight = availableHeight / (1 + combatLogExpectedHeightRatio);
                 mainGameCanvasWidth = mainGameCanvasHeight * mainGameAspectRatio;
             }
         }
@@ -120,18 +115,7 @@ export class CompatibilityManager {
         this.renderer.resizeCanvas(mainGameCanvasWidth, mainGameCanvasHeight);
         console.log(`[CompatibilityManager] Main Canvas adjusted to: ${mainGameCanvasWidth}x${mainGameCanvasHeight}`);
 
-        // 2. 용병 패널 캔버스 해상도 업데이트
-        if (this.mercenaryPanelCanvas) {
-            const mercenaryPanelHeight = Math.floor(mainGameCanvasHeight * mercenaryPanelExpectedHeightRatio);
-            this.mercenaryPanelCanvas.style.width = `${mainGameCanvasWidth}px`;
-            this.mercenaryPanelCanvas.style.height = `${mercenaryPanelHeight}px`;
-            if (this.mercenaryPanelManager && this.mercenaryPanelManager.resizeCanvas) {
-                this.mercenaryPanelManager.resizeCanvas();
-            }
-            console.log(`[CompatibilityManager] Mercenary Panel Canvas adjusted to: ${mainGameCanvasWidth}x${mercenaryPanelHeight}`);
-        }
-
-        // 3. 전투 로그 캔버스 해상도 업데이트
+        // 2. 전투 로그 캔버스 해상도 업데이트
         if (this.combatLogCanvas) {
             const combatLogHeight = Math.floor(mainGameCanvasHeight * combatLogExpectedHeightRatio);
             this.combatLogCanvas.style.width = `${mainGameCanvasWidth}px`;
@@ -153,9 +137,6 @@ export class CompatibilityManager {
         }
         if (this.mapManager && this.mapManager.recalculateMapDimensions) {
             this.mapManager.recalculateMapDimensions();
-        }
-        if (this.mercenaryPanelManager && this.mercenaryPanelManager.recalculatePanelDimensions) {
-            this.mercenaryPanelManager.recalculatePanelDimensions();
         }
         if (this.battleLogManager && this.battleLogManager.recalculateLogDimensions) {
             this.battleLogManager.recalculateLogDimensions();

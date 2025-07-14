@@ -12,8 +12,6 @@ export function runCanvasBridgeManagerUnitTests() {
 
     const mockGameCanvas = document.createElement('canvas');
     mockGameCanvas.id = 'gameCanvas';
-    const mockMercenaryPanelCanvas = document.createElement('canvas');
-    mockMercenaryPanelCanvas.id = 'mercenaryPanelCanvas';
     const mockCombatLogCanvas = document.createElement('canvas');
     mockCombatLogCanvas.id = 'combatLogCanvas';
 
@@ -25,7 +23,7 @@ export function runCanvasBridgeManagerUnitTests() {
     try {
         const cbm = new CanvasBridgeManager(
             mockGameCanvas,
-            mockMercenaryPanelCanvas,
+            null,
             mockCombatLogCanvas,
             mockEventManager,
             mockMeasureManager
@@ -45,7 +43,7 @@ export function runCanvasBridgeManagerUnitTests() {
     try {
         const cbm = new CanvasBridgeManager(
             mockGameCanvas,
-            mockMercenaryPanelCanvas,
+            null,
             mockCombatLogCanvas,
             mockEventManager,
             mockMeasureManager
@@ -61,7 +59,7 @@ export function runCanvasBridgeManagerUnitTests() {
     try {
         const cbm = new CanvasBridgeManager(
             mockGameCanvas,
-            mockMercenaryPanelCanvas,
+            null,
             mockCombatLogCanvas,
             mockEventManager,
             mockMeasureManager
@@ -75,7 +73,7 @@ export function runCanvasBridgeManagerUnitTests() {
         mockEventManager.subscribe('dragMove', () => { dragMoveEmitted = true; });
         mockEventManager.subscribe('drop', () => { dropEmitted = true; });
 
-        cbm._onMouseDown({ clientX: 10, clientY: 10, target: mockMercenaryPanelCanvas });
+        cbm._onMouseDown({ clientX: 10, clientY: 10, target: mockGameCanvas });
         cbm._onMouseMove({ clientX: 20, clientY: 20, target: mockGameCanvas });
         cbm._onMouseUp({ clientX: 20, clientY: 20, target: mockGameCanvas });
 

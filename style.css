@@ -30,13 +30,7 @@ canvas {
     box-sizing: border-box; /* 테두리 포함 크기 계산 */
 }
 
-/* 용병 패널 캔버스 전용 스타일 (JS가 크기 제어) */
-#mercenaryPanelCanvas {
-    margin-bottom: 0px; /* 패널과 메인 게임 캔버스 사이의 간격을 제거 */
-    border: 2px solid #00f; /* 구분을 위한 다른 테두리 색상 */
-    flex-shrink: 0;
-    aspect-ratio: 16 / 2.25; /* 메인 캔버스 높이의 약 25% 비율 */
-}
+/* 용병 패널 캔버스 스타일은 이제 필요 없습니다. */
 
 /* ✨ 전투 로그 캔버스 전용 스타일 (JS가 크기 제어) */
 #combatLogCanvas {

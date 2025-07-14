@@ -29,6 +29,8 @@ export class PanelEngine {
     drawPanel(panelName, ctx) {
         const panel = this.panels.get(panelName);
         if (panel) {
+            // PanelEngine은 이제 패널 컨텍스트를 직접 전달하고, MercenaryPanelManager는 PanelEngine을 통해 그려지지 않습니다.
+            // 따라서 이곳에서는 BattleLogManager만 예상됩니다.
             panel.draw(ctx);
         } else {
             console.warn(`[PanelEngine] Panel '${panelName}' not found.`);

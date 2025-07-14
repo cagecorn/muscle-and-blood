@@ -2,13 +2,13 @@
 
 import { MercenaryPanelManager } from '../../js/managers/MercenaryPanelManager.js';
 
-export function runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager) {
+export function runMercenaryPanelManagerUnitTests(measureManager, battleSimulationManager, logicManager, eventManager) {
     console.log("--- MercenaryPanelManager Unit Test Start ---");
 
     let testCount = 0;
     let passCount = 0;
 
-    // Mock 캔버스 요소 생성
+    // Mock 캔버스와 컨텍스트 생성 (draw 테스트용)
     const mockCanvas = document.createElement('canvas');
     mockCanvas.width = 600;
     mockCanvas.height = 200;
@@ -17,10 +17,9 @@ export function runMercenaryPanelManagerUnitTests(measureManager, battleSimulati
     // 테스트 1: 초기화 및 캔버스 속성 확인
     testCount++;
     try {
-        const panelManager = new MercenaryPanelManager(mockCanvas, measureManager, battleSimulationManager, logicManager);
-        if (panelManager.canvas === mockCanvas && panelManager.ctx === mockCtx &&
-            panelManager.gridRows === 2 && panelManager.gridCols === 6) {
-            console.log("MercenaryPanelManager: Initialized correctly with canvas properties. [PASS]");
+        const panelManager = new MercenaryPanelManager(measureManager, battleSimulationManager, logicManager, eventManager);
+        if (panelManager.gridRows === 2 && panelManager.gridCols === 6) {
+            console.log("MercenaryPanelManager: Initialized correctly. [PASS]");
             passCount++;
         } else {
             console.error("MercenaryPanelManager: Initialization failed. [FAIL]", panelManager);
@@ -32,7 +31,7 @@ export function runMercenaryPanelManagerUnitTests(measureManager, battleSimulati
     // 테스트 2: recalculatePanelDimensions 호출 후 슬롯 크기 확인
     testCount++;
     try {
-        const panelManager = new MercenaryPanelManager(mockCanvas, measureManager, battleSimulationManager, logicManager);
+        const panelManager = new MercenaryPanelManager(measureManager, battleSimulationManager, logicManager, eventManager);
         panelManager.recalculatePanelDimensions(); // 수동 호출
         const expectedSlotWidth = 600 / 6; // 600px / 6 cols
         const expectedSlotHeight = 200 / 2; // 200px / 2 rows
@@ -50,7 +49,7 @@ export function runMercenaryPanelManagerUnitTests(measureManager, battleSimulati
     // 테스트 3: draw 메서드가 호출되는지 시각적 확인 (콘솔 로그를 통한 간접 확인)
     testCount++;
     try {
-        const panelManager = new MercenaryPanelManager(mockCanvas, measureManager, battleSimulationManager, logicManager);
+        const panelManager = new MercenaryPanelManager(measureManager, battleSimulationManager, logicManager, eventManager);
         const originalFillRect = mockCtx.fillRect;
         let fillRectCalled = false;
         mockCtx.fillRect = function(...args) {
@@ -58,7 +57,7 @@ export function runMercenaryPanelManagerUnitTests(measureManager, battleSimulati
             originalFillRect.apply(this, args);
         };
 
-        panelManager.draw(mockCtx);
+        panelManager.draw(mockCtx, 0, 0, 600, 200);
 
         if (fillRectCalled) {
             console.log("MercenaryPanelManager: Draw method called and performed basic drawing operations. [PASS]");
@@ -84,7 +83,7 @@ export function runMercenaryPanelManagerUnitTests(measureManager, battleSimulati
         const originalUnitsOnGrid = battleSimulationManager.unitsOnGrid;
         battleSimulationManager.unitsOnGrid = [mockUnit];
 
-        const panelManager = new MercenaryPanelManager(mockCanvas, measureManager, battleSimulationManager, logicManager);
+        const panelManager = new MercenaryPanelManager(measureManager, battleSimulationManager, logicManager, eventManager);
         const originalFillText = mockCtx.fillText;
         let fillTextCalledForUnit = false;
         mockCtx.fillText = function(text, ...args) {
@@ -100,7 +99,7 @@ export function runMercenaryPanelManagerUnitTests(measureManager, battleSimulati
             originalDrawImage.apply(this, args);
         };
 
-        panelManager.draw(mockCtx);
+        panelManager.draw(mockCtx, 0, 0, 600, 200);
 
         if (fillTextCalledForUnit && drawImageCalledForUnit) {
             console.log("MercenaryPanelManager: Draw method drew unit info and image. [PASS]");

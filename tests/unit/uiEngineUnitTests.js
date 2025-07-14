@@ -22,11 +22,12 @@ export function runUIEngineUnitTests() {
     };
     const mockMeasureManager = new MeasureManager();
     const mockEventManager = new EventManager();
+    const mockMercenaryPanelManager = { draw: () => {} };
 
     // 테스트 1: 초기화 확인
     testCount++;
     try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager);
+        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
         if (uiEngine.renderer === mockRenderer && uiEngine.getUIState() === 'mapScreen') {
             console.log("UIEngine: Initialized correctly. [PASS]");
             passCount++;
@@ -40,7 +41,7 @@ export function runUIEngineUnitTests() {
     // 테스트 2: recalculateUIDimensions 호출 후 버튼 위치 확인
     testCount++;
     try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager);
+        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
         uiEngine.recalculateUIDimensions();
 
         const expectedButtonX = (mockRenderer.canvas.width - uiEngine.buttonWidth) / 2;
@@ -59,7 +60,7 @@ export function runUIEngineUnitTests() {
     // 테스트 3: setUIState 및 getUIState
     testCount++;
     try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager);
+        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
         uiEngine.setUIState('combatScreen');
         if (uiEngine.getUIState() === 'combatScreen') {
             console.log("UIEngine: UI state set and retrieved correctly. [PASS]");
@@ -74,7 +75,7 @@ export function runUIEngineUnitTests() {
     // 테스트 4: isClickOnButton - 버튼 클릭 성공
     testCount++;
     try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager);
+        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
         uiEngine.setUIState('mapScreen');
         const button = uiEngine.battleStartButton;
         const clickX = button.x + button.width / 2;
@@ -93,7 +94,7 @@ export function runUIEngineUnitTests() {
     // 테스트 5: isClickOnButton - 버튼 클릭 실패 (다른 UI 상태)
     testCount++;
     try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager);
+        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
         uiEngine.setUIState('combatScreen');
         const button = uiEngine.battleStartButton;
         const clickX = button.x + button.width / 2;
@@ -112,7 +113,7 @@ export function runUIEngineUnitTests() {
     // 테스트 6: handleBattleStartClick - 이벤트 발생 확인 (간접)
     testCount++;
     try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager);
+        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
         let eventEmitted = false;
         mockEventManager.subscribe('battleStart', () => { eventEmitted = true; });
 
@@ -131,7 +132,7 @@ export function runUIEngineUnitTests() {
     // 테스트 7: draw 메서드 (mapScreen)
     testCount++;
     try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager);
+        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
         uiEngine.setUIState('mapScreen');
         mockRenderer.ctx.fillRectCalled = false;
         mockRenderer.ctx.fillTextCalled = false;
@@ -151,7 +152,7 @@ export function runUIEngineUnitTests() {
     // 테스트 8: draw 메서드 (combatScreen)
     testCount++;
     try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager);
+        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
         uiEngine.setUIState('combatScreen');
         mockRenderer.ctx.fillRectCalled = false;
         mockRenderer.ctx.fillTextCalled = false;
