@@ -1,8 +1,10 @@
 // js/managers/BattleStageManager.js
 
 export class BattleStageManager {
-    constructor() {
+    constructor(assetLoaderManager) {
         console.log("🏟️ BattleStageManager initialized. Preparing the arena. 🏟️");
+        this.assetLoaderManager = assetLoaderManager; // AssetLoaderManager 저장
+        this.backgroundImage = null; // 배경 이미지 객체
     }
 
     /**
@@ -15,8 +17,19 @@ export class BattleStageManager {
         const logicalWidth = ctx.canvas.width / (window.devicePixelRatio || 1);
         const logicalHeight = ctx.canvas.height / (window.devicePixelRatio || 1);
 
-        ctx.fillStyle = '#6A5ACD'; // 전투 스테이지 배경색 (보라색)
-        ctx.fillRect(0, 0, logicalWidth, logicalHeight); // 논리적 크기를 사용하여 배경 채움
+        if (!this.backgroundImage) {
+            // 이미지가 로드되지 않았다면 로드 시도
+            this.backgroundImage = this.assetLoaderManager.getImage('sprite_battle_stage_forest');
+            if (!this.backgroundImage) {
+                console.warn("[BattleStageManager] Battle stage background image not loaded. Using fallback color.");
+                ctx.fillStyle = '#6A5ACD'; // 대체 색상 (보라색)
+                ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+                return;
+            }
+        }
+
+        // 배경 이미지를 논리적 캔버스 크기에 맞춰 그립니다.
+        ctx.drawImage(this.backgroundImage, 0, 0, logicalWidth, logicalHeight);
 
         ctx.fillStyle = 'white';
         ctx.font = '40px Arial';

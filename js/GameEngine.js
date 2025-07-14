@@ -153,7 +153,7 @@ export class GameEngine {
         this.layerEngine = new LayerEngine(this.renderer, this.cameraEngine);
 
         this.territoryManager = new TerritoryManager();
-        this.battleStageManager = new BattleStageManager();
+        this.battleStageManager = new BattleStageManager(this.assetLoaderManager); // ✨ assetLoaderManager 전달
         this.battleGridManager = new BattleGridManager(this.measureManager, this.logicManager);
         // VFXManager에 AnimationManager를 전달하여 HP 바 위치를 애니메이션과 동기화합니다.
         this.vfxManager = new VFXManager(
@@ -326,6 +326,8 @@ export class GameEngine {
             UNITS.WARRIOR.spriteId,
             'assets/images/warrior.png'
         );
+        // ✨ 전투 배경 이미지 로드
+        await this.assetLoaderManager.loadImage('sprite_battle_stage_forest', 'assets/images/battle-stage-forest.png');
 
         console.log(`[GameEngine] Registered unit ID: ${UNITS.WARRIOR.id}`);
         console.log(`[GameEngine] Loaded warrior sprite: ${UNITS.WARRIOR.spriteId}`);
