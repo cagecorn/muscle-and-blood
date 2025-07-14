@@ -14,6 +14,7 @@ export const GAME_EVENTS = {
     LOG_MESSAGE: 'logMessage',
     WEAPON_DROPPED: 'weaponDropped',
     UNIT_DISARMED: 'unitDisarmed',
+    UNIT_CAPTURED: 'unitCaptured',
     REQUEST_STATUS_EFFECT_APPLICATION: 'requestStatusEffectApplication',
     DRAG_START: 'dragStart',
     DRAG_MOVE: 'dragMove',

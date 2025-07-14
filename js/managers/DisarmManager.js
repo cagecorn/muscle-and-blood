@@ -1,5 +1,7 @@
 // js/managers/DisarmManager.js
 
+import { GAME_EVENTS } from '../constants.js';
+
 export class DisarmManager {
     constructor(eventManager, statusEffectManager, battleSimulationManager, measureManager) {
         console.log("\uD83D\uDEE0\uFE0F DisarmManager initialized. Ready to handle disarming events. \uD83D\uDEE0\uFE0F");
@@ -8,8 +10,10 @@ export class DisarmManager {
         this.battleSimulationManager = battleSimulationManager;
         this.measureManager = measureManager;
 
+        this.capturedUnits = [];
+
         // 유닛 사망 이벤트 구독
-        this.eventManager.subscribe('unitDeath', this._onUnitDeath.bind(this));
+        this.eventManager.subscribe(GAME_EVENTS.UNIT_DEATH, this._onUnitDeath.bind(this));
         console.log("[DisarmManager] Subscribed to 'unitDeath' event.");
     }
 
@@ -42,13 +46,27 @@ export class DisarmManager {
             this.statusEffectManager.applyStatusEffect(data.unitId, 'status_disarmed');
 
             // 3. 무기 드롭 애니메이션 트리거
-            this.eventManager.emit('weaponDropped', { unitId: data.unitId, weaponSpriteId: 'sprite_zombie_weapon_default' });
+            this.eventManager.emit(GAME_EVENTS.WEAPON_DROPPED, { unitId: data.unitId, weaponSpriteId: 'sprite_zombie_weapon_default' });
             console.log(`[DisarmManager] Weapon drop animation triggered for unit '${data.unitId}'.`);
 
-            // TODO: 포획 로직 등 추가
-            this.eventManager.emit('unitDisarmed', { unitId: data.unitId, unitName: data.unitName });
+            // 포획 시도
+            const captureChance = this.measureManager.get('gameConfig.captureChance') || 0;
+            const captured = Math.random() < captureChance;
+
+            // 무장해제 완료 알림
+            this.eventManager.emit(GAME_EVENTS.UNIT_DISARMED, { unitId: data.unitId, unitName: data.unitName });
+
+            if (captured) {
+                this.capturedUnits.push(data.unitId);
+                this.eventManager.emit(GAME_EVENTS.UNIT_CAPTURED, { unitId: data.unitId, unitName: data.unitName });
+                console.log(`[DisarmManager] Unit '${data.unitName}' captured.`);
+            }
         } else {
             console.log(`[DisarmManager] Unit '${data.unitName}' (${data.unitId}) is not a disarmable unit.`);
         }
+    }
+
+    getCapturedUnits() {
+        return [...this.capturedUnits];
     }
 }

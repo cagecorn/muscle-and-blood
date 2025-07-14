@@ -3,6 +3,7 @@
 import { DisarmManager } from '../../js/managers/DisarmManager.js';
 import { EventManager } from '../../js/managers/EventManager.js';
 import { MeasureManager } from '../../js/managers/MeasureManager.js';
+import { GAME_EVENTS } from '../../js/constants.js';
 
 export function runDisarmManagerUnitTests(eventManager, measureManager, statusEffectManager, battleSimulationManager) {
     console.log("--- DisarmManager Unit Test Start ---");
@@ -73,10 +74,10 @@ export function runDisarmManagerUnitTests(eventManager, measureManager, statusEf
     const originalSetting = mm.get('gameConfig.enableDisarmSystem');
     mm.set('gameConfig.enableDisarmSystem', true);
 
-    eventManager.subscribe('weaponDropped', (data) => {
+    eventManager.subscribe(GAME_EVENTS.WEAPON_DROPPED, (data) => {
         if (data.unitId === 'unit_zombie_001') weaponEvent = true;
     });
-    eventManager.subscribe('unitDisarmed', (data) => {
+    eventManager.subscribe(GAME_EVENTS.UNIT_DISARMED, (data) => {
         if (data.unitId === 'unit_zombie_001') disarmedEvent = true;
     });
 
@@ -138,6 +139,31 @@ export function runDisarmManagerUnitTests(eventManager, measureManager, statusEf
     } catch (e) {
         console.error("DisarmManager: Error during non-zombie test. [FAIL]", e);
     } finally {
+        mm.set('gameConfig.enableDisarmSystem', originalSetting);
+    }
+
+    // 테스트 5: 포획 로직 동작 확인
+    testCount++;
+    let capturedEvent = false;
+    mm.set('gameConfig.enableDisarmSystem', true);
+    mm.set('gameConfig.captureChance', 1); // 100% 확률로 포획
+    eventManager.subscribe(GAME_EVENTS.UNIT_CAPTURED, (data) => {
+        if (data.unitId === 'unit_zombie_001') capturedEvent = true;
+    });
+
+    try {
+        const dm = new DisarmManager(eventManager, mockStatusEffectManager, bsm, mm);
+        dm._onUnitDeath({ unitId: 'unit_zombie_001', unitName: '테스트 좀비', unitType: 'enemy' });
+        if (capturedEvent && dm.getCapturedUnits().includes('unit_zombie_001')) {
+            console.log("DisarmManager: Capture logic executed. [PASS]");
+            passCount++;
+        } else {
+            console.error("DisarmManager: Capture logic failed. [FAIL]");
+        }
+    } catch (e) {
+        console.error("DisarmManager: Error during capture logic test. [FAIL]", e);
+    } finally {
+        mm.set('gameConfig.captureChance', 0.5);
         mm.set('gameConfig.enableDisarmSystem', originalSetting);
     }
 
