@@ -28,9 +28,11 @@ export const UI_STATES = {
 };
 
 export const BUTTON_IDS = {
-    BATTLE_START: 'battleStartButton',
+    // 캔버스에 그려지는 버튼 ID (현재는 사용하지 않음)
+    // BATTLE_START: 'battleStartButton',
+
+    // HTML 버튼 ID
     TOGGLE_HERO_PANEL: 'toggleHeroPanelBtn',
-    // HTML 요소로 제공되는 전투 시작 버튼
     BATTLE_START_HTML: 'battleStartHtmlBtn'
 };
 
