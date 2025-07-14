@@ -46,6 +46,7 @@ import { STATUS_EFFECTS } from '../data/statusEffects.js';
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
 import { BattleGridManager } from './managers/BattleGridManager.js';
+import { ButtonEngine } from './managers/ButtonEngine.js'; // ✨ ButtonEngine 임포트
 
 import { UNITS } from '../data/unit.js';
 import { CLASSES } from '../data/class.js';
@@ -101,6 +102,9 @@ export class GameEngine {
             this.eventManager
         );
 
+        // ✨ 클릭 가능한 UI 버튼을 관리하는 ButtonEngine 초기화
+        this.buttonEngine = new ButtonEngine();
+
         const combatLogCanvasElement = document.getElementById('combatLogCanvas');
         if (!combatLogCanvasElement) {
             console.error("GameEngine: Combat Log Canvas not found. Game cannot proceed without it.");
@@ -121,8 +125,8 @@ export class GameEngine {
 
         // UIEngine과 MapManager를 먼저 초기화
         this.mapManager = new MapManager(this.measureManager);
-        // UIEngine 초기화 시 mercenaryPanelManager를 함께 전달
-        this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager, this.mercenaryPanelManager);
+        // UIEngine 초기화 시 mercenaryPanelManager와 buttonEngine을 함께 전달
+        this.uiEngine = new UIEngine(this.renderer, this.measureManager, this.eventManager, this.mercenaryPanelManager, this.buttonEngine);
 
         // CompatibilityManager 초기화 (필요 매니저들을 모두 전달)
         this.compatibilityManager = new CompatibilityManager(
@@ -136,7 +140,8 @@ export class GameEngine {
         );
 
         this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneEngine);
-        this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine);
+        // ✨ InputManager 초기화 시 buttonEngine을 함께 전달
+        this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine, this.buttonEngine);
 
         const mainGameCanvasElement = document.getElementById(canvasId);
         this.canvasBridgeManager = new CanvasBridgeManager(
@@ -430,6 +435,8 @@ export class GameEngine {
     getStatusEffectManager() { return this.statusEffectManager; }
     getWorkflowManager() { return this.workflowManager; }
     getDisarmManager() { return this.disarmManager; }
+
+    getButtonEngine() { return this.buttonEngine; }
 
     // Dice 관련 엔진/매니저에 대한 getter
     getDiceEngine() { return this.diceEngine; }

@@ -92,6 +92,7 @@
         <button id="runMeasureManagerUnitTestsBtn">MeasureManager 유닛 테스트</button>
         <button id="runMapManagerUnitTestsBtn">MapManager 유닛 테스트</button>
         <button id="runUIEngineUnitTestsBtn">UIEngine 유닛 테스트</button>
+        <button id="runButtonEngineUnitTestsBtn">ButtonEngine 유닛 테스트</button>
         <button id="runDiceEngineUnitTestsBtn">DiceEngine 유닛 테스트</button>
         <button id="runDiceRollManagerUnitTestsBtn">DiceRollManager 유닛 테스트</button>
         <button id="runDiceBotManagerUnitTestsBtn">DiceBotManager 유닛 테스트</button>
@@ -170,6 +171,7 @@
             runMeasureManagerUnitTests,
             runMapManagerUnitTests,
             runUIEngineUnitTests,
+            runButtonEngineUnitTests,
             runDiceEngineUnitTests,
             runDiceRollManagerUnitTests,
             runDiceBotManagerUnitTests,
@@ -279,6 +281,7 @@
                 runMeasureManagerUnitTests();
                 runMapManagerUnitTests();
                 runUIEngineUnitTests();
+                runButtonEngineUnitTests();
                 runDiceEngineUnitTests();
                 runDiceRollManagerUnitTests();
                 runDiceBotManagerUnitTests();
@@ -335,6 +338,9 @@
             });
             document.getElementById('runUIEngineUnitTestsBtn').addEventListener('click', () => {
                 runUIEngineUnitTests();
+            });
+            document.getElementById('runButtonEngineUnitTestsBtn').addEventListener('click', () => {
+                runButtonEngineUnitTests();
             });
             // ✨ 다이스 관련 유닛 테스트 버튼
             document.getElementById('runDiceEngineUnitTestsBtn').addEventListener('click', () => {

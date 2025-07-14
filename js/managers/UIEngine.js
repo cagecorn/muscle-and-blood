@@ -1,12 +1,13 @@
 // js/managers/UIEngine.js
 
 export class UIEngine {
-    constructor(renderer, measureManager, eventManager, mercenaryPanelManager) {
+    constructor(renderer, measureManager, eventManager, mercenaryPanelManager, buttonEngine) { // ✨ buttonEngine 추가
         console.log("\ud83c\udf9b UIEngine initialized. Ready to draw interfaces. \ud83c\udf9b");
         this.renderer = renderer;
         this.measureManager = measureManager;
         this.eventManager = eventManager;
         this.mercenaryPanelManager = mercenaryPanelManager; // MercenaryPanelManager 인스턴스 저장
+        this.buttonEngine = buttonEngine; // ✨ ButtonEngine 인스턴스 저장
 
         this.canvas = renderer.canvas;
         this.ctx = renderer.ctx;
@@ -24,6 +25,18 @@ export class UIEngine {
             height: this.buttonHeight,
             text: '전투 시작'
         };
+
+        // ButtonEngine을 통해 버튼을 등록합니다.
+        if (this.buttonEngine) {
+            this.buttonEngine.registerButton(
+                'battleStartButton',
+                this.battleStartButton.x,
+                this.battleStartButton.y,
+                this.battleStartButton.width,
+                this.battleStartButton.height,
+                this.handleBattleStartClick.bind(this)
+            );
+        }
 
         console.log("[UIEngine] Initialized for overlay UI rendering.");
     }
@@ -46,6 +59,17 @@ export class UIEngine {
             text: '전투 시작'
         };
 
+        // ButtonEngine에 저장된 버튼 위치도 업데이트합니다.
+        if (this.buttonEngine) {
+            this.buttonEngine.updateButtonRect(
+                'battleStartButton',
+                this.battleStartButton.x,
+                this.battleStartButton.y,
+                this.battleStartButton.width,
+                this.battleStartButton.height
+            );
+        }
+
         // ✨ 추가: 버튼 계산 후 최종 위치 및 크기 로그
         console.log(`[UIEngine Debug] Battle Start Button: X=${this.battleStartButton.x}, Y=${this.battleStartButton.y}, Width=${this.battleStartButton.width}, Height=${this.battleStartButton.height}`);
         console.log(`[UIEngine Debug] Canvas Logical Dimensions: ${this.canvas.width / pixelRatio}x${this.canvas.height / pixelRatio}`);
@@ -67,19 +91,6 @@ export class UIEngine {
         // 필요에 따라 UI 상태를 변경할 수 있지만, 오버레이는 현재 UI 상태와 별개로 표시될 수 있습니다.
     }
 
-    // canvas 내부 좌표(mouseX, mouseY)를 직접 받아 버튼 영역과 비교합니다.
-    isClickOnButton(mouseX, mouseY) {
-        if (this._currentUIState !== 'mapScreen') {
-            return false;
-        }
-
-        const button = this.battleStartButton;
-
-        return (
-            mouseX >= button.x && mouseX <= button.x + button.width &&
-            mouseY >= button.y && mouseY <= button.y + button.height
-        );
-    }
 
     handleBattleStartClick() {
         console.log("[UIEngine] '전투 시작' 버튼 클릭 처리됨!");
@@ -87,14 +98,16 @@ export class UIEngine {
     }
 
     draw(ctx) {
-        // 현재 UI 상태에 따라 기본 UI 그리기
-        if (this._currentUIState === 'mapScreen') {
+        // ButtonEngine에서 최신 버튼 위치 정보를 가져와 그립니다.
+        const battleStartButtonRect = this.buttonEngine ? this.buttonEngine.getButtonRect('battleStartButton') : null;
+
+        if (this._currentUIState === 'mapScreen' && battleStartButtonRect) {
             ctx.fillStyle = 'darkgreen';
             ctx.fillRect(
-                this.battleStartButton.x,
-                this.battleStartButton.y,
-                this.battleStartButton.width,
-                this.battleStartButton.height
+                battleStartButtonRect.x,
+                battleStartButtonRect.y,
+                battleStartButtonRect.width,
+                battleStartButtonRect.height
             );
             ctx.fillStyle = 'white';
             ctx.font = '24px Arial';
@@ -102,8 +115,8 @@ export class UIEngine {
             ctx.textBaseline = 'middle';
             ctx.fillText(
                 this.battleStartButton.text,
-                this.battleStartButton.x + this.battleStartButton.width / 2,
-                this.battleStartButton.y + this.battleStartButton.height / 2 + 8
+                battleStartButtonRect.x + battleStartButtonRect.width / 2,
+                battleStartButtonRect.y + battleStartButtonRect.height / 2 + 8
             );
         } else if (this._currentUIState === 'combatScreen') {
             // 전투 화면에서는 현재 별도의 상단 텍스트를 표시하지 않습니다.
@@ -134,9 +147,7 @@ export class UIEngine {
     }
 
     getButtonDimensions() {
-        return {
-            width: this.battleStartButton.width,
-            height: this.battleStartButton.height
-        };
+        const rect = this.buttonEngine ? this.buttonEngine.getButtonRect('battleStartButton') : null;
+        return rect ? { width: rect.width, height: rect.height } : { width: 0, height: 0 };
     }
 }
