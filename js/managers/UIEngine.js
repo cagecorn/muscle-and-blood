@@ -96,11 +96,7 @@ export class UIEngine {
                 this.battleStartButton.y + this.battleStartButton.height / 2 + 8
             );
         } else if (this._currentUIState === 'combatScreen') {
-            ctx.fillStyle = 'white';
-            ctx.font = '48px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('전투 진행 중!', this.canvas.width / 2, 50);
+            // 전투 화면에서는 현재 별도의 상단 텍스트를 표시하지 않습니다.
         }
     }
 
