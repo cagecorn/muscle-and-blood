@@ -53,8 +53,7 @@ export class TurnEngine {
 
     async nextTurn() {
         const livingMercenaries = this.battleSimulationManager.unitsOnGrid.filter(u => u.type === ATTACK_TYPES.MERCENARY && u.currentHp > 0); // ✨ 상수 사용
-        // 포획 애니메이션을 보기 위해 HP가 0이 된 좀비도 전장에 남아 있는 동안은 전투가 지속되도록 합니다
-        const enemiesOnField = this.battleSimulationManager.unitsOnGrid.filter(u => u.type === ATTACK_TYPES.ENEMY); // ✨ 상수 사용
+        const livingEnemies = this.battleSimulationManager.unitsOnGrid.filter(u => u.type === ATTACK_TYPES.ENEMY && u.currentHp > 0); // ✨ 상수 사용
 
         if (livingMercenaries.length === 0) {
             console.log("[TurnEngine] All mercenaries defeated! Battle Over.");
@@ -62,8 +61,8 @@ export class TurnEngine {
             this.eventManager.setGameRunningState(false);
             return;
         }
-        if (enemiesOnField.length === 0) {
-            console.log("[TurnEngine] All enemies defeated or captured! Battle Over.");
+        if (livingEnemies.length === 0) {
+            console.log("[TurnEngine] All enemies defeated! Battle Over.");
             this.eventManager.emit(GAME_EVENTS.BATTLE_END, { reason: 'allEnemiesDefeated' }); // ✨ 상수 사용
             this.eventManager.setGameRunningState(false);
             return;
