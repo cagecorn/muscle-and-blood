@@ -18,7 +18,8 @@ export const GAME_EVENTS = {
     DRAG_START: 'dragStart',
     DRAG_MOVE: 'dragMove',
     DROP: 'drop',
-    DRAG_CANCEL: 'dragCancel'
+    DRAG_CANCEL: 'dragCancel',
+    ATTEMPT_UNIT_CAPTURE: 'attemptUnitCapture'
 };
 
 export const UI_STATES = {

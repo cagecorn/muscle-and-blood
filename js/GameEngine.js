@@ -64,6 +64,10 @@ export class GameEngine {
             throw new Error("Renderer initialization failed.");
         }
         this.eventManager = new EventManager();
+        // GameEngine에서 각 매니저 인스턴스에 대한 getter를 추가하여 순환 참조를 피합니다.
+        this.getVFXManager = () => this.vfxManager;
+        this.getStatusEffectManager = () => this.statusEffectManager;
+        this.getBattleCalculationManager = () => this.battleCalculationManager;
         this.guardianManager = new GuardianManager();
         this.measureManager = new MeasureManager();
         // 게임 규칙을 관리하는 RuleManager 초기화
@@ -187,7 +191,9 @@ export class GameEngine {
             this.eventManager,
             this.battleSimulationManager,
             this.diceRollManager,
-            this.delayEngine
+            this.delayEngine,
+            this.getVFXManager.bind(this),
+            this.getStatusEffectManager.bind(this)
         );
 
         // Status effect 관련 매니저 초기화
@@ -196,7 +202,7 @@ export class GameEngine {
             this.eventManager,
             this.idManager,
             this.turnCountManager,
-            this.battleCalculationManager
+            this.getBattleCalculationManager.bind(this)
         );
         this.workflowManager = new WorkflowManager(
             this.eventManager,
@@ -333,6 +339,11 @@ export class GameEngine {
         await this.assetLoaderManager.loadImage(
             UNITS.WARRIOR.spriteId,
             'assets/images/warrior.png'
+        );
+        // ✨ 포획 애니메이션에 사용될 전사 마무리 이미지 로드
+        await this.assetLoaderManager.loadImage(
+            'sprite_warrior_finish',
+            'assets/images/warrior-finish.png'
         );
         // ✨ 전투 배경 이미지 로드
         await this.assetLoaderManager.loadImage('sprite_battle_stage_forest', 'assets/images/battle-stage-forest.png');
