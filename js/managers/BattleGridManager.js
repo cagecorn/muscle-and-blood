@@ -14,7 +14,7 @@ export class BattleGridManager {
      * @param {CanvasRenderingContext2D} ctx - 캔버스 2D 렌더링 컨텍스트
      */
     draw(ctx) {
-        const sceneContentDimensions = this.logicManager.getCurrentSceneContentDimensions(); // 이제 순수 그리드 크기를 반환
+        const sceneContentDimensions = this.logicManager.getCurrentSceneContentDimensions(); // 순수 그리드 컨텐츠 크기 (gameResolution)
         const canvasWidth = this.measureManager.get('gameResolution.width'); // 캔버스 실제 CSS 너비
         const canvasHeight = this.measureManager.get('gameResolution.height'); // 캔버스 실제 CSS 높이
 
@@ -24,15 +24,20 @@ export class BattleGridManager {
         const gridContentWidth = sceneContentDimensions.width;
         const gridContentHeight = sceneContentDimensions.height;
 
-        // 이 gridContentWidth/Height를 사용하여 effectiveTileSize를 역으로 계산
-        const effectiveTileSize = gridContentWidth / this.gridCols; // 또는 gridContentHeight / this.gridRows; (둘은 같을 것임)
+        // ✨ 핵심 변경: 그리드의 가로 및 세로 비율에 맞춰 타일 크기를 계산하고 더 작은 값을 선택
+        // 캔버스 너비에 맞춰 계산된 타일 크기
+        const tileSizeBasedOnWidth = gridContentWidth / this.gridCols;
+        // 캔버스 높이에 맞춰 계산된 타일 크기
+        const tileSizeBasedOnHeight = gridContentHeight / this.gridRows;
 
-        // 전체 그리드 크기 (여기서는 gridContentWidth/Height와 동일)
-        const totalGridWidth = gridContentWidth;
-        const totalGridHeight = gridContentHeight;
+        // 두 값 중 더 작은 타일 크기를 선택하여 그리드가 캔버스 내에 완전히 보이도록 함
+        const effectiveTileSize = Math.min(tileSizeBasedOnWidth, tileSizeBasedOnHeight);
+
+        // 실제 그려질 그리드의 총 크기
+        const totalGridWidth = effectiveTileSize * this.gridCols;
+        const totalGridHeight = effectiveTileSize * this.gridRows;
 
         // ✨ 그리드를 캔버스 중앙에 배치하기 위한 오프셋 계산 (패딩 포함)
-        // (캔버스 전체 크기 - 그리드 컨텐츠 크기) / 2 + 패딩
         const gridOffsetX = (canvasWidth - totalGridWidth) / 2;
         const gridOffsetY = (canvasHeight - totalGridHeight) / 2;
 
