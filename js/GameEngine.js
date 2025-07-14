@@ -17,6 +17,7 @@ import { AssetLoaderManager } from './managers/AssetLoaderManager.js';
 import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
 import { AnimationManager } from './managers/AnimationManager.js';
 import { VFXManager } from './managers/VFXManager.js';
+import { ParticleEngine } from './managers/ParticleEngine.js'; // ✨ ParticleEngine 임포트
 import { DisarmManager } from './managers/DisarmManager.js'; // ✨ DisarmManager 임포트
 import { CanvasBridgeManager } from './managers/CanvasBridgeManager.js'; // ✨ CanvasBridgeManager 추가
 import { BindingManager } from './managers/BindingManager.js';
@@ -236,6 +237,16 @@ export class GameEngine {
             this.statusEffectManager
         );
 
+        // ✨ ParticleEngine 초기화 (VFXManager보다 먼저)
+        this.particleEngine = new ParticleEngine(
+            this.measureManager,
+            this.cameraEngine,
+            this.battleSimulationManager
+        );
+
+        // VFXManager에 ParticleEngine 전달
+        this.vfxManager.particleEngine = this.particleEngine;
+
         // ✨ sceneEngine에 UI_STATES 상수 사용
         this.sceneEngine.registerScene(UI_STATES.MAP_SCREEN, [this.territoryManager]);
         this.sceneEngine.registerScene(UI_STATES.COMBAT_SCREEN, [
@@ -387,6 +398,9 @@ export class GameEngine {
         this.sceneEngine.update(deltaTime);
         this.animationManager.update(deltaTime);
         this.vfxManager.update(deltaTime);
+        if (this.particleEngine) {
+            this.particleEngine.update(deltaTime); // ✨ ParticleEngine 업데이트 호출
+        }
     }
 
     _draw() {
@@ -441,6 +455,7 @@ export class GameEngine {
     getStatusEffectManager() { return this.statusEffectManager; }
     getWorkflowManager() { return this.workflowManager; }
     getDisarmManager() { return this.disarmManager; }
+    getParticleEngine() { return this.particleEngine; } // ✨ ParticleEngine getter 추가
 
     getButtonEngine() { return this.buttonEngine; }
 
