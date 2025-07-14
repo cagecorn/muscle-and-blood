@@ -7,7 +7,7 @@ export class MeasureManager {
         // 게임의 모든 사이즈 관련 설정을 이곳에 정의
         this._measurements = {
             tileSize: 512, // 맵 타일의 기본 사이즈 (이 값은 이제 BattleGridManager에서 직접 사용되지 않고, 기본 타일 사이즈의 개념으로 유지)
-            mapGrid: { rows: 10, cols: 15 }, // 맵 그리드의 행/열
+            mapGrid: { rows: 9, cols: 16 }, // ✨ 그리드 비율을 16:9로 변경
             gameResolution: {
                 width: 1280,
                 height: 720
@@ -15,9 +15,14 @@ export class MeasureManager {
             ui: {
                 mapPanelWidthRatio: 0.7,
                 mapPanelHeightRatio: 0.9,
-                buttonHeight: 50,
+                buttonHeight: 50, // 이전 절대값, 하위 비율 설정과 함께 유지
                 buttonWidth: 200,
-                buttonMargin: 10
+                buttonMargin: 10,
+                // ✨ 비율 기반 UI 크기 정의
+                buttonHeightRatio: 0.07,  // 게임 높이의 7%
+                buttonWidthRatio: 0.20,   // 게임 너비의 20%
+                buttonMarginRatio: 0.015, // 게임 높이의 1.5%
+                fontSizeRatio: 0.03       // 폰트 크기 비율 (게임 높이의 3%)
             },
             // 새로운 설정: 배틀 스테이지 관련
             battleStage: {
@@ -29,16 +34,20 @@ export class MeasureManager {
             },
             // ✨ 용병 패널 관련 설정 업데이트
             mercenaryPanel: {
-                baseSlotSize: 100, // 각 슬롯의 기본 크기 (UI 계산용)
+                baseSlotSize: 100,
                 gridRows: 2,
                 gridCols: 6,
-                heightRatio: 0.25 // 메인 캔버스 높이의 25% (예시)
+                heightRatio: 0.25,
+                // ✨ 패널 내부 텍스트 크기 비율
+                unitTextFontSizeRatio: 0.04
             },
             // ✨ 전투 로그 관련 설정 추가
             combatLog: {
-                heightRatio: 0.15, // 메인 캔버스 높이의 15% (예시)
-                lineHeight: 20, // 한 줄 높이 (px)
-                padding: 10 // 내부 여백 (px)
+                heightRatio: 0.15,
+                lineHeight: 20, // 절대값 (호환용)
+                padding: 10,
+                // ✨ 줄 높이를 게임 높이 비율로 표현
+                lineHeightRatio: 0.025
             },
             // ✨ 새로운 게임 설정 섹션
             gameConfig: {

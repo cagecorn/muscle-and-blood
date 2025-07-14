@@ -25,12 +25,9 @@ export class BattleLogManager {
      * 이 메서드는 CompatibilityManager가 캔버스 크기를 조정한 후 호출해야 합니다.
      */
     recalculateLogDimensions() {
-        const measuredLineHeight = this.measureManager.get('combatLog.lineHeight');
-        const measuredPadding = this.measureManager.get('combatLog.padding');
-
-        // 캔버스 높이에 따라 표시할 최대 줄 수와 줄 간격 재조정
-        this.padding = measuredPadding;
-        this.lineHeight = measuredLineHeight;
+        const logicalCanvasHeight = this.measureManager.get('gameResolution.height');
+        this.padding = this.measureManager.get('combatLog.padding');
+        this.lineHeight = Math.floor(logicalCanvasHeight * this.measureManager.get('combatLog.lineHeightRatio'));
         this.maxLogLines = Math.floor(((this.canvas.height / this.pixelRatio) - 2 * this.padding) / this.lineHeight);
         
         // 최대 줄 수를 초과하는 오래된 메시지 제거

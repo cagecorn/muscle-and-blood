@@ -49,14 +49,15 @@ export class MercenaryPanelManager {
         }
         for (let i = 0; i <= this.gridRows; i++) {
             ctx.beginPath();
-            ctx.moveTo(panelX, panelY + i * slotHeight);
+            ctx.moveTo(0, panelY + i * slotHeight); // 패널 영역 전체에 선을 그림
             ctx.lineTo(panelX + panelWidth, panelY + i * slotHeight);
             ctx.stroke();
         }
 
         const units = this.battleSimulationManager ? this.battleSimulationManager.unitsOnGrid : [];
         ctx.fillStyle = 'white';
-        ctx.font = '14px Arial';
+        const unitNameFontSize = Math.floor(panelHeight * this.measureManager.get('mercenaryPanel.unitTextFontSizeRatio'));
+        const unitHpFontSize = Math.floor(unitNameFontSize * 0.8);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -69,15 +70,19 @@ export class MercenaryPanelManager {
 
             if (units[i]) {
                 const unit = units[i];
-                ctx.fillText(`${unit.name}`, x, y - 10);
-                ctx.fillText(`HP: ${unit.currentHp}/${unit.baseStats.hp}`, x, y + 10);
+                ctx.font = `${unitNameFontSize}px Arial`;
+                ctx.fillText(`${unit.name}`, x, y - unitNameFontSize * 0.8);
+
+                ctx.font = `${unitHpFontSize}px Arial`;
+                ctx.fillText(`HP: ${unit.currentHp}/${unit.baseStats.hp}`, x, y + unitHpFontSize * 0.8);
                 if (unit.image) {
                     const imgSize = Math.min(slotWidth, slotHeight) * 0.7;
                     const imgX = panelX + col * slotWidth + (slotWidth - imgSize) / 2;
-                    const imgY = panelY + row * slotHeight + (slotHeight - imgSize) / 2 - 25;
+                    const imgY = panelY + row * slotHeight + (slotHeight - imgSize) / 2 - unitNameFontSize * 1.5;
                     ctx.drawImage(unit.image, imgX, imgY, imgSize, imgSize);
                 }
             } else {
+                ctx.font = `${unitNameFontSize}px Arial`;
                 ctx.fillText(`Slot ${i + 1}`, x, y);
             }
         }

@@ -5,8 +5,8 @@ export class BattleGridManager {
         console.log("\uD83D\uDCDC BattleGridManager initialized. Ready to draw the battlefield grid. \uD83D\uDCDC");
         this.measureManager = measureManager;
         this.logicManager = logicManager;
-        this.gridRows = 10;
-        this.gridCols = 15;
+        this.gridRows = 9;  // 16:9 비율에 맞춘 행 수
+        this.gridCols = 16; // 16:9 비율에 맞춘 열 수
     }
 
     /**
@@ -17,8 +17,6 @@ export class BattleGridManager {
         const sceneContentDimensions = this.logicManager.getCurrentSceneContentDimensions(); // 순수 그리드 컨텐츠 크기 (gameResolution)
         const canvasWidth = this.measureManager.get('gameResolution.width'); // 캔버스 실제 CSS 너비
         const canvasHeight = this.measureManager.get('gameResolution.height'); // 캔버스 실제 CSS 높이
-
-        const stagePadding = this.measureManager.get('battleStage.padding');
 
         // LogicManager에서 계산된 순수 그리드 컨텐츠 크기 (패딩 제외)
         const gridContentWidth = sceneContentDimensions.width;

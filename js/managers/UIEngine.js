@@ -17,10 +17,11 @@ export class UIEngine {
 
         this.recalculateUIDimensions();
 
-        const pixelRatio = window.devicePixelRatio || 1;
+        const logicalCanvasWidth = this.measureManager.get('gameResolution.width');
+        const logicalCanvasHeight = this.measureManager.get('gameResolution.height');
         this.battleStartButton = {
-            x: (this.canvas.width / pixelRatio - this.buttonWidth) / 2,
-            y: (this.canvas.height / pixelRatio) - this.buttonHeight - this.buttonMargin,
+            x: (logicalCanvasWidth - this.buttonWidth) / 2,
+            y: logicalCanvasHeight - this.buttonHeight - this.buttonMargin,
             width: this.buttonWidth,
             height: this.buttonHeight,
             text: '전투 시작'
@@ -43,17 +44,21 @@ export class UIEngine {
 
     recalculateUIDimensions() {
         console.log("[UIEngine] Recalculating UI dimensions based on MeasureManager...");
-        // measureManager에서 가져오는 값들이 올바른지 확인합니다.
-        this.mapPanelWidth = this.canvas.width * this.measureManager.get('ui.mapPanelWidthRatio');
-        this.mapPanelHeight = this.canvas.height * this.measureManager.get('ui.mapPanelHeightRatio');
-        this.buttonHeight = this.measureManager.get('ui.buttonHeight');
-        this.buttonWidth = this.measureManager.get('ui.buttonWidth');
-        this.buttonMargin = this.measureManager.get('ui.buttonMargin');
 
-        const pixelRatio = window.devicePixelRatio || 1;
+        const logicalCanvasWidth = this.measureManager.get('gameResolution.width');
+        const logicalCanvasHeight = this.measureManager.get('gameResolution.height');
+
+        this.mapPanelWidth = logicalCanvasWidth * this.measureManager.get('ui.mapPanelWidthRatio');
+        this.mapPanelHeight = logicalCanvasHeight * this.measureManager.get('ui.mapPanelHeightRatio');
+
+        this.buttonHeight = Math.floor(logicalCanvasHeight * this.measureManager.get('ui.buttonHeightRatio'));
+        this.buttonWidth = Math.floor(logicalCanvasWidth * this.measureManager.get('ui.buttonWidthRatio'));
+        this.buttonMargin = Math.floor(logicalCanvasHeight * this.measureManager.get('ui.buttonMarginRatio'));
+        this.uiFontSize = Math.floor(logicalCanvasHeight * this.measureManager.get('ui.fontSizeRatio'));
+
         this.battleStartButton = {
-            x: (this.canvas.width / pixelRatio - this.buttonWidth) / 2, // 논리적 캔버스 너비 사용
-            y: (this.canvas.height / pixelRatio) - this.buttonHeight - this.buttonMargin, // 논리적 캔버스 높이 사용
+            x: (logicalCanvasWidth - this.buttonWidth) / 2,
+            y: logicalCanvasHeight - this.buttonHeight - this.buttonMargin,
             width: this.buttonWidth,
             height: this.buttonHeight,
             text: '전투 시작'
@@ -72,7 +77,7 @@ export class UIEngine {
 
         // ✨ 추가: 버튼 계산 후 최종 위치 및 크기 로그
         console.log(`[UIEngine Debug] Battle Start Button: X=${this.battleStartButton.x}, Y=${this.battleStartButton.y}, Width=${this.battleStartButton.width}, Height=${this.battleStartButton.height}`);
-        console.log(`[UIEngine Debug] Canvas Logical Dimensions: ${this.canvas.width / pixelRatio}x${this.canvas.height / pixelRatio}`);
+        console.log(`[UIEngine Debug] Canvas Logical Dimensions: ${logicalCanvasWidth}x${logicalCanvasHeight}`);
     }
 
     getUIState() {
@@ -110,13 +115,13 @@ export class UIEngine {
                 battleStartButtonRect.height
             );
             ctx.fillStyle = 'white';
-            ctx.font = '24px Arial';
+            ctx.font = `${this.uiFontSize}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(
                 this.battleStartButton.text,
                 battleStartButtonRect.x + battleStartButtonRect.width / 2,
-                battleStartButtonRect.y + battleStartButtonRect.height / 2 + 8
+                battleStartButtonRect.y + battleStartButtonRect.height / 2 + (this.uiFontSize * 0.25)
             );
         } else if (this._currentUIState === 'combatScreen') {
             // 전투 화면에서는 현재 별도의 상단 텍스트를 표시하지 않습니다.
