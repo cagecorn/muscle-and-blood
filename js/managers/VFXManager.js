@@ -4,7 +4,7 @@ import { GAME_EVENTS } from '../constants.js';
 
 export class VFXManager {
     // animationManager를 추가로 받아 유닛의 애니메이션 위치를 참조합니다.
-    constructor(renderer, measureManager, cameraEngine, battleSimulationManager, animationManager, eventManager) {
+    constructor(renderer, measureManager, cameraEngine, battleSimulationManager, animationManager, eventManager, particleEngine = null) { // ✨ particleEngine 추가
         console.log("\u2728 VFXManager initialized. Ready to render visual effects. \u2728");
         this.renderer = renderer;
         this.measureManager = measureManager;
@@ -12,6 +12,7 @@ export class VFXManager {
         this.battleSimulationManager = battleSimulationManager; // 유닛 데이터를 가져오기 위함
         this.animationManager = animationManager; // ✨ AnimationManager 저장
         this.eventManager = eventManager;
+        this.particleEngine = particleEngine; // ✨ ParticleEngine 저장
 
         this.activeDamageNumbers = [];
 
@@ -23,6 +24,10 @@ export class VFXManager {
         // ✨ subscribe to damage display events
         this.eventManager.subscribe(GAME_EVENTS.DISPLAY_DAMAGE, (data) => {
             this.addDamageNumber(data.unitId, data.damage, data.color);
+            // 피해를 입었을 때 파티클 생성
+            if (this.particleEngine && data.damage > 0) {
+                this.particleEngine.addParticles(data.unitId, 'red'); // 붉은색 파티클
+            }
         });
     }
 
@@ -317,6 +322,10 @@ export class VFXManager {
             ctx.globalAlpha = drop.opacity;
             ctx.drawImage(drop.sprite, drop.startX, drop.currentY, weaponSize, weaponSize);
             ctx.restore();
+        }
+        // ✨ 파티클 그리기 호출
+        if (this.particleEngine) {
+            this.particleEngine.draw(ctx);
         }
     }
 }
