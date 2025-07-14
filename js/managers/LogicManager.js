@@ -23,21 +23,11 @@ export class LogicManager {
             contentWidth = canvasWidth;
             contentHeight = canvasHeight;
         } else if (currentSceneName === 'battleScene') {
-            // 전투 씬의 경우 실제 그리드 크기를 계산
-            const gridCols = 15;
-            const gridRows = 10;
-            const stagePadding = this.measureManager.get('battleStage.padding');
-
-            const gridDrawableWidth = canvasWidth - 2 * stagePadding;
-            const gridDrawableHeight = canvasHeight - 2 * stagePadding;
-
-            const effectiveTileSize = Math.min(
-                gridDrawableWidth / gridCols,
-                gridDrawableHeight / gridRows
-            );
-
-            contentWidth = gridCols * effectiveTileSize;
-            contentHeight = gridRows * effectiveTileSize;
+            // 전투 씬의 경우, 전체 캔버스 영역을 콘텐츠로 간주합니다.
+            // BattleStageManager가 배경을 전체 캔버스에 그리므로
+            // 카메라가 이 전체 영역을 프레임해야 합니다.
+            contentWidth = canvasWidth;
+            contentHeight = canvasHeight;
         } else {
             console.warn(`[LogicManager] Unknown scene name '${currentSceneName}'. Returning main game canvas dimensions as content dimensions.`);
             contentWidth = canvasWidth;

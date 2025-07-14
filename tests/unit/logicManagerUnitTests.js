@@ -44,7 +44,7 @@ export function runLogicManagerUnitTests(logicManager) {
     testCount++;
     let logicManagerBattle = new logicManager.constructor(mockMeasureManager, mockSceneManagerBattle);
     const battleContent = logicManagerBattle.getCurrentSceneContentDimensions();
-    if (battleContent.width === 960 && battleContent.height === 640) {
+    if (battleContent.width === 1280 && battleContent.height === 720) {
         console.log("LogicManager: Battle scene content dimensions correct. [PASS]");
         passCount++;
     } else {
@@ -54,7 +54,7 @@ export function runLogicManagerUnitTests(logicManager) {
     // \ud14c\uc2a4\ud2b8 3: \uc90c \uc81c\ud55c (\ucee8\ud150\uce20\uac00 \uce74\ubc84\uc2a4 \ud06c\uae30\uc77c \ub54c)
     testCount++;
     const zoomLimits = logicManagerBattle.getZoomLimits();
-    const expectedMinZoom = 720 / 640; // 1.125...
+    const expectedMinZoom = 1.0; // 콘텐츠와 캔버스 크기가 동일
     if (Math.abs(zoomLimits.minZoom - expectedMinZoom) < 0.01 && zoomLimits.maxZoom === 10.0) {
         console.log("LogicManager: Zoom limits correct for canvas-sized content. [PASS]");
         passCount++;
@@ -65,7 +65,7 @@ export function runLogicManagerUnitTests(logicManager) {
     // \ud14c\uc2a4\ud2b8 4: \ud310 \uc81c\uc57d (\uc90c 1.0\uc77c \ub54c, \ucee8\ud150\uce20\uac00 \uce74\ubc84\uc2a4 \ud06c\uae30\uc774\ub85c \uc911\uc559 \uc815\ub82c)
     testCount++;
     const panPos1 = logicManagerBattle.applyPanConstraints(50, 50, 1.0);
-    if (panPos1.x === 160 && panPos1.y === 40) {
+    if (panPos1.x === 0 && panPos1.y === 0) {
         console.log("LogicManager: Pan constraints correct for zoom 1.0 (centered). [PASS]");
         passCount++;
     } else {
@@ -85,7 +85,7 @@ export function runLogicManagerUnitTests(logicManager) {
     // \ud14c\uc2a4\ud2b8 6: \ud310 \uc81c\uc57d (\ubc94\uc704\ub97c \ubc8c\uc5b4\ub098\ub294 \uacbd\uc6b0)
     testCount++;
     const panPos3 = logicManagerBattle.applyPanConstraints(-2000, -1000, 2.0);
-    if (panPos3.x === -640 && panPos3.y === -560) {
+    if (panPos3.x === -1280 && panPos3.y === -720) {
         console.log("LogicManager: Pan constraints correct for out-of-bounds (clamped). [PASS]");
         passCount++;
     } else {
