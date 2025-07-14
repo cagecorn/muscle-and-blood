@@ -6,7 +6,7 @@ self.onmessage = (event) => {
     switch (type) {
         case 'CALCULATE_DAMAGE': {
             // ✨ payload에서 대상 유닛의 배리어 정보를 가져옵니다.
-            const { attackerStats, targetStats, skillData, currentTargetHp, currentTargetBarrier, maxBarrier, preCalculatedDamageRoll } = payload;
+            const { attackerStats, targetStats, skillData, currentTargetHp, currentTargetBarrier, maxBarrier, preCalculatedDamageRoll, attackerUnitId } = payload;
 
             // 최종 적용될 데미지 (방어력 적용 후)
             let finalDamageToApply = preCalculatedDamageRoll - targetStats.defense;
@@ -35,10 +35,11 @@ self.onmessage = (event) => {
             self.postMessage({
                 type: 'DAMAGE_CALCULATED',
                 unitId: payload.targetUnitId,
+                attackerUnitId: attackerUnitId,
                 newHp: newHp,
-                newBarrier: newBarrier,          // ✨ 업데이트된 배리어 값 반환
-                hpDamageDealt: hpDamageDealt,    // ✨ HP로 들어간 데미지 반환
-                barrierDamageDealt: barrierDamageDealt // ✨ 배리어로 흡수된 데미지 반환
+                newBarrier: newBarrier,
+                hpDamageDealt: hpDamageDealt,
+                barrierDamageDealt: barrierDamageDealt
             });
             break;
         }
