@@ -5,6 +5,7 @@ export { runGuardianManagerTests } from './unit/guardianManagerUnitTests.js';
 export { runMeasureManagerUnitTests } from './unit/measureManagerUnitTests.js';
 export { runMapManagerUnitTests } from './unit/mapManagerUnitTests.js';
 export { runUIEngineUnitTests } from './unit/uiEngineUnitTests.js';
+export { runButtonEngineUnitTests } from './unit/buttonEngineUnitTests.js';
 
 // new unit tests
 export { runSceneEngineUnitTests } from './unit/sceneEngineUnitTests.js';

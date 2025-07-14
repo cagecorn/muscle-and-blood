@@ -72,43 +72,6 @@ export function runUIEngineUnitTests() {
         console.error("UIEngine: Error setting/getting UI state. [FAIL]", e);
     }
 
-    // 테스트 4: isClickOnButton - 버튼 클릭 성공
-    testCount++;
-    try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
-        uiEngine.setUIState('mapScreen');
-        const button = uiEngine.battleStartButton;
-        const clickX = button.x + button.width / 2;
-        const clickY = button.y + button.height / 2;
-
-        if (uiEngine.isClickOnButton(clickX, clickY)) {
-            console.log("UIEngine: isClickOnButton returned true for valid click. [PASS]");
-            passCount++;
-        } else {
-            console.error("UIEngine: isClickOnButton failed for valid click. [FAIL]");
-        }
-    } catch (e) {
-        console.error("UIEngine: Error during isClickOnButton success test. [FAIL]", e);
-    }
-
-    // 테스트 5: isClickOnButton - 버튼 클릭 실패 (다른 UI 상태)
-    testCount++;
-    try {
-        const uiEngine = new UIEngine(mockRenderer, mockMeasureManager, mockEventManager, mockMercenaryPanelManager);
-        uiEngine.setUIState('combatScreen');
-        const button = uiEngine.battleStartButton;
-        const clickX = button.x + button.width / 2;
-        const clickY = button.y + button.height / 2;
-
-        if (!uiEngine.isClickOnButton(clickX, clickY)) {
-            console.log("UIEngine: isClickOnButton returned false for incorrect UI state. [PASS]");
-            passCount++;
-        } else {
-            console.error("UIEngine: isClickOnButton failed for incorrect UI state. [FAIL]");
-        }
-    } catch (e) {
-        console.error("UIEngine: Error during isClickOnButton (wrong state) test. [FAIL]", e);
-    }
 
     // 테스트 6: handleBattleStartClick - 이벤트 발생 확인 (간접)
     testCount++;

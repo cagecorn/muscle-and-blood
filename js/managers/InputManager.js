@@ -1,11 +1,12 @@
 // js/managers/InputManager.js
 
 export class InputManager {
-    constructor(renderer, cameraEngine, uiEngine) {
+    constructor(renderer, cameraEngine, uiEngine, buttonEngine) { // ✨ buttonEngine 추가
         console.log("🎮 InputManager initialized. Ready to process user input. 🎮");
         this.renderer = renderer;
         this.cameraEngine = cameraEngine;
         this.uiEngine = uiEngine;
+        this.buttonEngine = buttonEngine; // ✨ ButtonEngine 인스턴스 저장
 
         this.canvas = this.renderer.canvas;
 
@@ -26,12 +27,14 @@ export class InputManager {
     }
 
     _onMouseDown(event) {
-        // 클릭이 버튼 위에서 발생하면 드래그를 시작하지 않고 바로 리턴합니다.
-        // 실제 버튼 클릭 처리는 _onClick에서 이루어집니다.
-        // 여기서는 event.clientX, Y를 그대로 사용하는 것이 맞습니다. isClickOnButton 내부에서 rect 계산.
-        if (this.uiEngine.getUIState() === 'mapScreen' && this.uiEngine.isClickOnButton(event.clientX, event.clientY)) {
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+
+        // ✨ ButtonEngine을 통해 버튼 클릭 여부를 판단합니다.
+        if (this.buttonEngine && this.buttonEngine.handleCanvasClick(mouseX, mouseY)) {
             this.isDragging = false;
-            console.log(`[InputManager Debug] MouseDown on Button detected: ClientX=${event.clientX}, ClientY=${event.clientY}`);
+            console.log(`[InputManager Debug] MouseDown on Button detected and handled by ButtonEngine.`);
             return;
         }
 
@@ -76,13 +79,11 @@ export class InputManager {
         console.log(`[InputManager Debug] Canvas Local Mouse: X=${mouseX}, Y=${mouseY}`);
         console.log(`[InputManager Debug] Current UI State: ${this.uiEngine.getUIState()}`);
 
-        // ✨ 핵심 수정 부분입니다.
-        // raw event.clientX/Y 대신 계산된 mouseX/Y를 isClickOnButton에 전달합니다.
-        if (this.uiEngine.isClickOnButton(mouseX, mouseY)) { // <--- 여기가 변경된 부분입니다.
-            console.log(`[InputManager Debug] isClickOnButton returned TRUE. Attempting to handle battle start.`);
-            this.uiEngine.handleBattleStartClick();
+        // ✨ ButtonEngine을 사용하여 클릭된 버튼이 있는지 확인하고 처리합니다.
+        if (this.buttonEngine && this.buttonEngine.handleCanvasClick(mouseX, mouseY)) {
+            console.log(`[InputManager Debug] Click event handled by ButtonEngine.`);
         } else {
-            console.log(`[InputManager Debug] isClickOnButton returned FALSE. Not a button click.`);
+            console.log(`[InputManager Debug] No button clicked or handled.`);
         }
     }
 }
