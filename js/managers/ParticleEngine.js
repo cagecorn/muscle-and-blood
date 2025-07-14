@@ -40,22 +40,29 @@ export class ParticleEngine {
         const particleDuration = this.measureManager.get('particle.duration');
         const particleSpeedY = this.measureManager.get('particle.speedY');
         const particleSpread = this.measureManager.get('particle.spread');
+        const particleStartOffsetY = this.measureManager.get('particle.startOffsetY'); // ✨ 새 상수 추가
+
+        // 유닛의 중심에서 파티클이 튀어나오도록 초기 위치 계산
+        const unitCenterX = gridOffsetX + unit.gridX * effectiveTileSize + effectiveTileSize / 2;
+        // 유닛 이미지의 상단 근처에서 튀어나오도록 조정
+        const unitTopY = gridOffsetY + unit.gridY * effectiveTileSize + effectiveTileSize * particleStartOffsetY; // ✨ Y 위치 조정
 
         for (let i = 0; i < particleCount; i++) {
-            const startX = gridOffsetX + unit.gridX * effectiveTileSize + effectiveTileSize / 2;
-            const startY = gridOffsetY + unit.gridY * effectiveTileSize + effectiveTileSize / 2;
+            // ✨ speedX, speedY에 더 큰 무작위성 추가
+            const speedX = (Math.random() - 0.5) * particleSpread; // 좌우로 더 많이 퍼지게
+            const speedY = particleSpeedY * (0.5 + Math.random() * 0.5); // 수직 속도에 변화를 줌 (최대 절반까지 감소)
 
             const particle = {
-                x: startX + (Math.random() * particleSpread - particleSpread / 2),
-                y: startY,
-                size: baseParticleSize * (0.8 + Math.random() * 0.4), // 크기 변화
+                x: unitCenterX + (Math.random() * baseParticleSize * 2 - baseParticleSize), // 유닛 중심 근처에서 약간 랜덤한 시작 X
+                y: unitTopY, // ✨ 유닛 이미지 상단에서 시작
+                size: baseParticleSize * (0.7 + Math.random() * 0.6), // 크기 변화 (0.7 ~ 1.3배)
                 color: color,
-                speedX: (Math.random() - 0.5) * 2, // -1에서 1 사이의 랜덤 값
-                speedY: particleSpeedY * (0.8 + Math.random() * 0.4), // 위로 솟구치는 속도
+                speedX: speedX,
+                speedY: speedY,
                 alpha: 1,
                 startTime: performance.now(),
                 duration: particleDuration,
-                initialY: startY // 초기 y 위치 저장 (재계산을 위해)
+                initialY: unitTopY // 초기 y 위치 저장 (재계산을 위해)
             };
             this.activeParticles.push(particle);
         }
@@ -74,8 +81,8 @@ export class ParticleEngine {
                 return false; // 파티클 수명 만료
             }
 
-            // 위치 업데이트
-            particle.x += particle.speedX * (deltaTime / 16); // 16ms를 기준으로 속도 조정
+            // 위치 업데이트 (speedY는 음수이므로 빼기)
+            particle.x += particle.speedX * (deltaTime / 16);
             particle.y -= particle.speedY * (deltaTime / 16);
 
             // 투명도 업데이트 (점점 사라지게)
