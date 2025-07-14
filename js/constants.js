@@ -29,7 +29,9 @@ export const UI_STATES = {
 
 export const BUTTON_IDS = {
     BATTLE_START: 'battleStartButton',
-    TOGGLE_HERO_PANEL: 'toggleHeroPanelBtn'
+    TOGGLE_HERO_PANEL: 'toggleHeroPanelBtn',
+    // HTML 요소로 제공되는 전투 시작 버튼
+    BATTLE_START_HTML: 'battleStartHtmlBtn'
 };
 
 export const ATTACK_TYPES = {

@@ -131,6 +131,8 @@
         <canvas id="gameCanvas"></canvas>
         <canvas id="combatLogCanvas"></canvas>
     </div>
+    <!-- ✨ 전투 시작을 위한 별도의 HTML 버튼 -->
+    <button id="battleStartHtmlBtn" class="game-button">전투 시작</button>
     <script type="module">
     import { GameEngine } from './js/GameEngine.js'; // <-- GameEngine 불러오기
     import {
@@ -464,6 +466,14 @@
             document.getElementById(BUTTON_IDS.TOGGLE_HERO_PANEL).addEventListener('click', () => { // ✨ 상수 사용
                 gameEngine.getUIEngine().toggleHeroPanel();
             });
+
+            // ✨ 전투 시작 HTML 버튼
+            const battleStartHtmlBtn = document.getElementById(BUTTON_IDS.BATTLE_START_HTML);
+            if (battleStartHtmlBtn) {
+                battleStartHtmlBtn.addEventListener('click', () => {
+                    gameEngine.getUIEngine().handleBattleStartClick();
+                });
+            }
 
 
             // 게임 업데이트 함수 정의 (DEBUG ONLY - GameEngine의 _update가 대신함)
