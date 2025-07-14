@@ -10,8 +10,8 @@ export class BattleSimulationManager {
         this.animationManager = animationManager;
         this.valorEngine = valorEngine;
         this.unitsOnGrid = [];
-        this.gridRows = 10; // BattleGridManager와 동일한 그리드 차원
-        this.gridCols = 15;
+        this.gridRows = 9;  // 16:9 비율에 맞춘 행 수
+        this.gridCols = 16; // 16:9 비율에 맞춘 열 수
     }
 
     /**
@@ -103,21 +103,20 @@ export class BattleSimulationManager {
         const canvasWidth = this.measureManager.get('gameResolution.width'); // 캔버스 실제 CSS 너비
         const canvasHeight = this.measureManager.get('gameResolution.height'); // 캔버스 실제 CSS 높이
 
-        const stagePadding = this.measureManager.get('battleStage.padding');
-
         // LogicManager에서 계산된 순수 그리드 컨텐츠 크기 (패딩 제외)
         const gridContentWidth = sceneContentDimensions.width;
         const gridContentHeight = sceneContentDimensions.height;
 
-        // 이 gridContentWidth/Height를 사용하여 effectiveTileSize를 역으로 계산
-        const effectiveTileSize = gridContentWidth / this.gridCols;
+        // BattleGridManager와 동일한 로직으로 타일 크기를 계산
+        const tileSizeBasedOnWidth = gridContentWidth / this.gridCols;
+        const tileSizeBasedOnHeight = gridContentHeight / this.gridRows;
+        const effectiveTileSize = Math.min(tileSizeBasedOnWidth, tileSizeBasedOnHeight);
 
-        // 전체 그리드 크기 (여기서는 gridContentWidth/Height와 동일)
-        const totalGridWidth = gridContentWidth;
-        const totalGridHeight = gridContentHeight;
+        // 실제 그려질 그리드의 총 크기
+        const totalGridWidth = effectiveTileSize * this.gridCols;
+        const totalGridHeight = effectiveTileSize * this.gridRows;
 
-        // ✨ 그리드를 캔버스 중앙에 배치하기 위한 오프셋 계산 (패딩 포함)
-        // (캔버스 전체 크기 - 그리드 컨텐츠 크기) / 2 + 패딩
+        // 그리드를 캔버스 중앙에 배치하기 위한 오프셋 계산
         const gridOffsetX = (canvasWidth - totalGridWidth) / 2;
         const gridOffsetY = (canvasHeight - totalGridHeight) / 2;
 
