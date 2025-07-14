@@ -31,11 +31,5 @@ export class BattleStageManager {
         // 배경 이미지를 논리적 캔버스 크기에 맞춰 그립니다.
         ctx.drawImage(this.backgroundImage, 0, 0, logicalWidth, logicalHeight);
 
-        ctx.fillStyle = 'white';
-        ctx.font = '40px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        // 텍스트를 캔버스 중앙에 배치 (논리적 크기 사용)
-        ctx.fillText('전투가 시작됩니다!', logicalWidth / 2, logicalHeight / 2);
     }
 }
