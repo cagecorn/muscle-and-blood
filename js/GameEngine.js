@@ -356,14 +356,8 @@ export class GameEngine {
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
 
         // ✨ BattleSimulationManager에 유닛 배치 시 currentHp 초기화
-        // 첫 번째 전사를 그리드의 더 왼쪽에 배치 (gridX: 3)
+        // 전사를 그리드의 더 왼쪽에 배치 (gridX: 3)
         this.battleSimulationManager.addUnit({ ...warriorData, currentHp: warriorData.baseStats.hp }, warriorImage, 3, 4);
-
-        // 두 번째 전사 유닛을 생성하여 바로 옆 타일에 배치합니다.
-        const secondWarriorId = 'unit_warrior_002';
-        const secondWarriorData = { ...warriorData, id: secondWarriorId };
-        await this.idManager.addOrUpdateId(secondWarriorId, secondWarriorData);
-        this.battleSimulationManager.addUnit({ ...secondWarriorData, currentHp: secondWarriorData.baseStats.hp }, warriorImage, 3, 5);
 
         const mockEnemyUnitData = {
             id: 'unit_zombie_001', // ID 변경
@@ -396,15 +390,8 @@ export class GameEngine {
 
         const enemyData = await this.idManager.get(mockEnemyUnitData.id);
         const enemyImage = this.assetLoaderManager.getImage(mockEnemyUnitData.spriteId);
-        // 첫 번째 좀비를 그리드의 더 오른쪽에 배치 (gridX: 10)
+        // 좀비를 그리드의 더 오른쪽에 배치 (gridX: 10)
         this.battleSimulationManager.addUnit({ ...enemyData, currentHp: enemyData.baseStats.hp }, enemyImage, 10, 4);
-
-        // 두 번째 좀비 유닛을 생성하여 그 옆 타일에 배치합니다.
-        const secondZombieId = 'unit_zombie_002';
-        const secondZombieData = { ...mockEnemyUnitData, id: secondZombieId };
-        await this.idManager.addOrUpdateId(secondZombieId, secondZombieData);
-        const enemyImage2 = this.assetLoaderManager.getImage(secondZombieData.spriteId);
-        this.battleSimulationManager.addUnit({ ...secondZombieData, currentHp: secondZombieData.baseStats.hp }, enemyImage2, 10, 5);
     }
 
     _update(deltaTime) {
