@@ -14,8 +14,6 @@ export class VFXManager {
         this.eventManager = eventManager;
 
         this.activeDamageNumbers = [];
-        // ✨ 포획 애니메이션 관리
-        this.activeCaptureAnimations = new Map();
 
         // ✨ 무기 드롭 애니메이션 관리
         this.eventManager.subscribe(GAME_EVENTS.WEAPON_DROPPED, this._onWeaponDropped.bind(this));
@@ -119,50 +117,6 @@ export class VFXManager {
             totalDuration: this.measureManager.get('vfx.weaponDropTotalDuration')
         });
         console.log(`[VFXManager] Weapon drop animation data added for unit ${data.unitId}.`);
-    }
-
-    /**
-     * 무장해제된 유닛을 포획하는 애니메이션을 시작합니다.
-     * @param {object} attackerUnit - 포획하는 유닛 (전사)
-     * @param {object} targetUnit - 포획되는 유닛 (좀비)
-     * @returns {Promise<void>} 애니메이션 완료 시 resolve
-     */
-    async startCaptureAnimation(attackerUnit, targetUnit) {
-        console.log(`[VFXManager] Starting capture animation for ${attackerUnit.name} capturing ${targetUnit.name}.`);
-
-        const captureId = `capture_${attackerUnit.id}_${targetUnit.id}_${performance.now()}`;
-
-        this.activeCaptureAnimations.set(captureId, {
-            attackerUnit: attackerUnit,
-            targetUnit: targetUnit,
-            originalAttackerImage: attackerUnit.image,
-            captureAttackerImage: this.battleSimulationManager.assetLoaderManager.getImage('sprite_warrior_finish'),
-            currentOffset: 0,
-            singleMoveDuration: 100,
-            oscillationAmount: 5,
-            totalOscillations: 10
-        });
-
-        const captureAnim = this.activeCaptureAnimations.get(captureId);
-
-        for (let i = 0; i < captureAnim.totalOscillations * 2; i++) {
-            captureAnim.currentOffset = (i % 2 === 0) ? captureAnim.oscillationAmount : -captureAnim.oscillationAmount;
-            if (i === captureAnim.totalOscillations * 2 - 1) {
-                captureAnim.currentOffset = 0;
-            }
-            await new Promise(r => setTimeout(r, captureAnim.singleMoveDuration));
-        }
-
-        captureAnim.currentOffset = 0;
-        this.activeCaptureAnimations.delete(captureId);
-
-        const index = this.battleSimulationManager.unitsOnGrid.findIndex(u => u.id === targetUnit.id);
-        if (index !== -1) {
-            this.battleSimulationManager.unitsOnGrid.splice(index, 1);
-            console.log(`[VFXManager] Captured unit '${targetUnit.id}' removed from grid.`);
-        }
-
-        attackerUnit.image = captureAnim.originalAttackerImage;
     }
 
     /**
@@ -300,58 +254,7 @@ export class VFXManager {
         console.log(`[VFXManager Debug] Drawing VFX Parameters: \n            Canvas (Logical): ${canvasWidth}x${canvasHeight}\n            Effective Tile Size: ${effectiveTileSize.toFixed(2)}\n            Grid Offset (X, Y): ${gridOffsetX.toFixed(2)}, ${gridOffsetY.toFixed(2)}`);
         // ✨ DEBUG LOG END FOR VFXManager Drawing Parameters
 
-        const unitsToDrawNormally = new Set(this.battleSimulationManager.unitsOnGrid.map(u => u.id));
-
-        // 포획 애니메이션 그리기
-        for (const [captureId, captureAnim] of this.activeCaptureAnimations.entries()) {
-            const attackerUnit = captureAnim.attackerUnit;
-            const targetUnit = captureAnim.targetUnit;
-
-            unitsToDrawNormally.delete(attackerUnit.id);
-            unitsToDrawNormally.delete(targetUnit.id);
-
-            const targetRenderPos = this.animationManager.getRenderPosition(
-                targetUnit.id,
-                targetUnit.gridX,
-                targetUnit.gridY,
-                effectiveTileSize,
-                gridOffsetX,
-                gridOffsetY
-            );
-            const targetImageSize = effectiveTileSize;
-            const targetImgOffsetX = (effectiveTileSize - targetImageSize) / 2;
-            const targetImgOffsetY = (effectiveTileSize - targetImageSize) / 2;
-            if (targetUnit.image) {
-                ctx.drawImage(targetUnit.image, targetRenderPos.drawX + targetImgOffsetX, targetRenderPos.drawY + targetImgOffsetY, targetImageSize, targetImageSize);
-            }
-
-            const attackerRenderPos = this.animationManager.getRenderPosition(
-                attackerUnit.id,
-                attackerUnit.gridX,
-                attackerUnit.gridY,
-                effectiveTileSize,
-                gridOffsetX,
-                gridOffsetY
-            );
-            const attackerImageSize = effectiveTileSize;
-            const attackerImgOffsetX = (effectiveTileSize - attackerImageSize) / 2;
-            const attackerImgOffsetY = (effectiveTileSize - attackerImageSize) / 2;
-
-            if (captureAnim.captureAttackerImage) {
-                ctx.drawImage(
-                    captureAnim.captureAttackerImage,
-                    attackerRenderPos.drawX + attackerImgOffsetX + captureAnim.currentOffset,
-                    attackerRenderPos.drawY + attackerImgOffsetY,
-                    attackerImageSize,
-                    attackerImageSize
-                );
-            }
-        }
-
         for (const unit of this.battleSimulationManager.unitsOnGrid) {
-            if (!unitsToDrawNormally.has(unit.id)) {
-                continue;
-            }
             // ✨ AnimationManager를 통해 현재 애니메이션이 적용된 위치를 조회합니다.
             const { drawX, drawY } = this.animationManager.getRenderPosition(
                 unit.id,

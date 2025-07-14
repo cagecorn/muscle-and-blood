@@ -4,12 +4,12 @@ import { STATUS_EFFECTS } from '../../data/statusEffects.js';
 import { GAME_EVENTS, ATTACK_TYPES } from '../constants.js';
 
 export class StatusEffectManager {
-    constructor(eventManager, idManager, turnCountManager, getBattleCalculationManager) {
+    constructor(eventManager, idManager, turnCountManager, battleCalculationManager) {
         console.log("\u2728 StatusEffectManager initialized. Managing unit status effects. \u2728");
         this.eventManager = eventManager;
         this.idManager = idManager;
         this.turnCountManager = turnCountManager;
-        this.getBattleCalculationManager = getBattleCalculationManager;
+        this.battleCalculationManager = battleCalculationManager;
         this._setupEventListeners();
     }
 
@@ -28,7 +28,7 @@ export class StatusEffectManager {
                     if (effect.effectData.effect.damagePerTurn) {
                         const damage = effect.effectData.effect.damagePerTurn;
                         console.log(`[StatusEffectManager] Unit ${unitId} takes ${damage} poison damage from ${effect.effectData.name}.`);
-                        this.getBattleCalculationManager().requestDamageCalculation('statusEffectSource', unitId, {
+                        this.battleCalculationManager.requestDamageCalculation('statusEffectSource', unitId, {
                             type: ATTACK_TYPES.STATUS_EFFECT, // ✨ 상수 사용
                             damageAmount: damage,
                             isFixedDamage: true
