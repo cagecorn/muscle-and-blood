@@ -1,5 +1,7 @@
 // js/managers/VFXManager.js
 
+import { GAME_EVENTS } from '../constants.js';
+
 export class VFXManager {
     // animationManager를 추가로 받아 유닛의 애니메이션 위치를 참조합니다.
     constructor(renderer, measureManager, cameraEngine, battleSimulationManager, animationManager, eventManager) {
@@ -14,12 +16,12 @@ export class VFXManager {
         this.activeDamageNumbers = [];
 
         // ✨ 무기 드롭 애니메이션 관리
-        this.eventManager.subscribe('weaponDropped', this._onWeaponDropped.bind(this));
+        this.eventManager.subscribe(GAME_EVENTS.WEAPON_DROPPED, this._onWeaponDropped.bind(this));
         this.activeWeaponDrops = new Map(); // unitId => animation data
         console.log("[VFXManager] Subscribed to 'weaponDropped' event.");
 
         // ✨ subscribe to damage display events
-        this.eventManager.subscribe('displayDamage', (data) => {
+        this.eventManager.subscribe(GAME_EVENTS.DISPLAY_DAMAGE, (data) => {
             this.addDamageNumber(data.unitId, data.damage, data.color);
         });
     }
@@ -96,22 +98,23 @@ export class VFXManager {
             gridOffsetY
         );
 
-        const weaponSize = effectiveTileSize * 0.5;
+        // ✨ 무기 크기, 시작/종료 위치 등을 MeasureManager 비율 값으로 계산
+        const weaponSize = effectiveTileSize * this.measureManager.get('vfx.weaponDropScale');
         const startX = drawX + (effectiveTileSize - weaponSize) / 2;
-        const startY = drawY - effectiveTileSize * 0.5;
+        const startY = drawY - effectiveTileSize * this.measureManager.get('vfx.weaponDropStartOffsetY');
 
         this.activeWeaponDrops.set(data.unitId, {
             sprite: weaponImage,
             startX: startX,
             startY: startY,
-            endY: drawY + effectiveTileSize * 0.8,
+            endY: drawY + effectiveTileSize * this.measureManager.get('vfx.weaponDropEndOffsetY'), // ✨ 끝 Y 위치 조정
             currentY: startY,
             opacity: 1,
             startTime: performance.now(),
-            popDuration: 300,
-            fallDuration: 500,
-            fadeDuration: 500,
-            totalDuration: 1300
+            popDuration: this.measureManager.get('vfx.weaponDropPopDuration'),
+            fallDuration: this.measureManager.get('vfx.weaponDropFallDuration'),
+            fadeDuration: this.measureManager.get('vfx.weaponDropFadeDuration'),
+            totalDuration: this.measureManager.get('vfx.weaponDropTotalDuration')
         });
         console.log(`[VFXManager] Weapon drop animation data added for unit ${data.unitId}.`);
     }
@@ -167,9 +170,9 @@ export class VFXManager {
         const currentHp = unit.currentHp !== undefined ? unit.currentHp : maxHp;
         const hpRatio = currentHp / maxHp;
 
-        const barWidth = effectiveTileSize * 0.8;
-        const barHeight = effectiveTileSize * 0.1;
-        const barOffsetY = -barHeight - 5; // 유닛 이미지 위에 위치
+        const barWidth = effectiveTileSize * this.measureManager.get('vfx.hpBarWidthRatio');
+        const barHeight = effectiveTileSize * this.measureManager.get('vfx.hpBarHeightRatio');
+        const barOffsetY = -(barHeight + this.measureManager.get('vfx.hpBarVerticalOffset')); // 유닛 이미지 위에 위치
 
         const hpBarDrawX = actualDrawX + (effectiveTileSize - barWidth) / 2;
         const hpBarDrawY = actualDrawY + barOffsetY;
@@ -202,9 +205,9 @@ export class VFXManager {
         const maxBarrier = unit.maxBarrier;
         const barrierRatio = maxBarrier > 0 ? currentBarrier / maxBarrier : 0;
 
-        const barWidth = effectiveTileSize * 0.8;
-        const barHeight = effectiveTileSize * 0.05;
-        const barOffsetY = effectiveTileSize * 0.1 + 8;
+        const barWidth = effectiveTileSize * this.measureManager.get('vfx.barrierBarWidthRatio');
+        const barHeight = effectiveTileSize * this.measureManager.get('vfx.barrierBarHeightRatio');
+        const barOffsetY = effectiveTileSize * this.measureManager.get('vfx.barrierBarVerticalOffset');
 
         const barrierBarDrawX = actualDrawX + (effectiveTileSize - barWidth) / 2;
         const barrierBarDrawY = actualDrawY + barOffsetY;
@@ -285,19 +288,21 @@ export class VFXManager {
             const elapsed = currentTime - dmgNum.startTime;
             const progress = elapsed / dmgNum.duration;
 
-            const currentYOffset = dmgNum.floatSpeed * elapsed;
+            const currentYOffset = this.measureManager.get('vfx.damageNumberFloatSpeed') * elapsed; // ✨ 비율 사용
             const alpha = Math.max(0, 1 - progress);
 
             ctx.save();
             ctx.globalAlpha = alpha;
             ctx.fillStyle = dmgNum.color || ((dmgNum.damage > 0) ? '#FF4500' : '#ADFF2F');
-            ctx.font = `bold ${20 + (1 - progress) * 5}px Arial`;
+            const baseFontSize = this.measureManager.get('vfx.damageNumberBaseFontSize');
+            const scaleFactor = this.measureManager.get('vfx.damageNumberScaleFactor');
+            ctx.font = `bold ${baseFontSize + (1 - progress) * scaleFactor}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
             ctx.fillText(
                 dmgNum.damage.toString(),
                 drawX + effectiveTileSize / 2,
-                drawY - currentYOffset - 5
+                drawY - currentYOffset - this.measureManager.get('vfx.damageNumberVerticalOffset')
             );
             ctx.restore();
         }
@@ -306,7 +311,7 @@ export class VFXManager {
         for (const [unitId, drop] of this.activeWeaponDrops.entries()) {
             if (!drop.sprite) continue;
 
-            const weaponSize = effectiveTileSize * 0.5; // 무기 이미지 크기
+            const weaponSize = effectiveTileSize * this.measureManager.get('vfx.weaponDropScale'); // ✨ 비율 사용
 
             ctx.save();
             ctx.globalAlpha = drop.opacity;

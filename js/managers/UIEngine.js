@@ -1,5 +1,9 @@
 // js/managers/UIEngine.js
 
+// ... (기존 임포트 유지)
+// ✨ 상수 파일 임포트
+import { GAME_EVENTS, UI_STATES, BUTTON_IDS } from '../constants.js';
+
 export class UIEngine {
     constructor(renderer, measureManager, eventManager, mercenaryPanelManager, buttonEngine) { // ✨ buttonEngine 추가
         console.log("\ud83c\udf9b UIEngine initialized. Ready to draw interfaces. \ud83c\udf9b");
@@ -12,7 +16,7 @@ export class UIEngine {
         this.canvas = renderer.canvas;
         this.ctx = renderer.ctx;
 
-        this._currentUIState = 'mapScreen';
+        this._currentUIState = UI_STATES.MAP_SCREEN; // ✨ 상수 사용
         this.heroPanelVisible = false; // 영웅 패널 가시성 상태
 
         this.recalculateUIDimensions();
@@ -30,7 +34,7 @@ export class UIEngine {
         // ButtonEngine을 통해 버튼을 등록합니다.
         if (this.buttonEngine) {
             this.buttonEngine.registerButton(
-                'battleStartButton',
+                BUTTON_IDS.BATTLE_START, // ✨ 상수 사용
                 this.battleStartButton.x,
                 this.battleStartButton.y,
                 this.battleStartButton.width,
@@ -67,7 +71,7 @@ export class UIEngine {
         // ButtonEngine에 저장된 버튼 위치도 업데이트합니다.
         if (this.buttonEngine) {
             this.buttonEngine.updateButtonRect(
-                'battleStartButton',
+                BUTTON_IDS.BATTLE_START, // ✨ 상수 사용
                 this.battleStartButton.x,
                 this.battleStartButton.y,
                 this.battleStartButton.width,
@@ -99,14 +103,14 @@ export class UIEngine {
 
     handleBattleStartClick() {
         console.log("[UIEngine] '전투 시작' 버튼 클릭 처리됨!");
-        this.eventManager.emit('battleStart', { mapId: 'currentMap', difficulty: 'normal' });
+        this.eventManager.emit(GAME_EVENTS.BATTLE_START, { mapId: 'currentMap', difficulty: 'normal' }); // ✨ 상수 사용
     }
 
     draw(ctx) {
         // ButtonEngine에서 최신 버튼 위치 정보를 가져와 그립니다.
-        const battleStartButtonRect = this.buttonEngine ? this.buttonEngine.getButtonRect('battleStartButton') : null;
+        const battleStartButtonRect = this.buttonEngine ? this.buttonEngine.getButtonRect(BUTTON_IDS.BATTLE_START) : null; // ✨ 상수 사용
 
-        if (this._currentUIState === 'mapScreen' && battleStartButtonRect) {
+        if (this._currentUIState === UI_STATES.MAP_SCREEN && battleStartButtonRect) { // ✨ 상수 사용
             ctx.fillStyle = 'darkgreen';
             ctx.fillRect(
                 battleStartButtonRect.x,
@@ -123,7 +127,7 @@ export class UIEngine {
                 battleStartButtonRect.x + battleStartButtonRect.width / 2,
                 battleStartButtonRect.y + battleStartButtonRect.height / 2 + (this.uiFontSize * 0.25)
             );
-        } else if (this._currentUIState === 'combatScreen') {
+        } else if (this._currentUIState === UI_STATES.COMBAT_SCREEN) { // ✨ 상수 사용
             // 전투 화면에서는 현재 별도의 상단 텍스트를 표시하지 않습니다.
         }
 
@@ -152,7 +156,7 @@ export class UIEngine {
     }
 
     getButtonDimensions() {
-        const rect = this.buttonEngine ? this.buttonEngine.getButtonRect('battleStartButton') : null;
+        const rect = this.buttonEngine ? this.buttonEngine.getButtonRect(BUTTON_IDS.BATTLE_START) : null; // ✨ 상수 사용
         return rect ? { width: rect.width, height: rect.height } : { width: 0, height: 0 };
     }
 }

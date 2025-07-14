@@ -1,5 +1,7 @@
 // js/main.js
 import { GameEngine } from './GameEngine.js';
+// ✨ 상수 파일 임포트
+import { BUTTON_IDS } from './constants.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
@@ -8,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameEngine.start();
 
         // 영웅 패널 버튼 클릭 이벤트 리스너 추가
-        const toggleHeroPanelBtn = document.getElementById('toggleHeroPanelBtn');
+        const toggleHeroPanelBtn = document.getElementById(BUTTON_IDS.TOGGLE_HERO_PANEL); // ✨ 상수 사용
         if (toggleHeroPanelBtn) {
             toggleHeroPanelBtn.addEventListener('click', () => {
                 gameEngine.getUIEngine().toggleHeroPanel();

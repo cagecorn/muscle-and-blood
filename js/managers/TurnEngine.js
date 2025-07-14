@@ -1,5 +1,8 @@
 // js/managers/TurnEngine.js
 
+// ✨ 상수 파일 임포트
+import { GAME_EVENTS, UI_STATES, ATTACK_TYPES } from '../constants.js';
+
 export class TurnEngine {
     constructor(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager, battleCalculationManager, statusEffectManager) {
         console.log("\uD83D\uDD01 TurnEngine initialized. Ready to manage game turns. \uD83D\uDD01");
@@ -23,7 +26,7 @@ export class TurnEngine {
             endOfTurn: []
         };
 
-        this.eventManager.subscribe('unitDeath', (data) => {
+        this.eventManager.subscribe(GAME_EVENTS.UNIT_DEATH, (data) => { // ✨ 상수 사용
             this.turnOrderManager.removeUnitFromOrder(data.unitId);
         });
     }
@@ -49,25 +52,25 @@ export class TurnEngine {
     }
 
     async nextTurn() {
-        const livingMercenaries = this.battleSimulationManager.unitsOnGrid.filter(u => u.type === 'mercenary' && u.currentHp > 0);
-        const livingEnemies = this.battleSimulationManager.unitsOnGrid.filter(u => u.type === 'enemy' && u.currentHp > 0);
+        const livingMercenaries = this.battleSimulationManager.unitsOnGrid.filter(u => u.type === ATTACK_TYPES.MERCENARY && u.currentHp > 0); // ✨ 상수 사용
+        const livingEnemies = this.battleSimulationManager.unitsOnGrid.filter(u => u.type === ATTACK_TYPES.ENEMY && u.currentHp > 0); // ✨ 상수 사용
 
         if (livingMercenaries.length === 0) {
             console.log("[TurnEngine] All mercenaries defeated! Battle Over.");
-            this.eventManager.emit('battleEnd', { reason: 'allMercenariesDefeated' });
+            this.eventManager.emit(GAME_EVENTS.BATTLE_END, { reason: 'allMercenariesDefeated' }); // ✨ 상수 사용
             this.eventManager.setGameRunningState(false);
             return;
         }
         if (livingEnemies.length === 0) {
             console.log("[TurnEngine] All enemies defeated! Battle Over.");
-            this.eventManager.emit('battleEnd', { reason: 'allEnemiesDefeated' });
+            this.eventManager.emit(GAME_EVENTS.BATTLE_END, { reason: 'allEnemiesDefeated' }); // ✨ 상수 사용
             this.eventManager.setGameRunningState(false);
             return;
         }
 
         this.currentTurn++;
         console.log(`\n--- Turn ${this.currentTurn} Starts ---`);
-        this.eventManager.emit('turnStart', { turn: this.currentTurn });
+        this.eventManager.emit(GAME_EVENTS.TURN_START, { turn: this.currentTurn }); // ✨ 상수 사용
         this.timingEngine.clearActions();
 
         for (const callback of this.turnPhaseCallbacks.startOfTurn) {
@@ -84,7 +87,7 @@ export class TurnEngine {
 
             this.activeUnitIndex = i;
             console.log(`[TurnEngine] Processing turn for unit: ${unit.name} (ID: ${unit.id})`);
-            this.eventManager.emit('unitTurnStart', { unitId: unit.id, unitName: unit.name });
+            this.eventManager.emit(GAME_EVENTS.UNIT_TURN_START, { unitId: unit.id, unitName: unit.name }); // ✨ 상수 사용
             // ✨ 상태 효과 확인: 유닛의 행동 가능 여부 검사
             const activeEffects = this.statusEffectManager.getUnitActiveEffects(unit.id);
             let canUnitAct = true;
@@ -130,12 +133,12 @@ export class TurnEngine {
                             const targetUnit = this.battleSimulationManager.unitsOnGrid.find(u => u.id === action.targetId);
                             if (targetUnit && targetUnit.currentHp > 0) {
                                 console.log(`[TurnEngine] Unit ${unit.name} attacks ${targetUnit.name}!`);
-                                this.eventManager.emit('unitAttackAttempt', {
+                                this.eventManager.emit(GAME_EVENTS.UNIT_ATTACK_ATTEMPT, { // ✨ 상수 사용
                                     attackerId: unit.id,
                                     targetId: targetUnit.id,
-                                    attackType: 'melee'
+                                    attackType: ATTACK_TYPES.MELEE // ✨ 상수 사용
                                 });
-                                const defaultAttackSkillData = { type: 'physical', dice: { num: 1, sides: 6 } };
+                                const defaultAttackSkillData = { type: ATTACK_TYPES.PHYSICAL, dice: { num: 1, sides: 6 } }; // ✨ 상수 사용
                                 this.battleCalculationManager.requestDamageCalculation(unit.id, targetUnit.id, defaultAttackSkillData);
                                 await this.delayEngine.waitFor(500);
                             } else {
@@ -154,7 +157,7 @@ export class TurnEngine {
             for (const callback of this.turnPhaseCallbacks.unitActions) {
                 await callback(unit);
             }
-            this.eventManager.emit('unitTurnEnd', { unitId: unit.id, unitName: unit.name });
+            this.eventManager.emit(GAME_EVENTS.UNIT_TURN_END, { unitId: unit.id, unitName: unit.name }); // ✨ 상수 사용
 
             await this.timingEngine.processActions();
             this.timingEngine.clearActions();

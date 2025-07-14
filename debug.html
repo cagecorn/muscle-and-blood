@@ -132,8 +132,8 @@
         <canvas id="combatLogCanvas"></canvas>
     </div>
     <script type="module">
-        import { GameEngine } from './js/GameEngine.js'; // <-- GameEngine 불러오기
-        import { 
+    import { GameEngine } from './js/GameEngine.js'; // <-- GameEngine 불러오기
+    import {
             runEngineTests, 
             injectRendererFault, 
             injectGameLoopFault, 
@@ -179,8 +179,10 @@
             runStatusEffectManagerUnitTests,
             runWorkflowManagerUnitTests,
             runDisarmManagerUnitTests
-        } from './tests/index.js';
-        import { STATUS_EFFECTS } from './data/statusEffects.js';
+    } from './tests/index.js';
+    import { STATUS_EFFECTS } from './data/statusEffects.js';
+    // ✨ 상수 파일 임포트
+    import { BUTTON_IDS } from './js/constants.js';
 
         document.addEventListener('DOMContentLoaded', () => {
             let gameEngine; // gameEngine 인스턴스를 스코프 밖으로 뺍니다.
@@ -459,7 +461,7 @@
             });
 
             // ✨ 영웅 패널 토글 버튼
-            document.getElementById('toggleHeroPanelBtn').addEventListener('click', () => {
+            document.getElementById(BUTTON_IDS.TOGGLE_HERO_PANEL).addEventListener('click', () => { // ✨ 상수 사용
                 gameEngine.getUIEngine().toggleHeroPanel();
             });
 
