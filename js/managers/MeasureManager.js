@@ -76,6 +76,14 @@ export class MeasureManager {
                 weaponDropFadeDuration: 500,    // 무기 사라지는 시간 (ms)
                 weaponDropTotalDuration: 1300   // 무기 애니메이션 총 지속 시간 (ms)
             },
+            // ✨ 파티클 효과 관련 설정 추가
+            particle: {
+                baseSize: 4,      // 파티클 기본 크기 (픽셀)
+                count: 10,        // 생성될 파티클 개수
+                duration: 500,    // 파티클 지속 시간 (ms)
+                speedY: 2,        // 파티클 수직 이동 속도 (픽셀/프레임)
+                spread: 10        // 파티클 분산 범위 (x축)
+            },
             // ✨ 새로운 게임 설정 섹션
             gameConfig: {
                 enableDisarmSystem: true // 무장해제 시스템 활성화 여부
