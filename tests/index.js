@@ -41,6 +41,7 @@ export { runTurnCountManagerUnitTests } from './unit/turnCountManagerUnitTests.j
 export { runStatusEffectManagerUnitTests } from './unit/statusEffectManagerUnitTests.js';
 export { runWorkflowManagerUnitTests } from './unit/workflowManagerUnitTests.js';
 export { runDisarmManagerUnitTests } from './unit/disarmManagerUnitTests.js';
+export { runCoordinateManagerUnitTests } from './unit/coordinateManagerUnitTests.js';
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 export { runBattleSimulationIntegrationTest } from './integration/battleSimulationIntegrationTest.js';

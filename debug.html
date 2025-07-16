@@ -101,6 +101,7 @@
         <button id="runStatusEffectManagerUnitTestsBtn">StatusEffectManager 유닛 테스트</button>
         <button id="runWorkflowManagerUnitTestsBtn">WorkflowManager 유닛 테스트</button>
         <button id="runDisarmManagerUnitTestsBtn">DisarmManager 유닛 테스트</button>
+        <button id="runCoordinateManagerUnitTestsBtn">CoordinateManager 유닛 테스트</button>
 
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
@@ -180,7 +181,8 @@
             runTurnCountManagerUnitTests,
             runStatusEffectManagerUnitTests,
             runWorkflowManagerUnitTests,
-            runDisarmManagerUnitTests
+            runDisarmManagerUnitTests,
+            runCoordinateManagerUnitTests
     } from './tests/index.js';
     import { STATUS_EFFECTS } from './data/statusEffects.js';
     // ✨ 상수 파일 임포트
@@ -293,6 +295,7 @@
                 runStatusEffectManagerUnitTests(eventManager, idManager, turnCountManager, battleCalculationManager);
                 runWorkflowManagerUnitTests(eventManager, statusEffectManager, battleSimulationManager);
                 runDisarmManagerUnitTests(eventManager, measureManager, statusEffectManager, battleSimulationManager);
+                runCoordinateManagerUnitTests(battleSimulationManager, gameEngine.getBattleGridManager());
             });
 
             document.getElementById('runMeasureManagerIntegrationTestBtn').addEventListener('click', () => {
@@ -367,6 +370,10 @@
             });
             document.getElementById('runDisarmManagerUnitTestsBtn').addEventListener('click', () => {
                 runDisarmManagerUnitTests(eventManager, measureManager, statusEffectManager, battleSimulationManager);
+            });
+            // ✨ CoordinateManager 단위 테스트 버튼 리스너 추가
+            document.getElementById('runCoordinateManagerUnitTestsBtn').addEventListener('click', () => {
+                runCoordinateManagerUnitTests(battleSimulationManager, gameEngine.getBattleGridManager());
             });
 
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
@@ -559,6 +566,7 @@
             runStatusEffectManagerUnitTests(eventManager, idManager, turnCountManager, battleCalculationManager);
             runWorkflowManagerUnitTests(eventManager, statusEffectManager, battleSimulationManager);
             runDisarmManagerUnitTests(eventManager, measureManager, statusEffectManager, battleSimulationManager);
+            runCoordinateManagerUnitTests(battleSimulationManager, gameEngine.getBattleGridManager());
         });
     </script>
 </body>
