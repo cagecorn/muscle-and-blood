@@ -7,7 +7,7 @@ import { WARRIOR_SKILLS } from '../../data/warriorSkills.js';
 
 export class HeroManager {
     constructor(idManager, diceEngine, assetLoaderManager, battleSimulationManager, unitSpriteEngine) {
-        console.log("\u2728 HeroManager initialized. Ready to create legendary heroes. \u2728");
+        console.log("✨ HeroManager initialized. Ready to create legendary heroes. ✨");
         this.idManager = idManager;
         this.diceEngine = diceEngine;
         this.assetLoaderManager = assetLoaderManager;
@@ -27,8 +27,9 @@ export class HeroManager {
      */
     async createWarriors(count, warriorClassData) {
         console.log(`[HeroManager] Creating data for ${count} new warriors...`);
-
-        // idManager에서 데이터를 가져오는 대신, 매개변수로 받은 데이터를 직접 사용합니다.
+        
+        // idManager에서 데이터를 비동기적으로 가져오는 대신,
+        // BattleEngine으로부터 직접 받은 데이터를 사용합니다.
         if (!warriorClassData) {
             console.error('[HeroManager] warriorClassData was not provided to createWarriors. Aborting.');
             return [];
@@ -36,8 +37,10 @@ export class HeroManager {
 
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
 
+        // 데이터가 없어도 오류가 나지 않도록 기본값을 항상 보장합니다.
         const statRanges = warriorClassData.statRanges || {};
         const availableSkills = warriorClassData.availableSkills || [];
+        const tags = warriorClassData.tags || [];
 
         if (!warriorImage) {
             console.error('[HeroManager] Warrior image not found. Cannot create warriors.');
@@ -52,15 +55,20 @@ export class HeroManager {
 
             const baseStats = {};
             for (const stat in statRanges) {
-                baseStats[stat] = this.diceEngine.getRandomInt(statRanges[stat][0], statRanges[stat][1]);
+                // statRanges가 비어있지 않다면 값을 생성합니다.
+                if (statRanges[stat] && Array.isArray(statRanges[stat])) {
+                    baseStats[stat] = this.diceEngine.getRandomInt(statRanges[stat][0], statRanges[stat][1]);
+                }
+            }
+             // HP가 생성되지 않은 경우를 대비한 안전장치
+            if (!baseStats.hp) {
+                baseStats.hp = 100;
             }
 
             const randomSkills = new Set();
-            if (Array.isArray(availableSkills) && availableSkills.length > 0) {
-                while (randomSkills.size < 3 && availableSkills.length > randomSkills.size) {
-                    const randomIndex = this.diceEngine.getRandomInt(0, availableSkills.length - 1);
-                    randomSkills.add(availableSkills[randomIndex]);
-                }
+            while (randomSkills.size < 3 && availableSkills.length > randomSkills.size) {
+                const randomIndex = this.diceEngine.getRandomInt(0, availableSkills.length - 1);
+                randomSkills.add(availableSkills[randomIndex]);
             }
 
             const heroUnitData = {
@@ -74,7 +82,7 @@ export class HeroManager {
                 baseStats: baseStats,
                 currentHp: baseStats.hp,
                 skillSlots: [...randomSkills],
-                tags: [...warriorClassData.tags]
+                tags: [...tags]
             };
 
             await this.idManager.addOrUpdateId(unitId, heroUnitData);
