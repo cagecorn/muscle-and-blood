@@ -39,8 +39,8 @@ export class HeroManager {
             }
         }
 
-        const statRanges = warriorClassData.statRanges || {};
-        const availableSkills = warriorClassData.availableSkills || [];
+        const statRanges = (warriorClassData && warriorClassData.statRanges) || {};
+        const availableSkills = (warriorClassData && warriorClassData.availableSkills) || [];
 
         if (!warriorImage) {
             console.error('[HeroManager] Warrior image not found. Cannot create warriors.');
@@ -59,7 +59,7 @@ export class HeroManager {
             }
 
             const randomSkills = new Set();
-            if (availableSkills.length > 0) {
+            if (Array.isArray(availableSkills) && availableSkills.length > 0) {
                 while (randomSkills.size < 3 && availableSkills.length > randomSkills.size) {
                     const randomIndex = this.diceEngine.getRandomInt(0, availableSkills.length - 1);
                     randomSkills.add(availableSkills[randomIndex]);
