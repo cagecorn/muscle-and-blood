@@ -109,10 +109,7 @@ export class BattleEngine {
         await this.assetLoaderManager.loadImage('sprite_warrior_default', 'assets/images/warrior.png');
         await this.assetLoaderManager.loadImage('sprite_zombie_default', 'assets/images/zombie.png');
 
-        // IdManager를 거치지 않고, 미리 import 해둔 정적 데이터를 직접 HeroManager에 전달합니다.
-        // 이것이 레이스 컨디션을 막는 가장 확실한 방법입니다.
-        // const heroes = await this.heroManager.createWarriors(3, CLASSES.WARRIOR);
-        // this.battleFormationManager.placeAllies(heroes);
+        // 초기 전투 설정 시에는 영웅을 자동 생성하지 않습니다. 필요 시 UI에서 고용하도록 합니다.
         await this.monsterSpawnManager.spawnMonstersForStage('stage1');
     }
 
