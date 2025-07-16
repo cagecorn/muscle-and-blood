@@ -3,8 +3,8 @@ export class Renderer {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) {
-            console.error(`Canvas with ID "${canvasId}" not found.`);
-            return;
+            // 필수 캔버스가 없으면 더 진행하지 않고 명확한 오류를 던집니다.
+            throw new Error(`[Renderer] Canvas with ID "${canvasId}" not found. Cannot initialize Renderer.`);
         }
         this.ctx = this.canvas.getContext('2d');
 

@@ -70,6 +70,8 @@ export class GameEngine {
             throw new Error("Renderer initialization failed.");
         }
         this.eventManager = new EventManager();
+        // ✨ CRITICAL_ERROR 이벤트 구독
+        this.eventManager.subscribe(GAME_EVENTS.CRITICAL_ERROR, this._handleCriticalError.bind(this));
         this.guardianManager = new GuardianManager();
         this.measureManager = new MeasureManager();
         // 게임 규칙을 관리하는 RuleManager 초기화
@@ -451,6 +453,17 @@ export class GameEngine {
     start() {
         console.log("\ud83d\ude80 GameEngine starting game loop... \ud83d\ude80");
         this.gameLoop.start();
+    }
+
+    /**
+     * ✨ 심각한 오류 발생 시 게임을 처리합니다.
+     * @param {object} errorData - 오류 데이터 (source, message, errorObject 포함)
+     * @private
+     */
+    _handleCriticalError(errorData) {
+        console.error("[GameEngine] CRITICAL ERROR DETECTED!", errorData);
+        this.eventManager.setGameRunningState(false); // 게임 루프 정지
+        alert(`치명적인 게임 오류 발생! (${errorData.source}):\n${errorData.message}\n게임을 일시 정지합니다. 콘솔을 확인해주세요.`);
     }
 
     getRenderer() { return this.renderer; }

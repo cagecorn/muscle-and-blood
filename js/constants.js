@@ -21,7 +21,8 @@ export const GAME_EVENTS = {
     DRAG_CANCEL: 'dragCancel',
     SYNERGY_ACTIVATED: 'synergyActivated',   // 이전 요청에 의해 추가된 코드
     SYNERGY_DEACTIVATED: 'synergyDeactivated', // 이전 요청에 의해 추가된 코드
-    CANVAS_MOUSE_MOVED: 'canvasMouseMoved' // ✨ 마우스 이동 이벤트 추가
+    CANVAS_MOUSE_MOVED: 'canvasMouseMoved', // ✨ 마우스 이동 이벤트 추가
+    CRITICAL_ERROR: 'criticalError' // ✨ 심각한 오류 발생 시 발행될 이벤트
 };
 
 export const UI_STATES = {

@@ -113,7 +113,7 @@ export class DetailInfoManager {
      * 툴팁 UI를 캔버스에 그립니다. LayerEngine에 의해 호출됩니다.
      * @param {CanvasRenderingContext2D} ctx - 캔버스 2D 렌더링 컨텍스트
      */
-    async draw(ctx) {
+    async draw(ctx) { // ✨ draw 메서드를 async로 변경하여 await를 사용할 수 있도록 함
         if (!this.hoveredUnit || this.tooltipAlpha <= 0) {
             return;
         }
@@ -144,7 +144,10 @@ export class DetailInfoManager {
         const heroDetails = await this.heroEngine.getHero(this.hoveredUnit.id); // 영웅 스킬/시너지 가져오기
         let classData = null;
         if (this.hoveredUnit.classId) {
-             classData = await this.idManager.get(this.hoveredUnit.classId);
+            classData = await this.idManager.get(this.hoveredUnit.classId);
+            if (!classData) {
+                console.warn(`[DetailInfoManager] Class data not found or invalid for ID: ${this.hoveredUnit.classId}`);
+            }
         }
 
         // 스킬 및 시너지 줄 수 계산
@@ -189,32 +192,40 @@ export class DetailInfoManager {
         currentYOffset += lineHeight + 5; // 다음 줄과의 간격
 
         // 클래스 및 타입
-        const className = classData ? classData.name : '알 수 없음';
+        let className = '알 수 없음';
+        if (classData && classData.name) {
+            className = classData.name;
+        }
         ctx.font = '14px Arial';
-        ctx.fillText(`클래스: ${className} | 타입: ${this.hoveredUnit.type}`, tooltipX + padding, tooltipY + currentYOffset);
+        ctx.fillText(`클래스: ${className} | 타입: ${this.hoveredUnit.type || '알 수 없음'}`, tooltipX + padding, tooltipY + currentYOffset);
         currentYOffset += lineHeight;
 
         ctx.font = '14px Arial';
         // HP 및 배리어
         ctx.fillStyle = '#FF4500'; // 빨간색
-        ctx.fillText(`HP: ${this.hoveredUnit.currentHp}/${this.hoveredUnit.baseStats.hp}`, tooltipX + padding, tooltipY + currentYOffset);
+        const displayHp = this.hoveredUnit.currentHp !== undefined ? this.hoveredUnit.currentHp : (this.hoveredUnit.baseStats ? this.hoveredUnit.baseStats.hp : '?');
+        const maxHp = this.hoveredUnit.baseStats ? this.hoveredUnit.baseStats.hp : '?';
+        ctx.fillText(`HP: ${displayHp}/${maxHp}`, tooltipX + padding, tooltipY + currentYOffset);
         currentYOffset += lineHeight;
 
         ctx.fillStyle = '#FFFF00'; // 노란색
-        ctx.fillText(`배리어: ${this.hoveredUnit.currentBarrier}/${this.hoveredUnit.maxBarrier}`, tooltipX + padding, tooltipY + currentYOffset);
+        const displayBarrier = this.hoveredUnit.currentBarrier !== undefined ? this.hoveredUnit.currentBarrier : '?';
+        const maxBarrier = this.hoveredUnit.maxBarrier !== undefined ? this.hoveredUnit.maxBarrier : '?';
+        ctx.fillText(`배리어: ${displayBarrier}/${maxBarrier}`, tooltipX + padding, tooltipY + currentYOffset);
         currentYOffset += lineHeight + 5; // 다음 섹션과의 간격
 
         ctx.fillStyle = '#FFFFFF';
         ctx.font = '14px Arial';
-        ctx.fillText(`공격: ${this.hoveredUnit.baseStats.attack || 0} | 방어: ${this.hoveredUnit.baseStats.defense || 0}`, tooltipX + padding, tooltipY + currentYOffset);
+        const baseStats = this.hoveredUnit.baseStats || {};
+        ctx.fillText(`공격: ${baseStats.attack || 0} | 방어: ${baseStats.defense || 0}`, tooltipX + padding, tooltipY + currentYOffset);
         currentYOffset += lineHeight;
-        ctx.fillText(`속도: ${this.hoveredUnit.baseStats.speed || 0} | 용맹: ${this.hoveredUnit.baseStats.valor || 0}`, tooltipX + padding, tooltipY + currentYOffset);
+        ctx.fillText(`속도: ${baseStats.speed || 0} | 용맹: ${baseStats.valor || 0}`, tooltipX + padding, tooltipY + currentYOffset);
         currentYOffset += lineHeight;
-        ctx.fillText(`힘: ${this.hoveredUnit.baseStats.strength || 0} | 인내: ${this.hoveredUnit.baseStats.endurance || 0}`, tooltipX + padding, tooltipY + currentYOffset);
+        ctx.fillText(`힘: ${baseStats.strength || 0} | 인내: ${baseStats.endurance || 0}`, tooltipX + padding, tooltipY + currentYOffset);
         currentYOffset += lineHeight;
-        ctx.fillText(`민첩: ${this.hoveredUnit.baseStats.agility || 0} | 지능: ${this.hoveredUnit.baseStats.intelligence || 0}`, tooltipX + padding, tooltipY + currentYOffset);
+        ctx.fillText(`민첩: ${baseStats.agility || 0} | 지능: ${baseStats.intelligence || 0}`, tooltipX + padding, tooltipY + currentYOffset);
         currentYOffset += lineHeight;
-        ctx.fillText(`지혜: ${this.hoveredUnit.baseStats.wisdom || 0} | 운: ${this.hoveredUnit.baseStats.luck || 0}`, tooltipX + padding, tooltipY + currentYOffset);
+        ctx.fillText(`지혜: ${baseStats.wisdom || 0} | 운: ${baseStats.luck || 0}`, tooltipX + padding, tooltipY + currentYOffset);
         currentYOffset += lineHeight + 5;
 
         // 스킬 정보 (HeroEngine에서 가져온 heroDetails에 스킬이 있다면)
