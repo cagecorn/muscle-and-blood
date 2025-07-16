@@ -26,13 +26,24 @@ export class HeroManager {
      */
     async createWarriors(count) {
         console.log(`[HeroManager] Creating data for ${count} new warriors...`);
-        const warriorClassData = await this.idManager.get(CLASSES.WARRIOR.id);
+        let warriorClassData = await this.idManager.get(CLASSES.WARRIOR.id);
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
-        const statRanges = warriorClassData.statRanges;
-        const availableSkills = warriorClassData.availableSkills;
 
-        if (!warriorClassData || !warriorImage) {
-            console.error('[HeroManager] Warrior class data or image not found. Cannot create warriors.');
+        if (!warriorClassData) {
+            console.warn('[HeroManager] Warrior class not registered in IdManager, falling back to static data.');
+            warriorClassData = CLASSES.WARRIOR;
+            try {
+                await this.idManager.addOrUpdateId(CLASSES.WARRIOR.id, warriorClassData);
+            } catch (e) {
+                console.error('[HeroManager] Failed to register warrior class to IdManager:', e);
+            }
+        }
+
+        const statRanges = warriorClassData.statRanges || {};
+        const availableSkills = warriorClassData.availableSkills || [];
+
+        if (!warriorImage) {
+            console.error('[HeroManager] Warrior image not found. Cannot create warriors.');
             return [];
         }
 
