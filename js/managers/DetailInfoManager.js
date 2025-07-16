@@ -1,6 +1,7 @@
 // js/managers/DetailInfoManager.js
 
 import { GAME_EVENTS } from '../constants.js'; // 이벤트 상수를 사용
+import { WARRIOR_SKILLS } from '../../data/warriorSkills.js';
 
 export class DetailInfoManager {
     /**
@@ -12,7 +13,7 @@ export class DetailInfoManager {
      * @param {IdManager} idManager - 클래스, 스킬, 시너지 이름 조회를 위한 IdManager 인스턴스
      * @param {CameraEngine} cameraEngine - 카메라 위치/줌 정보를 조회하기 위한 CameraEngine 인스턴스
      */
-    constructor(eventManager, measureManager, battleSimulationManager, heroEngine, idManager, cameraEngine) {
+    constructor(eventManager, measureManager, battleSimulationManager, heroEngine, idManager, cameraEngine, skillIconManager) {
         console.log("🔍 DetailInfoManager initialized. Ready to show unit details on hover. 🔍");
         this.eventManager = eventManager;
         this.measureManager = measureManager;
@@ -20,6 +21,7 @@ export class DetailInfoManager {
         this.heroEngine = heroEngine;
         this.idManager = idManager;
         this.cameraEngine = cameraEngine;
+        this.skillIconManager = skillIconManager;
 
         this.hoveredUnit = null;       // 현재 마우스가 올라간 유닛
         this.lastMouseX = 0;           // 마우스의 마지막 X 좌표 (논리적 캔버스 좌표)
@@ -247,11 +249,20 @@ export class DetailInfoManager {
             ctx.font = 'bold 16px Arial';
             ctx.fillText('스킬:', tooltipX + padding, tooltipY + currentYOffset);
             currentYOffset += lineHeight;
-            ctx.font = '14px Arial';
             for (const skillId of skillsToList) {
-                // 스킬 ID에서 "skill_" 프리픽스 제거하여 표시 (예: "skill_1" -> "1")
-                ctx.fillText(`- ${skillId.replace('skill_', '').replace('passive_', '패시브-')}`, tooltipX + padding, tooltipY + currentYOffset);
-                currentYOffset += lineHeight;
+                const skillData = Object.values(WARRIOR_SKILLS).find(s => s.id === skillId);
+                const icon = this.skillIconManager ? this.skillIconManager.getSkillIcon(skillId) : null;
+                const iconSize = 20;
+                const iconX = tooltipX + padding;
+                const iconY = tooltipY + currentYOffset;
+                if (icon) {
+                    ctx.drawImage(icon, iconX, iconY, iconSize, iconSize);
+                }
+                ctx.font = '14px Arial';
+                const textX = iconX + iconSize + 5;
+                const textY = iconY + 2;
+                ctx.fillText(skillData ? skillData.name : skillId, textX, textY);
+                currentYOffset += iconSize + 5;
             }
             currentYOffset += 5; // 다음 섹션과의 간격
         }

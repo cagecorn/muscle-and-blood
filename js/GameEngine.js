@@ -294,7 +294,8 @@ export class GameEngine {
             this.battleSimulationManager,
             this.heroEngine,
             this.idManager,
-            this.cameraEngine
+            this.cameraEngine,
+            this.skillIconManager
         );
 
         // ✨ TagManager 초기화
@@ -542,6 +543,8 @@ export class GameEngine {
         await this.idManager.addOrUpdateId(CLASSES.WARRIOR.id, CLASSES.WARRIOR);
         // ✨ 새롭게 추가된 해골 클래스도 등록
         await this.idManager.addOrUpdateId(CLASSES.SKELETON.id, CLASSES.SKELETON);
+        await this.idManager.addOrUpdateId(CLASSES.ZOMBIE.id, CLASSES.ZOMBIE);
+        await this.idManager.addOrUpdateId(CLASSES.WARRIOR_VALIANT.id, CLASSES.WARRIOR_VALIANT);
 
         // ✨ IdManager에 WARRIOR_SKILLS 데이터 등록
         for (const skillKey in WARRIOR_SKILLS) {
@@ -583,12 +586,6 @@ export class GameEngine {
         console.log(`[GameEngine] Registered unit ID: ${UNITS.WARRIOR.id}`);
         console.log(`[GameEngine] Loaded warrior sprite: ${UNITS.WARRIOR.spriteId}`);
 
-        // 샘플 ID 조회 및 이미지 로드 (동기적 접근을 위해)
-        const warriorData = await this.idManager.get(UNITS.WARRIOR.id);
-        const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
-        // ✨ 전사 패널 이미지 로드 후 참조
-        const warriorPanelImage = this.assetLoaderManager.getImage('sprite_warrior_panel');
-
         await this.unitSpriteEngine.registerUnitSprites('unit_warrior_001', {
             idle: 'assets/images/warrior.png',
             attack: 'assets/images/warrior-attack.png',
@@ -596,14 +593,6 @@ export class GameEngine {
             finish: 'assets/images/warrior-finish.png',
             status: 'assets/images/warrior-status-effects.png'
         });
-
-        // ✨ BattleSimulationManager에 유닛 배치 시 currentHp 초기화
-        // 전사를 그리드의 더 왼쪽에 배치 (gridX: 3)
-        this.battleSimulationManager.addUnit({
-            ...warriorData,
-            currentHp: warriorData.baseStats.hp,
-            panelImage: warriorPanelImage // ✨ 용병 패널에 사용될 이미지
-        }, warriorImage, 3, 4);
 
         const mockEnemyUnitData = {
             id: 'unit_zombie_001', // ID 변경
@@ -634,10 +623,65 @@ export class GameEngine {
         // ✨ 좀비 무기 이미지 로드
         await this.assetLoaderManager.loadImage('sprite_zombie_weapon_default', 'assets/images/zombie-weapon.png');
 
-        const enemyData = await this.idManager.get(mockEnemyUnitData.id);
-        const enemyImage = this.assetLoaderManager.getImage(mockEnemyUnitData.spriteId);
-        // 좀비를 그리드의 더 오른쪽에 배치 (gridX: 10)
-        this.battleSimulationManager.addUnit({ ...enemyData, currentHp: enemyData.baseStats.hp }, enemyImage, 10, 4);
+        await this._initBattleGrid();
+    }
+
+    async _initBattleGrid() {
+        const valiantWarriorClassData = await this.idManager.get('class_warrior_valiant');
+        const warriorSkillKeys = Object.keys(WARRIOR_SKILLS);
+
+        const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
+        const zombieImage = this.assetLoaderManager.getImage('sprite_zombie_default');
+
+        for (let i = 0; i < 3; i++) {
+            const unitId = `unit_warrior_valiant_${i + 1}`;
+            const startX = 2 + i * 2;
+            const startY = 2;
+
+            const randomSkills = new Set();
+            while (randomSkills.size < 3) {
+                const randomIndex = Math.floor(this.diceEngine.getRandomFloat() * warriorSkillKeys.length);
+                const randomSkillId = WARRIOR_SKILLS[warriorSkillKeys[randomIndex]].id;
+                randomSkills.add(randomSkillId);
+            }
+
+            const warriorClassDataWithSkills = { ...valiantWarriorClassData, skills: [...randomSkills] };
+            await this.idManager.addOrUpdateId(warriorClassDataWithSkills.id, warriorClassDataWithSkills);
+
+            const warriorUnit = {
+                id: unitId,
+                name: '용맹한 전사',
+                classId: 'class_warrior_valiant',
+                type: ATTACK_TYPES.MERCENARY,
+                spriteId: UNITS.WARRIOR.spriteId,
+                gridX: startX,
+                gridY: startY,
+                baseStats: { ...valiantWarriorClassData.baseStats },
+                currentHp: valiantWarriorClassData.baseStats.hp,
+                skillSlots: [...randomSkills]
+            };
+            this.battleSimulationManager.addUnit(warriorUnit, warriorImage, startX, startY);
+        }
+
+        const zombieClassData = await this.idManager.get('class_zombie');
+        for (let i = 0; i < 5; i++) {
+            const unitId = `unit_zombie_${i + 1}`;
+            const startX = 12 + i;
+            const startY = 6;
+
+            const zombieUnit = {
+                id: unitId,
+                name: '좀비',
+                classId: 'class_zombie',
+                type: ATTACK_TYPES.ENEMY,
+                spriteId: 'sprite_zombie_default',
+                gridX: startX,
+                gridY: startY,
+                baseStats: zombieClassData && zombieClassData.baseStats ? { ...zombieClassData.baseStats } : { hp: 80, attack: 15, defense: 5, speed: 30 },
+                currentHp: zombieClassData && zombieClassData.baseStats ? zombieClassData.baseStats.hp : 80
+            };
+            this.battleSimulationManager.addUnit(zombieUnit, zombieImage, startX, startY);
+        }
     }
 
     _update(deltaTime) {
