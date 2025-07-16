@@ -387,7 +387,12 @@ export class GameEngine {
         // 12. Sprite & Action Managers
         // ------------------------------------------------------------------
         this.unitSpriteEngine = new UnitSpriteEngine(this.assetLoaderManager, this.battleSimulationManager);
-        this.unitActionManager = new UnitActionManager(this.eventManager, this.unitSpriteEngine, this.delayEngine);
+        this.unitActionManager = new UnitActionManager(
+            this.eventManager,
+            this.unitSpriteEngine,
+            this.delayEngine,
+            this.battleSimulationManager
+        );
 
         // ------------------------------------------------------------------
         // 13. Scene Registrations & Layer Engine Setup
@@ -430,7 +435,7 @@ export class GameEngine {
         this.gameLoop = new GameLoop(this._update, this._draw);
 
         // ✨ _initAsyncManagers에서 로드할 총 에셋 및 데이터 수를 수동으로 계산
-        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length + 5 + 5 + 3; // 9(기존) + 5(워리어 스킬) + 5(기본 상태 아이콘) + 5(워리어 스킬 아이콘) + 3(전사 상태 스프라이트)
+        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length + 5 + 5 + 4; // 9(기존) + 5(워리어 스킬) + 5(기본 상태 아이콘) + 5(워리어 스킬 아이콘) + 4(전사 상태 스프라이트)
         this.assetLoaderManager.setTotalAssetsToLoad(expectedDataAndAssetCount);
 
         // 초기화 과정의 비동기 처리
@@ -528,6 +533,10 @@ export class GameEngine {
             'sprite_warrior_finish',
             'assets/images/warrior-finish.png'
         );
+        await this.assetLoaderManager.loadImage(
+            'sprite_warrior_status',
+            'assets/images/warrior-status-effects.png'
+        );
         // ✨ 전사 패널 이미지 로드
         await this.assetLoaderManager.loadImage('sprite_warrior_panel', 'assets/images/warrior-panel-1.png');
         // ✨ 전투 배경 이미지 로드
@@ -546,7 +555,8 @@ export class GameEngine {
             idle: 'assets/images/warrior.png',
             attack: 'assets/images/warrior-attack.png',
             hitted: 'assets/images/warrior-hitted.png',
-            finish: 'assets/images/warrior-finish.png'
+            finish: 'assets/images/warrior-finish.png',
+            status: 'assets/images/warrior-status-effects.png'
         });
 
         // ✨ BattleSimulationManager에 유닛 배치 시 currentHp 초기화
