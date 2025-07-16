@@ -3,6 +3,8 @@
 // 이 모듈은 게임 내 모든 클래스의 기본 정보를 정의합니다.
 // IdManager와 연동하여 고유 ID를 사용합니다.
 
+import { WARRIOR_SKILLS } from './warriorSkills.js';
+
 export const CLASS_ROLES = {
     MELEE_DPS: 'melee_dps',
     RANGED_DPS: 'ranged_dps',
@@ -17,7 +19,11 @@ export const CLASSES = {
         name: '전사',
         role: CLASS_ROLES.MELEE_DPS,
         description: '강력한 근접 공격과 방어력을 겸비한 병종.',
-        skills: ['skill_melee_attack', 'skill_shield_block'],
+        skills: [
+            WARRIOR_SKILLS.CHARGE.id,
+            WARRIOR_SKILLS.BATTLE_CRY.id,
+            WARRIOR_SKILLS.IRON_WILL.id
+        ],
         moveRange: 3, // 전사의 이동 거리
         tags: ['근접', '방어', '용병_클래스'] // ✨ 태그 추가
     },
