@@ -54,11 +54,12 @@ export const WARRIOR_SKILLS = {
         id: 'skill_warrior_retaliate',
         name: '반격',
         type: SKILL_TYPES.REACTION,
-        probability: 30, // 이 확률은 공격받을 때마다 다시 계산됩니다.
-        description: '공격을 받을 시 일정 확률로 즉시 반격합니다.',
+        description: '공격을 받을 시 일정 확률로 즉시 80%의 피해로 반격합니다.',
         requiredUserTags: ['방어'],
         effect: {
-            counterAttackDamageMultiplier: 0.8 // 80% 공격력으로 반격
+            probability: 0.4, // 기본 발동 확률 40% (슬롯에 따라 조정될 수 있음)
+            damageModifier: 0.8, // 반격 시 피해량 80%
+            tags: ['일반공격'] // 이 공격이 평타 판정임을 명시
         }
     },
     // 패시브 스킬 (상시 발동 예시)

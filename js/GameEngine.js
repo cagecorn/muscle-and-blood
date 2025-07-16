@@ -62,6 +62,7 @@ import { WarriorSkillsAI } from './managers/warriorSkillsAI.js'; // ✨ WarriorS
 import { UnitSpriteEngine } from './managers/UnitSpriteEngine.js';
 import { UnitActionManager } from './managers/UnitActionManager.js';
 import { PassiveSkillManager } from './managers/PassiveSkillManager.js';
+import { ReactionSkillManager } from './managers/ReactionSkillManager.js'; // ✨ ReactionSkillManager import
 
 // ✨ 상수 파일 임포트
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES, GAME_DEBUG_MODE } from './constants.js';
@@ -405,6 +406,14 @@ export class GameEngine {
             this.battleSimulationManager,
             this.workflowManager
         );
+        this.reactionSkillManager = new ReactionSkillManager(
+            this.eventManager,
+            this.idManager,
+            this.diceEngine,
+            this.battleSimulationManager,
+            this.battleCalculationManager,
+            this.delayEngine
+        );
 
         // ------------------------------------------------------------------
         // 13. Scene Registrations & Layer Engine Setup
@@ -716,4 +725,5 @@ export class GameEngine {
     getUnitSpriteEngine() { return this.unitSpriteEngine; }
     getUnitActionManager() { return this.unitActionManager; }
     getPassiveSkillManager() { return this.passiveSkillManager; }
+    getReactionSkillManager() { return this.reactionSkillManager; }
 }

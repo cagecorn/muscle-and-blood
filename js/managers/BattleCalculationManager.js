@@ -54,6 +54,12 @@ export class BattleCalculationManager {
         }
     }
 
+    /**
+     * 데미지 계산을 요청하고 결과를 이벤트로 전달합니다.
+     * @param {string} attackerUnitId
+     * @param {string} targetUnitId
+     * @param {object} skillData - 스킬 정보 또는 일반 공격 정보
+     */
     requestDamageCalculation(attackerUnitId, targetUnitId, skillData = null) {
         const attackerUnit = this.battleSimulationManager.unitsOnGrid.find(u => u.id === attackerUnitId);
         const targetUnit = this.battleSimulationManager.unitsOnGrid.find(u => u.id === targetUnitId);

@@ -51,4 +51,12 @@ export const ATTACK_TYPES = {
     ENEMY: 'enemy'
 };
 
+export const SKILL_TYPES = {
+    ACTIVE: 'active',
+    PASSIVE: 'passive',
+    DEBUFF: 'debuff',
+    REACTION: 'reaction',
+    BUFF: 'buff'
+};
+
 export const GAME_DEBUG_MODE = true; // ✨ 디버그 모드 플래그 (배포 시 false로 설정)
