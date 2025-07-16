@@ -35,8 +35,8 @@ export const UI_STATES = {
 };
 
 export const BUTTON_IDS = {
-    // 캔버스에 그려지는 버튼 ID (현재는 사용하지 않음)
-    // BATTLE_START: 'battleStartButton',
+    // 캔버스에 그려지는 버튼 ID
+    HIRE_WARRIOR: 'hireWarriorBtn',
 
     // HTML 버튼 ID
     TOGGLE_HERO_PANEL: 'toggleHeroPanelBtn',
