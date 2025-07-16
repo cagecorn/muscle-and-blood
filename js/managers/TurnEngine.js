@@ -4,7 +4,7 @@
 import { GAME_EVENTS, UI_STATES, ATTACK_TYPES } from '../constants.js';
 
 export class TurnEngine {
-    constructor(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, animationManager, battleCalculationManager, statusEffectManager) {
+    constructor(eventManager, battleSimulationManager, turnOrderManager, classAIManager, delayEngine, timingEngine, measureManager, animationManager, battleCalculationManager, statusEffectManager) {
         console.log("\uD83D\uDD01 TurnEngine initialized. Ready to manage game turns. \uD83D\uDD01");
         this.eventManager = eventManager;
         this.battleSimulationManager = battleSimulationManager;
@@ -13,6 +13,7 @@ export class TurnEngine {
         this.delayEngine = delayEngine;
         this.timingEngine = timingEngine;
         this.animationManager = animationManager;
+        this.measureManager = measureManager;
         this.battleCalculationManager = battleCalculationManager;
         this.statusEffectManager = statusEffectManager;
 
@@ -172,7 +173,7 @@ export class TurnEngine {
 
         console.log(`--- Turn ${this.currentTurn} Ends ---\n`);
 
-        await this.delayEngine.waitFor(1000);
+        await this.delayEngine.waitFor(this.measureManager.get('timing.turnEndDelay'));
 
         if (this.eventManager.getGameRunningState()) {
             this.nextTurn();

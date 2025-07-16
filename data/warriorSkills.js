@@ -1,13 +1,7 @@
 // data/warriorSkills.js
 
-// 스킬 타입 상수는 필요에 따라 별도의 constants.js 파일로 이동 가능
-export const SKILL_TYPES = {
-    ACTIVE: 'active',
-    PASSIVE: 'passive',
-    DEBUFF: 'debuff',
-    REACTION: 'reaction',
-    BUFF: 'buff'
-};
+// 스킬 타입 상수는 constants.js에서 가져옵니다
+import { SKILL_TYPES } from '../js/constants.js';
 
 export const WARRIOR_SKILLS = {
     // 액티브 스킬 (첫 번째 슬롯에 있으면 좋은 스킬 예시)

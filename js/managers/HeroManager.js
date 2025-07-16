@@ -28,7 +28,8 @@ export class HeroManager {
         console.log(`[HeroManager] Creating data for ${count} new warriors...`);
         const warriorClassData = await this.idManager.get(CLASSES.WARRIOR.id);
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
-        const warriorSkillKeys = Object.keys(WARRIOR_SKILLS);
+        const statRanges = warriorClassData.statRanges;
+        const availableSkills = warriorClassData.availableSkills;
 
         if (!warriorClassData || !warriorImage) {
             console.error('[HeroManager] Warrior class data or image not found. Cannot create warriors.');
@@ -41,11 +42,15 @@ export class HeroManager {
             const unitId = `hero_warrior_${Date.now()}_${i}`;
             const randomName = this.heroNameList[this.diceEngine.getRandomInt(0, this.heroNameList.length - 1)];
 
+            const baseStats = {};
+            for (const stat in statRanges) {
+                baseStats[stat] = this.diceEngine.getRandomInt(statRanges[stat][0], statRanges[stat][1]);
+            }
+
             const randomSkills = new Set();
-            while (randomSkills.size < 3) {
-                const randomIndex = this.diceEngine.getRandomInt(0, warriorSkillKeys.length - 1);
-                const randomSkillId = WARRIOR_SKILLS[warriorSkillKeys[randomIndex]].id;
-                randomSkills.add(randomSkillId);
+            while (randomSkills.size < 3 && availableSkills.length > randomSkills.size) {
+                const randomIndex = this.diceEngine.getRandomInt(0, availableSkills.length - 1);
+                randomSkills.add(availableSkills[randomIndex]);
             }
 
             const heroUnitData = {
@@ -56,8 +61,8 @@ export class HeroManager {
                 spriteId: UNITS.WARRIOR.spriteId,
                 gridX: 0,
                 gridY: 0,
-                baseStats: { ...UNITS.WARRIOR.baseStats },
-                currentHp: UNITS.WARRIOR.baseStats.hp,
+                baseStats: baseStats,
+                currentHp: baseStats.hp,
                 skillSlots: [...randomSkills],
                 tags: [...CLASSES.WARRIOR.tags]
             };

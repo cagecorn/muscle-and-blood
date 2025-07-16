@@ -76,6 +76,12 @@ export class MeasureManager {
                 weaponDropFadeDuration: 500,    // 무기 사라지는 시간 (ms)
                 weaponDropTotalDuration: 1300   // 무기 애니메이션 총 지속 시간 (ms)
             },
+            // ✨ 타이밍 관련 설정 추가
+            timing: {
+                turnEndDelay: 1000,     // 턴 종료 후 다음 턴 시작까지의 딜레이
+                skillExecutionDelay: 800, // 스킬 시전 시 기본 딜레이
+                damageDisplayDelay: 100  // 다중 피해 표시 사이의 딜레이
+            },
             // ✨ 파티클 효과 관련 설정 추가
             particle: {
                 baseSize: 4,      // 파티클 기본 크기 (픽셀)

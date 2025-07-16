@@ -64,6 +64,7 @@ export class BattleEngine {
             this.classAIManager,
             this.delayEngine,
             this.timingEngine,
+            measureManager,
             animationManager,
             null,
             null
