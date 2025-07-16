@@ -59,9 +59,11 @@ export class HeroManager {
             }
 
             const randomSkills = new Set();
-            while (randomSkills.size < 3 && availableSkills.length > randomSkills.size) {
-                const randomIndex = this.diceEngine.getRandomInt(0, availableSkills.length - 1);
-                randomSkills.add(availableSkills[randomIndex]);
+            if (availableSkills.length > 0) {
+                while (randomSkills.size < 3 && availableSkills.length > randomSkills.size) {
+                    const randomIndex = this.diceEngine.getRandomInt(0, availableSkills.length - 1);
+                    randomSkills.add(availableSkills[randomIndex]);
+                }
             }
 
             const heroUnitData = {
