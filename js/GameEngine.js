@@ -48,6 +48,7 @@ import { TurnCountManager } from './managers/TurnCountManager.js';
 import { StatusEffectManager } from './managers/StatusEffectManager.js';
 import { WorkflowManager } from './managers/WorkflowManager.js';
 import { HeroEngine } from "./managers/HeroEngine.js"; // HeroEngine 추가
+import { HeroManager } from './managers/HeroManager.js'; // ✨ HeroManager import
 import { SynergyEngine } from './managers/SynergyEngine.js'; // ✨ SynergyEngine 추가
 import { STATUS_EFFECTS } from '../data/statusEffects.js';
 
@@ -279,6 +280,14 @@ export class GameEngine {
             this.assetLoaderManager,
             this.diceEngine,
             this.diceBotManager
+        );
+
+        // ✨ HeroManager 초기화 - 실제 전사 영웅 생성을 담당
+        this.heroManager = new HeroManager(
+            this.idManager,
+            this.diceEngine,
+            this.assetLoaderManager,
+            this.battleSimulationManager
         );
 
         // ✨ SynergyEngine 초기화
@@ -627,41 +636,10 @@ export class GameEngine {
     }
 
     async _initBattleGrid() {
-        const valiantWarriorClassData = await this.idManager.get('class_warrior_valiant');
-        const warriorSkillKeys = Object.keys(WARRIOR_SKILLS);
+        // ✨ 기존 테스트용 전사 유닛 생성 코드를 제거하고 HeroManager를 사용합니다.
+        await this.heroManager.createAndPlaceWarriors(3);
 
-        const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
         const zombieImage = this.assetLoaderManager.getImage('sprite_zombie_default');
-
-        for (let i = 0; i < 3; i++) {
-            const unitId = `unit_warrior_valiant_${i + 1}`;
-            const startX = 2 + i * 2;
-            const startY = 2;
-
-            const randomSkills = new Set();
-            while (randomSkills.size < 3) {
-                const randomIndex = Math.floor(this.diceEngine.getRandomFloat() * warriorSkillKeys.length);
-                const randomSkillId = WARRIOR_SKILLS[warriorSkillKeys[randomIndex]].id;
-                randomSkills.add(randomSkillId);
-            }
-
-            const warriorClassDataWithSkills = { ...valiantWarriorClassData, skills: [...randomSkills] };
-            await this.idManager.addOrUpdateId(warriorClassDataWithSkills.id, warriorClassDataWithSkills);
-
-            const warriorUnit = {
-                id: unitId,
-                name: '용맹한 전사',
-                classId: 'class_warrior_valiant',
-                type: ATTACK_TYPES.MERCENARY,
-                spriteId: UNITS.WARRIOR.spriteId,
-                gridX: startX,
-                gridY: startY,
-                baseStats: { ...valiantWarriorClassData.baseStats },
-                currentHp: valiantWarriorClassData.baseStats.hp,
-                skillSlots: [...randomSkills]
-            };
-            this.battleSimulationManager.addUnit(warriorUnit, warriorImage, startX, startY);
-        }
 
         const zombieClassData = await this.idManager.get('class_zombie');
         for (let i = 0; i < 5; i++) {
@@ -766,6 +744,8 @@ export class GameEngine {
     getDiceEngine() { return this.diceEngine; }
     getDiceRollManager() { return this.diceRollManager; }
     getHeroEngine() { return this.heroEngine; }
+    // ✨ HeroManager getter 추가
+    getHeroManager() { return this.heroManager; }
     // ✨ SynergyEngine getter 추가
     getSynergyEngine() { return this.synergyEngine; }
     // ✨ DetailInfoManager getter 추가

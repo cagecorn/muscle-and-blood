@@ -1,0 +1,70 @@
+// js/managers/HeroManager.js
+
+import { ATTACK_TYPES } from '../constants.js';
+import { UNITS } from '../../data/unit.js';
+import { CLASSES } from '../../data/class.js';
+import { WARRIOR_SKILLS } from '../../data/warriorSkills.js';
+
+export class HeroManager {
+    constructor(idManager, diceEngine, assetLoaderManager, battleSimulationManager) {
+        console.log("\u2728 HeroManager initialized. Ready to create legendary heroes. \u2728");
+        this.idManager = idManager;
+        this.diceEngine = diceEngine;
+        this.assetLoaderManager = assetLoaderManager;
+        this.battleSimulationManager = battleSimulationManager;
+        this.heroNameList = [
+            '레오닉', '아서스', '가로쉬', '스랄', '제이나', '안두인',
+            '바리안', '실바나스', '그롬마쉬', '렉사르', '알렉스트라자', '이렐리아'
+        ];
+    }
+
+    /**
+     * 지정된 수만큼의 전사 클래스 영웅을 생성하여 전투에 배치합니다.
+     * @param {number} count - 생성할 영웅의 수
+     */
+    async createAndPlaceWarriors(count) {
+        console.log(`[HeroManager] Creating ${count} new warriors...`);
+        const warriorClassData = await this.idManager.get(CLASSES.WARRIOR.id);
+        const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
+        const warriorSkillKeys = Object.keys(WARRIOR_SKILLS);
+
+        if (!warriorClassData || !warriorImage) {
+            console.error('[HeroManager] Warrior class data or image not found. Cannot create warriors.');
+            return;
+        }
+
+        for (let i = 0; i < count; i++) {
+            const unitId = `hero_warrior_${Date.now()}_${i}`;
+            const randomName = this.heroNameList[this.diceEngine.getRandomInt(0, this.heroNameList.length - 1)];
+
+            const randomSkills = new Set();
+            while (randomSkills.size < 3) {
+                const randomIndex = this.diceEngine.getRandomInt(0, warriorSkillKeys.length - 1);
+                const randomSkillId = WARRIOR_SKILLS[warriorSkillKeys[randomIndex]].id;
+                randomSkills.add(randomSkillId);
+            }
+
+            const startX = 2 + i * 2;
+            const startY = 4;
+
+            const heroUnitData = {
+                id: unitId,
+                name: randomName,
+                classId: CLASSES.WARRIOR.id,
+                type: ATTACK_TYPES.MERCENARY,
+                spriteId: UNITS.WARRIOR.spriteId,
+                gridX: startX,
+                gridY: startY,
+                baseStats: { ...UNITS.WARRIOR.baseStats },
+                currentHp: UNITS.WARRIOR.baseStats.hp,
+                skillSlots: [...randomSkills],
+                tags: [...CLASSES.WARRIOR.tags]
+            };
+
+            await this.idManager.addOrUpdateId(unitId, heroUnitData);
+            this.battleSimulationManager.addUnit(heroUnitData, warriorImage, startX, startY);
+
+            console.log(`[HeroManager] Created warrior: ${randomName} (ID: ${unitId}) at (${startX}, ${startY})`);
+        }
+    }
+}
