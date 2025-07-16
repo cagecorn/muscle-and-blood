@@ -69,19 +69,21 @@ export class ClassAIManager {
     }
 
     async executeSkillAI(userUnit, skillData) {
-        let targetUnit = null;
+        if (!skillData.aiFunction) {
+            if (GAME_DEBUG_MODE) console.warn(`[ClassAIManager] Skill ${skillData.name} has no 'aiFunction' defined.`);
+            return;
+        }
 
-        if (skillData.id === WARRIOR_SKILLS.CHARGE.id) {
-            targetUnit = this.targetingManager.getLowestHpUnit('enemy');
-            if (targetUnit) {
-                await this.warriorSkillsAI.charge(userUnit, targetUnit, skillData);
-            } else if (GAME_DEBUG_MODE) {
-                console.log(`[ClassAIManager] Charge skill for ${userUnit.name} has no target.`);
+        const aiFunction = this.warriorSkillsAI[skillData.aiFunction];
+        if (typeof aiFunction === 'function') {
+            let targetUnit = null;
+            if (skillData.id === WARRIOR_SKILLS.CHARGE.id) {
+                targetUnit = this.targetingManager.getLowestHpUnit('enemy');
             }
-        } else if (skillData.id === WARRIOR_SKILLS.BATTLE_CRY.id) {
-            await this.warriorSkillsAI.battleCry(userUnit, skillData);
-        } else if (GAME_DEBUG_MODE) {
-            console.warn(`[ClassAIManager] No specific AI execution logic found for skill: ${skillData.name}`);
+
+            await aiFunction.call(this.warriorSkillsAI, userUnit, targetUnit, skillData);
+        } else {
+            if (GAME_DEBUG_MODE) console.warn(`[ClassAIManager] AI function '${skillData.aiFunction}' not found in WarriorSkillsAI.`);
         }
     }
 

@@ -8,19 +8,19 @@ export class StatusIconManager {
      * StatusIconManager를 초기화합니다.
      * @param {SkillIconManager} skillIconManager
      * @param {BattleSimulationManager} battleSimulationManager
-     * @param {AnimationManager} animationManager
+     * @param {BindingManager} bindingManager
      * @param {MeasureManager} measureManager
      * @param {TurnCountManager} turnCountManager
      */
-    constructor(skillIconManager, battleSimulationManager, animationManager, measureManager, turnCountManager) {
+    constructor(skillIconManager, battleSimulationManager, bindingManager, measureManager, turnCountManager) {
         if (GAME_DEBUG_MODE) console.log("\u2728 StatusIconManager initialized. Displaying status effects visually. \u2728");
-        if (!skillIconManager || !battleSimulationManager || !animationManager || !measureManager || !turnCountManager) {
+        if (!skillIconManager || !battleSimulationManager || !bindingManager || !measureManager || !turnCountManager) {
             throw new Error("[StatusIconManager] Missing one or more essential dependencies. Cannot initialize.");
         }
 
         this.skillIconManager = skillIconManager;
         this.battleSimulationManager = battleSimulationManager;
-        this.animationManager = animationManager;
+        this.bindingManager = bindingManager;
         this.measureManager = measureManager;
         this.turnCountManager = turnCountManager;
 
@@ -34,7 +34,7 @@ export class StatusIconManager {
      * @param {CanvasRenderingContext2D} ctx
      */
     draw(ctx) {
-        const { effectiveTileSize, gridOffsetX, gridOffsetY } = this.battleSimulationManager.getGridRenderParameters();
+        const { effectiveTileSize } = this.battleSimulationManager.getGridRenderParameters();
 
         for (const unit of this.battleSimulationManager.unitsOnGrid) {
             if (unit.currentHp <= 0) continue;
@@ -42,14 +42,9 @@ export class StatusIconManager {
             const activeEffects = this.turnCountManager.getEffectsOfUnit(unit.id);
             if (!activeEffects || activeEffects.size === 0) continue;
 
-            const { drawX, drawY } = this.animationManager.getRenderPosition(
-                unit.id,
-                unit.gridX,
-                unit.gridY,
-                effectiveTileSize,
-                gridOffsetX,
-                gridOffsetY
-            );
+            const bindings = this.bindingManager.getBindings(unit.id);
+            if (!bindings) continue;
+            const { renderX: drawX, renderY: drawY } = bindings;
 
             const baseIconSize = effectiveTileSize * this.iconSizeRatio;
             let currentIconDrawX = drawX + (effectiveTileSize - (activeEffects.size * baseIconSize + (activeEffects.size - 1) * this.iconSpacing)) / 2;
