@@ -95,6 +95,38 @@ export class BattleSimulationManager {
     }
 
     /**
+     * 유닛 렌더링에 필요한 그리드 관련 파라미터를 반환합니다.
+     * 이 값들은 BattleGridManager와 VFXManager에서도 사용됩니다.
+     * @returns {{effectiveTileSize: number, gridOffsetX: number, gridOffsetY: number, totalGridWidth: number, totalGridHeight: number}}
+     */
+    getGridRenderParameters() {
+        const sceneContentDimensions = this.logicManager.getCurrentSceneContentDimensions();
+        const canvasWidth = this.measureManager.get('gameResolution.width');
+        const canvasHeight = this.measureManager.get('gameResolution.height');
+
+        const gridContentWidth = sceneContentDimensions.width;
+        const gridContentHeight = sceneContentDimensions.height;
+
+        const tileSizeBasedOnWidth = gridContentWidth / this.gridCols;
+        const tileSizeBasedOnHeight = gridContentHeight / this.gridRows;
+        const effectiveTileSize = Math.min(tileSizeBasedOnWidth, tileSizeBasedOnHeight);
+
+        const totalGridWidth = effectiveTileSize * this.gridCols;
+        const totalGridHeight = effectiveTileSize * this.gridRows;
+
+        const gridOffsetX = (canvasWidth - totalGridWidth) / 2;
+        const gridOffsetY = (canvasHeight - totalGridHeight) / 2;
+
+        return {
+            effectiveTileSize,
+            gridOffsetX,
+            gridOffsetY,
+            totalGridWidth,
+            totalGridHeight
+        };
+    }
+
+    /**
      * 배틀 그리드에 배치된 모든 유닛을 그립니다.
      * @param {CanvasRenderingContext2D} ctx
      */

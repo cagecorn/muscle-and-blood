@@ -52,6 +52,7 @@ import { BattleStageManager } from './managers/BattleStageManager.js';
 import { BattleGridManager } from './managers/BattleGridManager.js';
 import { CoordinateManager } from './managers/CoordinateManager.js';
 import { ButtonEngine } from './managers/ButtonEngine.js'; // ✨ ButtonEngine 임포트
+import { DetailInfoManager } from './managers/DetailInfoManager.js'; // ✨ DetailInfoManager 추가
 
 // ✨ 상수 파일 임포트
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES } from './constants.js';
@@ -148,8 +149,8 @@ export class GameEngine {
         );
 
         this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneEngine);
-        // ✨ InputManager 초기화 시 buttonEngine을 함께 전달
-        this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine, this.buttonEngine);
+        // ✨ InputManager 초기화 시 buttonEngine과 eventManager를 함께 전달
+        this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine, this.buttonEngine, this.eventManager);
 
         const mainGameCanvasElement = document.getElementById(canvasId);
         this.canvasBridgeManager = new CanvasBridgeManager(
@@ -194,6 +195,15 @@ export class GameEngine {
 
         // ✨ SynergyEngine 초기화
         this.synergyEngine = new SynergyEngine(this.idManager, this.eventManager);
+
+        // ✨ DetailInfoManager 초기화
+        this.detailInfoManager = new DetailInfoManager(
+            this.eventManager,
+            this.measureManager,
+            this.battleSimulationManager,
+            this.heroEngine,
+            this.idManager
+        );
         // BattleCalculationManager는 DiceRollManager가 준비된 이후에 초기화합니다.
         this.battleCalculationManager = new BattleCalculationManager(
             this.eventManager,
@@ -279,6 +289,11 @@ export class GameEngine {
         this.layerEngine.registerLayer('uiLayer', (ctx) => {
             this.uiEngine.draw(ctx);
         }, 100);
+
+        // ✨ DetailInfoManager의 draw 메서드를 별도의 레이어로 등록 (가장 위에 오도록 높은 Z-Index)
+        this.layerEngine.registerLayer('detailInfoLayer', (ctx) => {
+            this.detailInfoManager.draw(ctx);
+        }, 200); // 100보다 높게 설정
 
 
         this._update = this._update.bind(this);
@@ -420,6 +435,8 @@ export class GameEngine {
         this.animationManager.update(deltaTime);
         this.vfxManager.update(deltaTime);
         this.particleEngine.update(deltaTime); // ✨ ParticleEngine 업데이트 호출
+        // ✨ DetailInfoManager 업데이트 호출
+        this.detailInfoManager.update(deltaTime);
     }
 
     _draw() {
@@ -484,6 +501,8 @@ export class GameEngine {
     getHeroEngine() { return this.heroEngine; }
     // ✨ SynergyEngine getter 추가
     getSynergyEngine() { return this.synergyEngine; }
+    // ✨ DetailInfoManager getter 추가
+    getDetailInfoManager() { return this.detailInfoManager; }
     getDiceBotManager() { return this.diceBotManager; }
     // ✨ CoordinateManager getter 추가
     getCoordinateManager() { return this.coordinateManager; }

@@ -4,12 +4,13 @@
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS } from '../constants.js';
 
 export class InputManager {
-    constructor(renderer, cameraEngine, uiEngine, buttonEngine) { // ✨ buttonEngine 추가
+    constructor(renderer, cameraEngine, uiEngine, buttonEngine, eventManager) { // ✨ buttonEngine 추가
         console.log("🎮 InputManager initialized. Ready to process user input. 🎮");
         this.renderer = renderer;
         this.cameraEngine = cameraEngine;
         this.uiEngine = uiEngine;
         this.buttonEngine = buttonEngine; // ✨ ButtonEngine 인스턴스 저장
+        this.eventManager = eventManager;
 
         this.canvas = this.renderer.canvas;
 
@@ -55,6 +56,16 @@ export class InputManager {
             this.cameraEngine.pan(dx, dy);
             this.lastMouseX = event.clientX;
             this.lastMouseY = event.clientY;
+        }
+
+        // ✨ 캔버스 내 논리적 마우스 좌표 계산
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+
+        // ✨ DetailInfoManager가 마우스 이동을 감지할 수 있도록 이벤트 발행
+        if (this.eventManager) {
+            this.eventManager.emit(GAME_EVENTS.CANVAS_MOUSE_MOVED, { x: mouseX, y: mouseY });
         }
     }
 
