@@ -12,6 +12,19 @@ export class BattleSimulationManager {
         this.unitsOnGrid = [];
         this.gridRows = 9;  // 16:9 비율에 맞춘 행 수
         this.gridCols = 16; // 16:9 비율에 맞춘 열 수
+
+        // DOD 스타일 컴포넌트 저장소 초기화
+        this.nextEntityId = 0;
+        this.components = {
+            position: new Map(),
+            stats: new Map(),
+            render: new Map(),
+            info: new Map()
+        };
+    }
+
+    createEntity() {
+        return this.nextEntityId++;
     }
 
     /**
@@ -22,27 +35,39 @@ export class BattleSimulationManager {
      * @param {number} gridY
      */
     addUnit(fullUnitData, unitImage, gridX, gridY) {
-        // ✨ 유닛의 용맹 스탯에 기반하여 초기 배리어를 계산합니다.
+        const entityId = this.createEntity();
+
         const initialBarrier = this.valorEngine.calculateInitialBarrier(fullUnitData.baseStats.valor || 0);
 
+        // 컴포넌트 저장
+        this.components.position.set(entityId, { x: gridX, y: gridY });
+        this.components.stats.set(entityId, {
+            ...fullUnitData.baseStats,
+            currentHp: fullUnitData.baseStats.hp,
+            currentBarrier: initialBarrier,
+            maxBarrier: initialBarrier
+        });
+        this.components.render.set(entityId, { spriteId: fullUnitData.spriteId, image: unitImage });
+        this.components.info.set(entityId, { id: entityId, name: fullUnitData.name, classId: fullUnitData.classId, type: fullUnitData.type, fullUnitData });
+
         const unitInstance = {
-            id: fullUnitData.id,
+            id: entityId,
             name: fullUnitData.name,
             spriteId: fullUnitData.spriteId,
-            image: unitImage, // ✨ 로드된 이미지 객체를 직접 저장합니다.
+            image: unitImage,
             classId: fullUnitData.classId,
             gridX,
             gridY,
-            // 필요한 경우 다른 데이터도 여기에 추가할 수 있습니다.
             baseStats: fullUnitData.baseStats,
             type: fullUnitData.type,
             fullUnitData: fullUnitData,
-            currentHp: fullUnitData.currentHp !== undefined ? fullUnitData.currentHp : fullUnitData.baseStats.hp,
-            currentBarrier: initialBarrier, // ✨ 현재 배리어 설정
-            maxBarrier: initialBarrier // ✨ 최대 배리어는 초기 배리어와 동일
+            currentHp: fullUnitData.baseStats.hp,
+            currentBarrier: initialBarrier,
+            maxBarrier: initialBarrier
         };
         this.unitsOnGrid.push(unitInstance);
-        console.log(`[BattleSimulationManager] Added unit '${unitInstance.id}' at (${gridX}, ${gridY}) with initial barrier ${initialBarrier}.`);
+        console.log(`[BattleSimulationManager] Created entity ${entityId} for unit ${fullUnitData.name}`);
+        return entityId;
     }
 
     /**
@@ -66,6 +91,11 @@ export class BattleSimulationManager {
                 }
                 unit.gridX = newGridX;
                 unit.gridY = newGridY;
+                const pos = this.components.position.get(unitId);
+                if (pos) {
+                    pos.x = newGridX;
+                    pos.y = newGridY;
+                }
                 console.log(`[BattleSimulationManager] Unit '${unitId}' moved from (${oldX}, ${oldY}) to (${newGridX}, ${newGridY}).`);
                 return true;
             } else {
@@ -86,12 +116,14 @@ export class BattleSimulationManager {
      * @returns {boolean} 타일 점유 여부
      */
     isTileOccupied(gridX, gridY, ignoreUnitId = null) {
-        return this.unitsOnGrid.some(u =>
-            u.gridX === gridX &&
-            u.gridY === gridY &&
-            u.id !== ignoreUnitId &&
-            u.currentHp > 0
-        );
+        for (const [id, pos] of this.components.position.entries()) {
+            if (id === ignoreUnitId) continue;
+            const stats = this.components.stats.get(id);
+            if (pos.x === gridX && pos.y === gridY && stats && stats.currentHp > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -101,11 +133,14 @@ export class BattleSimulationManager {
      * @returns {object | undefined} 해당 위치의 유닛 객체 또는 없으면 undefined
      */
     getUnitAt(gridX, gridY) {
-        return this.unitsOnGrid.find(u =>
-            u.gridX === gridX &&
-            u.gridY === gridY &&
-            u.currentHp > 0
-        );
+        for (const [id, pos] of this.components.position.entries()) {
+            const stats = this.components.stats.get(id);
+            const info = this.components.info.get(id);
+            if (pos.x === gridX && pos.y === gridY && stats && stats.currentHp > 0) {
+                return { id, name: info.name, gridX: pos.x, gridY: pos.y, currentHp: stats.currentHp };
+            }
+        }
+        return undefined;
     }
 
     /**
