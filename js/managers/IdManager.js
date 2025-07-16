@@ -176,6 +176,35 @@ export class IdManager {
     }
 
     /**
+     * Remove all ID entries from IndexedDB and memory.
+     * Useful for ensuring a clean state during debugging.
+     * @returns {Promise<void>}
+     */
+    async clearAllData() {
+        if (!this.db) {
+            console.warn('[IdManager] IndexedDB not initialized, cannot clear data.');
+            return;
+        }
+
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.clear();
+
+            request.onsuccess = () => {
+                this.idMap.clear();
+                console.log('[IdManager] All ID data cleared from IndexedDB and memory.');
+                resolve();
+            };
+
+            request.onerror = (event) => {
+                console.error('[IdManager] Failed to clear all data:', event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+
+    /**
      * Example: cache a resource URL using Cache API.
      * @param {string} url
      * @returns {Promise<void>}
