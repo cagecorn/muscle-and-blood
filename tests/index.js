@@ -6,6 +6,7 @@ export { runMeasureManagerUnitTests } from './unit/measureManagerUnitTests.js';
 export { runMapManagerUnitTests } from './unit/mapManagerUnitTests.js';
 export { runUIEngineUnitTests } from './unit/uiEngineUnitTests.js';
 export { runButtonEngineUnitTests } from './unit/buttonEngineUnitTests.js';
+export { runDetailInfoManagerUnitTests } from './unit/detailInfoManagerUnitTests.js'; // ✨ DetailInfoManager 단위 테스트 추가
 
 // new unit tests
 export { runSceneEngineUnitTests } from './unit/sceneEngineUnitTests.js';
@@ -68,4 +69,5 @@ export function runEngineTests(renderer, gameLoop, battleSimulationManager = nul
     if (idManager && eventManager) {
         runSynergyEngineUnitTests(idManager, eventManager);
     }
+    runDetailInfoManagerUnitTests(); // 목업 사용
 }

@@ -19,8 +19,9 @@ export const GAME_EVENTS = {
     DRAG_MOVE: 'dragMove',
     DROP: 'drop',
     DRAG_CANCEL: 'dragCancel',
-    SYNERGY_ACTIVATED: 'synergyActivated',
-    SYNERGY_DEACTIVATED: 'synergyDeactivated'
+    SYNERGY_ACTIVATED: 'synergyActivated',   // 이전 요청에 의해 추가된 코드
+    SYNERGY_DEACTIVATED: 'synergyDeactivated', // 이전 요청에 의해 추가된 코드
+    CANVAS_MOUSE_MOVED: 'canvasMouseMoved' // ✨ 마우스 이동 이벤트 추가
 };
 
 export const UI_STATES = {
