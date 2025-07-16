@@ -257,6 +257,12 @@ export class GameEngine {
         this.delayEngine = new DelayEngine();
         this.timingEngine = new TimingEngine(this.delayEngine);
 
+        // ✨ RevertManager 초기화
+        this.revertManager = new RevertManager(
+            this.battleSimulationManager,
+            this.timingEngine,
+            this.delayEngine
+        );
         // ✨ MovingManager 초기화 - delayEngine이 준비된 이후
         this.movingManager = new MovingManager(
             this.battleSimulationManager,
@@ -302,7 +308,8 @@ export class GameEngine {
             this.eventManager,
             this.battleSimulationManager,
             this.diceRollManager,
-            this.delayEngine
+            this.delayEngine,
+            this.revertManager
         );
 
         // Status effect 관련 매니저 초기화
@@ -374,6 +381,8 @@ export class GameEngine {
             vfxManager: this.vfxManager,
             diceEngine: this.diceEngine,
             workflowManager: this.workflowManager,
+            assetLoaderManager: this.assetLoaderManager,
+            revertManager: this.revertManager
             animationManager: this.animationManager,
             measureManager: this.measureManager,
             idManager: this.idManager,
@@ -422,7 +431,7 @@ export class GameEngine {
         this.gameLoop = new GameLoop(this._update, this._draw);
 
         // ✨ _initAsyncManagers에서 로드할 총 에셋 및 데이터 수를 수동으로 계산
-        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length + 5 + 5 + 1; // 9(기존) + 5(워리어 스킬) + 5(기본 상태 아이콘) + 5(워리어 스킬 아이콘) + 1(warrior-finish.png)
+        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length + 5 + 5 + 1 + 2; // 9(기존) + 5(워리어 스킬) + 5(기본 상태 아이콘) + 5(워리어 스킬 아이콘) + 1(warrior-finish.png) + 2(새로운 애니메이션 이미지)
         this.assetLoaderManager.setTotalAssetsToLoad(expectedDataAndAssetCount);
 
         // 초기화 과정의 비동기 처리
@@ -513,6 +522,8 @@ export class GameEngine {
         // ✨ 전투 배경 이미지 로드
         await this.assetLoaderManager.loadImage('sprite_battle_stage_forest', 'assets/images/battle-stage-forest.png');
 
+        await this.assetLoaderManager.loadImage("sprite_warrior_attack", "assets/images/warrior-attack.png");
+        await this.assetLoaderManager.loadImage("sprite_warrior_hitted", "assets/images/warrior-hitted.png");
         console.log(`[GameEngine] Registered unit ID: ${UNITS.WARRIOR.id}`);
         console.log(`[GameEngine] Loaded warrior sprite: ${UNITS.WARRIOR.spriteId}`);
 
@@ -641,6 +652,7 @@ export class GameEngine {
     getMovingManager() { return this.movingManager; } // ✨ MovingManager getter 추가
 
     getButtonEngine() { return this.buttonEngine; }
+    getRevertManager() { return this.revertManager; } // ✨ RevertManager getter 추가
 
     // Dice 관련 엔진/매니저에 대한 getter
     getDiceEngine() { return this.diceEngine; }
