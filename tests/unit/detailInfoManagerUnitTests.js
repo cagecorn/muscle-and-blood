@@ -31,6 +31,9 @@ export function runDetailInfoManagerUnitTests() {
         animationManager: mockAnimationManager, // BattleSimulationManager가 AnimationManager를 가지고 있다고 가정
         getGridRenderParameters: () => ({ effectiveTileSize: 100, gridOffsetX: 0, gridOffsetY: 0 })
     };
+    const mockCameraEngine = {
+        screenToWorld: (x, y) => ({ x, y })
+    };
     const mockHeroEngine = {
         heroes: new Map(),
         getHero: async (heroId) => {
@@ -85,7 +88,7 @@ export function runDetailInfoManagerUnitTests() {
     // 테스트 1: 초기화 확인
     testCount++;
     try {
-        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager);
+        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager, mockCameraEngine);
         if (dim.eventManager === mockEventManager && dim.hoveredUnit === null) {
             console.log("DetailInfoManager: Initialized correctly. [PASS]");
             passCount++;
@@ -99,7 +102,7 @@ export function runDetailInfoManagerUnitTests() {
     // 테스트 2: _onCanvasMouseMove - 마우스 좌표 업데이트 확인
     testCount++;
     try {
-        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager);
+        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager, mockCameraEngine);
         dim._onCanvasMouseMove({ x: 100, y: 150 });
         if (dim.lastMouseX === 100 && dim.lastMouseY === 150) {
             console.log("DetailInfoManager: _onCanvasMouseMove updated mouse coordinates. [PASS]");
@@ -120,7 +123,7 @@ export function runDetailInfoManagerUnitTests() {
         return { drawX: 0, drawY: 0 };
     };
     try {
-        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager);
+        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager, mockCameraEngine);
         dim._onCanvasMouseMove({ x: 120, y: 120 }); // warrior 위에 마우스
         dim.update(16); // 델타 타임
 
@@ -137,7 +140,7 @@ export function runDetailInfoManagerUnitTests() {
     // 테스트 4: update - 호버링 해제
     testCount++;
     try {
-        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager);
+        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager, mockCameraEngine);
         dim.hoveredUnit = mockWarriorUnit; // 이미 호버링 중
         dim.tooltipVisible = true;
         dim.tooltipAlpha = 1;
@@ -163,7 +166,7 @@ export function runDetailInfoManagerUnitTests() {
         return { drawX: 0, drawY: 0 };
     };
     try {
-        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager);
+        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager, mockCameraEngine);
         dim._onCanvasMouseMove({ x: 120, y: 120 }); // 죽은 유닛 위에 마우스
         dim.update(16);
 
@@ -185,7 +188,7 @@ export function runDetailInfoManagerUnitTests() {
     mockCtx.strokeRectCalled = false;
     mockCtx.fillTextCalled = false;
     try {
-        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager);
+        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager, mockCameraEngine);
         dim.hoveredUnit = mockWarriorUnit;
         dim.tooltipVisible = true;
         dim.tooltipAlpha = 1; // 완전 표시 상태
@@ -207,7 +210,7 @@ export function runDetailInfoManagerUnitTests() {
     mockCtx.strokeRectCalled = false;
     mockCtx.fillTextCalled = false;
     try {
-        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager);
+        const dim = new DetailInfoManager(mockEventManager, mockMeasureManager, mockBattleSimulationManager, mockHeroEngine, mockIdManager, mockCameraEngine);
         dim.hoveredUnit = null;
         dim.tooltipVisible = false;
         dim.tooltipAlpha = 0;

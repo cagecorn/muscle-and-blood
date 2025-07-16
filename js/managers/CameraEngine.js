@@ -59,4 +59,16 @@ export class CameraEngine {
         // ✨ 추가: reset 후 Pan Constraints 적용 후 값 확인
         console.log(`[CameraEngine Debug] After clamping: final X=${this.x.toFixed(2)}, Y=${this.y.toFixed(2)}, Zoom=${this.zoom.toFixed(2)}`);
     }
+
+    /**
+     * 화면 좌표를 게임 월드 좌표로 변환합니다.
+     * @param {number} screenX - 화면상의 마우스 X 좌표
+     * @param {number} screenY - 화면상의 마우스 Y 좌표
+     * @returns {{x:number, y:number}} 변환된 게임 월드 좌표
+     */
+    screenToWorld(screenX, screenY) {
+        const worldX = (screenX - this.x) / this.zoom;
+        const worldY = (screenY - this.y) / this.zoom;
+        return { x: worldX, y: worldY };
+    }
 }
