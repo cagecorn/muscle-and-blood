@@ -9,8 +9,8 @@
 // import { CoordinateManager } from './CoordinateManager.js';
 // import { TargetingManager } from './TargetingManager.js';
 // import { VFXManager } from './VFXManager.js';
-// import { GAME_EVENTS, ATTACK_TYPES } from '../constants.js'; // 상수 임포트
-// import { WARRIOR_SKILLS } from '../../data/warriorSkills.js'; // 워리어 스킬 데이터 임포트
+import { GAME_EVENTS, ATTACK_TYPES, GAME_DEBUG_MODE } from '../constants.js'; // ✨ GAME_DEBUG_MODE 임포트
+import { WARRIOR_SKILLS } from '../../data/warriorSkills.js';
 
 export class WarriorSkillsAI {
     /**
@@ -19,7 +19,7 @@ export class WarriorSkillsAI {
      * @param {object} managers - BattleSimulationManager, BattleCalculationManager, EventManager 등 스킬 실행에 필요한 모든 매니저 객체
      */
     constructor(managers) {
-        console.log("\u2694\ufe0f WarriorSkillsAI initialized. Ready to execute warrior skills. \u2694\ufe0f");
+        if (GAME_DEBUG_MODE) console.log("\u2694\ufe0f WarriorSkillsAI initialized. Ready to execute warrior skills. \u2694\ufe0f");
         this.managers = managers; // 모든 필요한 매니저를 하나의 객체로 받음
     }
 
@@ -32,41 +32,46 @@ export class WarriorSkillsAI {
      */
     async charge(userUnit, targetUnit, skillData) {
         if (!userUnit || !targetUnit || userUnit.currentHp <= 0 || targetUnit.currentHp <= 0) {
-            console.warn("[WarriorSkillsAI] Charge skill failed: Invalid user or target unit.");
+            if (GAME_DEBUG_MODE) console.warn("[WarriorSkillsAI] Charge skill failed: Invalid user or target unit.");
             return;
         }
         if (GAME_DEBUG_MODE) console.log(`[WarriorSkillsAI] ${userUnit.name} uses ${skillData.name} on ${targetUnit.name}!`);
 
-        // 1. 이동 애니메이션 (타겟 바로 앞 칸으로 이동)
-        const targetX = targetUnit.gridX;
-        const targetY = targetUnit.gridY;
-        const potentialMoveX = targetX > userUnit.gridX ? targetX - 1 : (targetX < userUnit.gridX ? targetX + 1 : targetX);
-        const potentialMoveY = targetY > userUnit.gridY ? targetY - 1 : (targetY < userUnit.gridY ? targetY + 1 : targetY);
+        // 1. ✨ 스킬 아이콘 애니메이션 시작 (즉시 발행)
+        this.managers.eventManager.emit(GAME_EVENTS.SKILL_EXECUTED, { skillId: skillData.id, userId: userUnit.id, targetId: targetUnit.id });
+        await this.managers.delayEngine.waitFor(800);
 
-        const moved = this.managers.battleSimulationManager.moveUnit(userUnit.id, potentialMoveX, potentialMoveY);
-        if (moved) {
-            await this.managers.animationManager.queueMoveAnimation(userUnit.id, userUnit.gridX, userUnit.gridY, potentialMoveX, potentialMoveY);
-            await this.managers.delayEngine.waitFor(200); // 이동 후 잠시 대기
-        } else {
-            if (GAME_DEBUG_MODE) console.warn("[WarriorSkillsAI] Charge: Could not move to target position, attacking from current spot.");
+        const userUnitClassData = await this.managers.idManager.get(userUnit.classId);
+        const moveRange = userUnitClassData ? userUnitClassData.moveRange || 1 : 1;
+
+        // 2. ✨ MovingManager를 통한 특수 이동 (돌진 애니메이션 및 잔상)
+        const moved = await this.managers.movingManager.chargeMove(
+            userUnit,
+            targetUnit.gridX,
+            targetUnit.gridY,
+            moveRange
+        );
+
+        if (!moved) {
+            if (GAME_DEBUG_MODE) console.log("[WarriorSkillsAI] Charge: Failed to move to optimal position, proceeding with attack from current location.");
         }
 
         // 2. 물리 피해 계산 및 적용
-        const attackSkillData = { type: ATTACK_TYPES.PHYSICAL, dice: { num: 1, sides: 8 } }; // 예시 주사위
-        // skillData.effect.damageMultiplier를 적용하여 데미지 증폭
-        attackSkillData.damageMultiplier = skillData.effect.damageMultiplier || 1;
+        const attackSkillData = {
+            type: ATTACK_TYPES.PHYSICAL,
+            dice: { num: 1, sides: 8 },
+            damageMultiplier: skillData.effect.damageMultiplier || 1
+        };
 
         this.managers.battleCalculationManager.requestDamageCalculation(userUnit.id, targetUnit.id, attackSkillData);
-        await this.managers.delayEngine.waitFor(300); // 데미지 처리 대기
+        await this.managers.delayEngine.waitFor(300); // 데미지 처리 및 숫자 출력 대기
 
         // 3. 기절 효과 적용 (확률)
         if (skillData.effect.stunChance && this.managers.diceEngine.getRandomFloat() < skillData.effect.stunChance) {
             this.managers.workflowManager.triggerStatusEffectApplication(targetUnit.id, 'status_stun');
-            await this.managers.delayEngine.waitFor(200); // 상태 효과 적용 대기
+            await this.managers.delayEngine.waitFor(200);
             if (GAME_DEBUG_MODE) console.log(`[WarriorSkillsAI] ${targetUnit.name} is stunned by ${userUnit.name}'s Charge!`);
         }
-
-        this.managers.eventManager.emit(GAME_EVENTS.SKILL_EXECUTED, { skillId: skillData.id, userId: userUnit.id, targetId: targetUnit.id });
     }
 
     /**
