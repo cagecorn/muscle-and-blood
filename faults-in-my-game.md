@@ -93,3 +93,45 @@ DelayEngine이나 TimingEngine과 같이 비동기 로직을 포함하는 매니
 모든 매서드와 가능한 예외 케이스를 커버하도록 단위 테스트 케이스를 확장해야 합니다. 특히 결함 주입 테스트 (Fault Injection Tests)의 범위를 넓혀 시스템의 견고성을 더욱 강화해야 합니다.
 
 개선 효과: 코드 변경 시 기존 기능이 손상되지 않음을 보장하고, 새로운 버그 발생 가능성을 줄입니다.
+
+
+
+1. Code Consistency and Documentation
+Magic numbers and string constants: The document advises consolidating scattered numeric values and strings (e.g., UI ratios, event names) into centralized managers or constants. Doing so simplifies future balancing and minimizes typos.
+
+JSDoc usage: Consistent documentation for classes, functions, and variables is recommended to improve maintainability and team communication
+
+2. Robust Error Handling
+Defensive programming: Managers should throw errors if critical dependencies are missing (e.g., Renderer’s canvas). Methods need to warn or return safe defaults when encountering null or undefined values.
+
+Worker error reporting: Web Worker modules such as EventManager should inform the main engine about critical failures rather than logging errors silently.
+
+3. Performance Optimization
+Excessive logging: Many managers log extensively (see BattleGridManager.draw() debug statements). Reduce console.log usage or gate it behind a debug flag to cut overhead.
+
+Object creation: Reuse objects during frequently-called loops to reduce GC pressure.
+
+Asset loading progress: AssetLoaderManager manages image loading but lacks a progress UI. Implement a progress indicator or asset bundling to shorten load times
+
+4. Game Logic Architecture
+Centralized state changes: Key stats like currentHp and currentBarrier should update through dedicated methods or a StatSystem to simplify debugging.
+
+Turn flow clarity: Structuring TurnEngine phases (start, actions, end) as explicit events helps maintain separation of concerns and future extensibility.
+
+Advanced AI patterns: As BasicAIManager and ClassAIManager become complex, consider behavior trees or state machines for scalability.
+
+Data vs. logic separation: Continue isolating data files (e.g., data/unit.js) for items, skills, and maps with validation at load time.
+
+5. Testing Coverage
+Mocking frameworks: Current tests rely on manual mocks. Adopting libraries like Sinon.js would make them easier to maintain and verify.
+
+Asynchronous tests: For managers using timeouts or Promises (e.g., DelayEngine), mocking timers will stabilize asynchronous tests and reduce test durations.
+
+Coverage expansion: Extend unit tests and fault-injection tests to cover more edge cases and safeguard against regressions.
+
+6. Modularization & Maintainability
+The project already separates many systems (e.g., SceneEngine, UIEngine, BattleGridManager), but cross-module coupling is high in places. Ensuring clear interfaces and dependency injection will keep modules reusable and easier to test.
+
+Comments in multiple languages and TODO markers (e.g., DisarmManager TODO at line 48) may hinder clarity. Prioritize consistent English or Korean comments depending on target contributors.
+
+Overall, the repository outlines an ambitious and modular game framework, but improved documentation, error handling, performance practices, and expanded testing would boost reliability and maintainability.
