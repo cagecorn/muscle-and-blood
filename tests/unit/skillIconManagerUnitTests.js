@@ -71,11 +71,11 @@ export function runSkillIconManagerUnitTests(assetLoaderManager, idManager) {
         const sim = new SkillIconManager(mockAssetLoaderManager, mockIdManager);
         await sim._loadDefaultSkillIcons();
         const icon = sim.getSkillIcon('non_existent_skill_icon');
-        if (icon === undefined) {
-            console.log("SkillIconManager: getSkillIcon returned undefined for non-existent icon. [PASS]");
+        if (icon && icon.src && icon.src.startsWith('data:image')) {
+            console.log("SkillIconManager: getSkillIcon returned placeholder for non-existent icon. [PASS]");
             passCount++;
         } else {
-            console.error("SkillIconManager: getSkillIcon failed for non-existent icon. [FAIL]", icon);
+            console.error("SkillIconManager: getSkillIcon failed to return placeholder for non-existent icon. [FAIL]", icon);
         }
     } catch (e) {
         console.error("SkillIconManager: Error during getSkillIcon (non-existent) test. [FAIL]", e);
