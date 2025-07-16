@@ -3,13 +3,12 @@ import { DelayEngine } from './DelayEngine.js'; // ✨ DelayEngine 추가
 import { GAME_EVENTS } from '../constants.js';
 
 export class BattleCalculationManager {
-    constructor(eventManager, battleSimulationManager, diceRollManager, delayEngine, revertManager) {
+    constructor(eventManager, battleSimulationManager, diceRollManager, delayEngine) {
         console.log("\ud83d\udcca BattleCalculationManager initialized. Delegating heavy calculations to worker. \ud83d\udcca");
         this.eventManager = eventManager;
         this.battleSimulationManager = battleSimulationManager;
         this.diceRollManager = diceRollManager;
         this.delayEngine = delayEngine; // ✨ delayEngine 저장
-        this.revertManager = revertManager; // ✨ revertManager 저장
         this.worker = new Worker('./js/workers/battleCalculationWorker.js');
 
         this.worker.onmessage = this._handleWorkerMessage.bind(this);
@@ -32,15 +31,6 @@ export class BattleCalculationManager {
 
             const unitToUpdate = this.battleSimulationManager.unitsOnGrid.find(u => u.id === unitId);
             if (unitToUpdate) {
-                // ✨ 데미지 받았을 때 애니메이션 처리
-                if (hpDamageDealt > 0 || barrierDamageDealt > 0) {
-                    if (unitToUpdate.classId === 'class_warrior') {
-                        this.revertManager.saveState(unitToUpdate.id, unitToUpdate.image);
-                        unitToUpdate.image = this.battleSimulationManager.assetLoaderManager.getImage('sprite_warrior_hitted');
-                        this.revertManager.revertState(unitToUpdate.id, 300); // 300ms 후 복귀
-                    }
-                }
-
                 unitToUpdate.currentHp = newHp;
                 unitToUpdate.currentBarrier = newBarrier;
 

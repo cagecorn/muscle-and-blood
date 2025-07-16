@@ -42,8 +42,6 @@ export function runWarriorSkillsAIUnitTests() {
                 if (GAME_DEBUG_MODE) console.log(`[MockDelayEngine] Waited ${ms}ms.`);
             }
         },
-        assetLoaderManager: { getImage: () => ({}) },
-        revertManager: { saveState: () => {}, revertState: () => {} },
         statusEffectManager: {
             applyStatusEffectCalled: false,
             applyStatusEffect: (unitId, effectId) => {
