@@ -22,25 +22,22 @@ export class HeroManager {
     /**
      * 지정된 수만큼의 전사 클래스 영웅 데이터를 생성하여 반환합니다.
      * @param {number} count - 생성할 영웅의 수
+     * @param {object} warriorClassData - IdManager를 거치지 않고 직접 받은 전사 클래스 데이터
      * @returns {Promise<object[]>} 생성된 영웅 데이터 배열
      */
-    async createWarriors(count) {
+    async createWarriors(count, warriorClassData) {
         console.log(`[HeroManager] Creating data for ${count} new warriors...`);
-        let warriorClassData = await this.idManager.get(CLASSES.WARRIOR.id);
-        const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
 
+        // idManager에서 데이터를 가져오는 대신, 매개변수로 받은 데이터를 직접 사용합니다.
         if (!warriorClassData) {
-            console.warn('[HeroManager] Warrior class not registered in IdManager, falling back to static data.');
-            warriorClassData = CLASSES.WARRIOR;
-            try {
-                await this.idManager.addOrUpdateId(CLASSES.WARRIOR.id, warriorClassData);
-            } catch (e) {
-                console.error('[HeroManager] Failed to register warrior class to IdManager:', e);
-            }
+            console.error('[HeroManager] warriorClassData was not provided to createWarriors. Aborting.');
+            return [];
         }
 
-        const statRanges = (warriorClassData && warriorClassData.statRanges) || {};
-        const availableSkills = (warriorClassData && warriorClassData.availableSkills) || [];
+        const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
+
+        const statRanges = warriorClassData.statRanges || {};
+        const availableSkills = warriorClassData.availableSkills || [];
 
         if (!warriorImage) {
             console.error('[HeroManager] Warrior image not found. Cannot create warriors.');
@@ -69,7 +66,7 @@ export class HeroManager {
             const heroUnitData = {
                 id: unitId,
                 name: randomName,
-                classId: CLASSES.WARRIOR.id,
+                classId: warriorClassData.id,
                 type: ATTACK_TYPES.MERCENARY,
                 spriteId: UNITS.WARRIOR.spriteId,
                 gridX: 0,
@@ -77,7 +74,7 @@ export class HeroManager {
                 baseStats: baseStats,
                 currentHp: baseStats.hp,
                 skillSlots: [...randomSkills],
-                tags: [...CLASSES.WARRIOR.tags]
+                tags: [...warriorClassData.tags]
             };
 
             await this.idManager.addOrUpdateId(unitId, heroUnitData);

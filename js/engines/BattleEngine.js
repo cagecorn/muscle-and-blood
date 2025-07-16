@@ -23,6 +23,7 @@ import { DiceRollManager } from '../managers/DiceRollManager.js';
 import { BattleCalculationManager } from '../managers/BattleCalculationManager.js';
 import { TurnCountManager } from '../managers/TurnCountManager.js';
 import { StatusEffectManager } from '../managers/StatusEffectManager.js';
+import { CLASSES } from '../../data/class.js'; // ◀◀◀ **이 부분을 추가해주세요!**
 
 /**
  * 전투 시뮬레이션과 턴 진행을 담당하는 엔진입니다.
@@ -108,7 +109,8 @@ export class BattleEngine {
         await this.assetLoaderManager.loadImage('sprite_warrior_default', 'assets/images/warrior.png');
         await this.assetLoaderManager.loadImage('sprite_zombie_default', 'assets/images/zombie.png');
 
-        const heroes = await this.heroManager.createWarriors(3);
+        // static 데이터를 직접 HeroManager에 전달하여 IdManager 의존성을 제거합니다.
+        const heroes = await this.heroManager.createWarriors(3, CLASSES.WARRIOR);
         this.battleFormationManager.placeAllies(heroes);
         await this.monsterSpawnManager.spawnMonstersForStage('stage1');
     }
