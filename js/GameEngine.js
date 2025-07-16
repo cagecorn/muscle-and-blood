@@ -18,6 +18,7 @@ import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
 import { AnimationManager } from './managers/AnimationManager.js';
 import { VFXManager } from './managers/VFXManager.js';
 import { ParticleEngine } from './managers/ParticleEngine.js'; // ✨ ParticleEngine 임포트
+import { ShadowEngine } from './managers/ShadowEngine.js'; // ✨ ShadowEngine 추가
 import { MovingManager } from './managers/MovingManager.js'; // ✨ MovingManager 추가
 import { DisarmManager } from './managers/DisarmManager.js'; // ✨ DisarmManager 임포트
 import { CanvasBridgeManager } from './managers/CanvasBridgeManager.js'; // ✨ CanvasBridgeManager 추가
@@ -121,6 +122,13 @@ export class GameEngine {
         );
         // 생성 후 상호 참조 설정
         this.animationManager.battleSimulationManager = this.battleSimulationManager;
+
+        // ✨ ShadowEngine 초기화
+        this.shadowEngine = new ShadowEngine(
+            this.battleSimulationManager,
+            this.animationManager,
+            this.measureManager
+        );
 
         // MercenaryPanelManager는 별도 캔버스를 사용하지 않고 UIEngine을 통해 그려집니다.
         this.mercenaryPanelManager = new MercenaryPanelManager(
@@ -340,6 +348,12 @@ export class GameEngine {
 
         // ✨ sceneEngine 초기 상태 설정에 UI_STATES 상수 사용
         this.sceneEngine.setCurrentScene(UI_STATES.MAP_SCREEN);
+
+        // ✨ LayerEngine에 ShadowEngine 그리기 레이어 등록
+        // sceneLayer(10)보다 낮게, 배경보다 높도록 5로 설정
+        this.layerEngine.registerLayer('shadowLayer', (ctx) => {
+            this.shadowEngine.draw(ctx);
+        }, 5);
 
         this.layerEngine.registerLayer('sceneLayer', (ctx) => {
             this.sceneEngine.draw(ctx);
@@ -607,4 +621,5 @@ export class GameEngine {
     getSkillIconManager() { return this.skillIconManager; }
     // ✨ StatusIconManager getter 추가
     getStatusIconManager() { return this.statusIconManager; }
+    getShadowEngine() { return this.shadowEngine; } // ✨ ShadowEngine getter 추가
 }
