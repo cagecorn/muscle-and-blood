@@ -12,6 +12,7 @@ export { runSkillIconManagerUnitTests } from './unit/skillIconManagerUnitTests.j
 export { runStatusIconManagerUnitTests } from './unit/statusIconManagerUnitTests.js'; // ✨ StatusIconManager 단위 테스트 추가
 export { runMovingManagerUnitTests } from './unit/movingManagerUnitTests.js'; // ✨ MovingManager 단위 테스트 추가
 export { runWarriorSkillsAIUnitTests } from './unit/warriorSkillsAIUnitTests.js'; // ✨ WarriorSkillsAI 테스트 임포트 확인
+export { runShadowEngineUnitTests } from './unit/shadowEngineUnitTests.js'; // ✨ ShadowEngine 단위 테스트 추가
 
 // new unit tests
 export { runSceneEngineUnitTests } from './unit/sceneEngineUnitTests.js';
@@ -80,4 +81,5 @@ export function runEngineTests(renderer, gameLoop, battleSimulationManager = nul
     runStatusIconManagerUnitTests(); // 목업 사용
     runMovingManagerUnitTests();
     runWarriorSkillsAIUnitTests();
+    runShadowEngineUnitTests();
 }

@@ -107,6 +107,7 @@
         <button id="runStatusIconManagerUnitTestsBtn">StatusIconManager 유닛 테스트</button>
         <button id="runMovingManagerUnitTestsBtn">MovingManager 유닛 테스트</button>
         <button id="runWarriorSkillsAIUnitTestsBtn">WarriorSkillsAI 유닛 테스트</button>
+        <button id="runShadowEngineUnitTestsBtn">ShadowEngine 유닛 테스트</button>
 
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
@@ -126,6 +127,7 @@
 
         <h4>시스템 제어</h4>
         <button id="toggleDisarmSystemBtn">무장해제 시스템 활성화/비활성화</button>
+        <button id="toggleShadowsBtn">그림자 효과 활성화/비활성화</button>
 
         <h4>상태 이상 테스트</h4>
         <button id="applyPoisonToSkeletonBtn">해골에 독 적용 (3턴)</button>
@@ -193,7 +195,8 @@
             runDetailInfoManagerUnitTests,
             runTagManagerUnitTests,
             runSkillIconManagerUnitTests,
-            runStatusIconManagerUnitTests
+            runStatusIconManagerUnitTests,
+            runShadowEngineUnitTests
     } from './tests/index.js';
     import { STATUS_EFFECTS } from './data/statusEffects.js';
     // ✨ 상수 파일 임포트
@@ -231,6 +234,7 @@
             const idManager = gameEngine.getIdManager();
             const basicAIManager = gameEngine.getBasicAIManager();
             const animationManager = gameEngine.getAnimationManager();
+            const shadowEngine = gameEngine.getShadowEngine(); // ✨ ShadowEngine 인스턴스 가져오기
             const turnCountManager = gameEngine.getTurnCountManager();
             const statusEffectManager = gameEngine.getStatusEffectManager();
             const workflowManager = gameEngine.getWorkflowManager();
@@ -420,6 +424,10 @@
             document.getElementById('runWarriorSkillsAIUnitTestsBtn').addEventListener('click', () => {
                 runWarriorSkillsAIUnitTests();
             });
+            // ✨ ShadowEngine 단위 테스트 버튼 리스너
+            document.getElementById('runShadowEngineUnitTestsBtn').addEventListener('click', () => {
+                runShadowEngineUnitTests();
+            });
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
                 injectRendererFault(renderer);
             });
@@ -486,6 +494,16 @@
                 toggleDisarmSystemBtn.textContent = `무장해제 시스템: ${!currentState ? '활성화됨' : '비활성화됨'}`;
                 console.log(`[Debug Main] 무장해제 시스템이 ${!currentState ? '활성화' : '비활성화'}되었습니다.`);
             });
+
+            // ✨ 그림자 토글 버튼 리스너
+            const toggleShadowsBtn = document.getElementById('toggleShadowsBtn');
+            if (toggleShadowsBtn) {
+                toggleShadowsBtn.textContent = `그림자 효과: ${shadowEngine.shadowsEnabled ? '활성화됨' : '비활성화됨'}`;
+                toggleShadowsBtn.addEventListener('click', () => {
+                    const newState = shadowEngine.toggleShadows();
+                    toggleShadowsBtn.textContent = `그림자 효과: ${newState ? '활성화됨' : '비활성화됨'}`;
+                });
+            }
 
             document.getElementById('applyPoisonToSkeletonBtn').addEventListener('click', () => {
                 workflowManager.triggerStatusEffectApplication('unit_skeleton_001', STATUS_EFFECTS.POISON.id);
