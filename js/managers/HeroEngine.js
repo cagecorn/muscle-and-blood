@@ -7,10 +7,11 @@ export class HeroEngine {
      * @param {AssetLoaderManager} assetLoaderManager - 이미지 에셋 로드를 위한 AssetLoaderManager 인스턴스
      * @param {DiceBotManager} diceBotManager - 무작위 값 생성을 위한 DiceBotManager 인스턴스
      */
-    constructor(idManager, assetLoaderManager, diceBotManager) {
+    constructor(idManager, assetLoaderManager, diceEngine, diceBotManager) {
         console.log("\u2728 HeroEngine initialized. The foundation for all heroes begins here! \u2728");
         this.idManager = idManager;
         this.assetLoaderManager = assetLoaderManager;
+        this.diceEngine = diceEngine;
         this.diceBotManager = diceBotManager;
 
         this.heroes = new Map(); // key: heroId, value: heroData (생성된 영웅 인스턴스 저장)
@@ -61,7 +62,7 @@ export class HeroEngine {
      * @returns {Promise<object>} 생성된 영웅 객체
      */
     async generateHero(options) {
-        const heroId = options.heroId || `hero_${Date.now()}_${this.diceBotManager.getRandomInt(1000, 9999)}`;
+        const heroId = options.heroId || `hero_${Date.now()}_${this.diceEngine.getRandomInt(1000, 9999)}`;
         const heroName = options.name || '미지의 영웅';
         const classId = options.classId || 'class_warrior'; // 기본 전사 클래스
 
@@ -73,34 +74,34 @@ export class HeroEngine {
         // 2. 랜덤 스탯 생성 (DiceBotManager 활용)
         // 각 스탯에 대해 대략적인 범위 설정
         const baseStats = {
-            hp: this.diceBotManager.getRandomInt(70, 120),
-            valor: this.diceBotManager.getRandomInt(10, 60),
-            strength: this.diceBotManager.getRandomInt(5, 30),
-            endurance: this.diceBotManager.getRandomInt(5, 30),
-            agility: this.diceBotManager.getRandomInt(5, 30),
-            intelligence: this.diceBotManager.getRandomInt(5, 30),
-            wisdom: this.diceBotManager.getRandomInt(5, 30),
-            luck: this.diceBotManager.getRandomInt(5, 30),
-            weight: this.diceBotManager.getRandomInt(10, 40),
-            speed: this.diceBotManager.getRandomInt(30, 90)
+            hp: this.diceEngine.getRandomInt(70, 120),
+            valor: this.diceEngine.getRandomInt(10, 60),
+            strength: this.diceEngine.getRandomInt(5, 30),
+            endurance: this.diceEngine.getRandomInt(5, 30),
+            agility: this.diceEngine.getRandomInt(5, 30),
+            intelligence: this.diceEngine.getRandomInt(5, 30),
+            wisdom: this.diceEngine.getRandomInt(5, 30),
+            luck: this.diceEngine.getRandomInt(5, 30),
+            weight: this.diceEngine.getRandomInt(10, 40),
+            speed: this.diceEngine.getRandomInt(30, 90)
         };
 
         // 3. 랜덤한 세 가지 스킬 부여 (임시 스킬 ID 사용)
         const skills = [
-            `skill_${this.diceBotManager.getRandomInt(1, 3)}`, // 첫 번째 스킬
-            `skill_${this.diceBotManager.getRandomInt(4, 6)}`, // 두 번째 스킬
-            `skill_passive_${this.diceBotManager.getRandomInt(1, 2)}` // 세 번째 스킬 (패시브)
+            `skill_${this.diceEngine.getRandomInt(1, 3)}`, // 첫 번째 스킬
+            `skill_${this.diceEngine.getRandomInt(4, 6)}`, // 두 번째 스킬
+            `skill_passive_${this.diceEngine.getRandomInt(1, 2)}` // 세 번째 스킬 (패시브)
         ];
 
         // 4. 랜덤한 특성 부여 (임시 특성 ID 사용)
-        const traits = [`trait_${this.diceBotManager.getRandomInt(1, 3)}`];
+        const traits = [`trait_${this.diceEngine.getRandomInt(1, 3)}`];
 
         // ✨ 5. 랜덤한 2~3개의 시너지 부여
         const allPossibleSynergies = ['synergy_warrior', 'synergy_mage', 'synergy_healer', 'synergy_archer'];
-        const numSynergies = this.diceBotManager.getRandomInt(2, 3);
+        const numSynergies = this.diceEngine.getRandomInt(2, 3);
         const assignedSynergies = [];
         while (assignedSynergies.length < numSynergies) {
-            const randomIndex = this.diceBotManager.getRandomInt(0, allPossibleSynergies.length - 1);
+            const randomIndex = this.diceEngine.getRandomInt(0, allPossibleSynergies.length - 1);
             const selectedSynergy = allPossibleSynergies[randomIndex];
             if (!assignedSynergies.includes(selectedSynergy)) {
                 assignedSynergies.push(selectedSynergy);
