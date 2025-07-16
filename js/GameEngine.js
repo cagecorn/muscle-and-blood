@@ -63,6 +63,8 @@ import { UnitSpriteEngine } from './managers/UnitSpriteEngine.js';
 import { UnitActionManager } from './managers/UnitActionManager.js';
 import { PassiveSkillManager } from './managers/PassiveSkillManager.js';
 import { ReactionSkillManager } from './managers/ReactionSkillManager.js'; // ✨ ReactionSkillManager import
+import { ConditionalManager } from './managers/ConditionalManager.js';
+import { PassiveIconManager } from './managers/PassiveIconManager.js';
 
 // ✨ 상수 파일 임포트
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES, GAME_DEBUG_MODE } from './constants.js';
@@ -299,14 +301,20 @@ export class GameEngine {
         this.tagManager = new TagManager(this.idManager);
 
         // ------------------------------------------------------------------
-        // 11. Combat Flow & AI Managers
+        // 11. Conditional Manager
+        // ------------------------------------------------------------------
+        this.conditionalManager = new ConditionalManager(this.battleSimulationManager, this.idManager);
+
+        // ------------------------------------------------------------------
+        // 12. Combat Flow & AI Managers
         // ------------------------------------------------------------------
         // BattleCalculationManager는 DiceRollManager를 나중에 주입합니다.
         this.battleCalculationManager = new BattleCalculationManager(
             this.eventManager,
             this.battleSimulationManager,
             null,
-            this.delayEngine
+            this.delayEngine,
+            this.conditionalManager
         );
 
         // Status effect 관련 매니저 초기화
@@ -416,6 +424,11 @@ export class GameEngine {
         );
 
         // ------------------------------------------------------------------
+        // 13. Conditional & Passive Visual Managers
+        // ------------------------------------------------------------------
+        this.passiveIconManager = new PassiveIconManager(this.battleSimulationManager, this.idManager, this.skillIconManager);
+
+        // ------------------------------------------------------------------
         // 13. Scene Registrations & Layer Engine Setup
         // ------------------------------------------------------------------
         // ✨ sceneEngine에 UI_STATES 상수 사용
@@ -439,6 +452,10 @@ export class GameEngine {
         this.layerEngine.registerLayer('statusIconLayer', (ctx) => {
             this.statusIconManager.draw(ctx);
         }, 15);
+
+        this.layerEngine.registerLayer('passiveIconLayer', (ctx) => {
+            this.passiveIconManager.draw(ctx);
+        }, 16); // 상태이상 아이콘 위에 그려지도록 z-index 조정
 
         this.layerEngine.registerLayer('uiLayer', (ctx) => {
             this.uiEngine.draw(ctx);
@@ -624,6 +641,7 @@ export class GameEngine {
     }
 
     _update(deltaTime) {
+        this.conditionalManager.update(); // ✨ 업데이트 루프에 추가
         this.sceneEngine.update(deltaTime);
         this.animationManager.update(deltaTime);
         this.vfxManager.update(deltaTime);
@@ -726,4 +744,6 @@ export class GameEngine {
     getUnitActionManager() { return this.unitActionManager; }
     getPassiveSkillManager() { return this.passiveSkillManager; }
     getReactionSkillManager() { return this.reactionSkillManager; }
+    getConditionalManager() { return this.conditionalManager; }
+    getPassiveIconManager() { return this.passiveIconManager; }
 }

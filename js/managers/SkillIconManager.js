@@ -42,7 +42,7 @@ export class SkillIconManager {
             'skill_warrior_battle_cry': 'assets/icons/skills/battle_cry.png',
             'skill_warrior_rending_strike': 'assets/icons/skills/rending_strike.png',
             'skill_warrior_retaliate': 'assets/icons/skills/retaliate.png',
-            'skill_warrior_iron_will': 'assets/icons/skills/iron_will.png',
+            'skill_warrior_iron_will': 'assets/icons/skills/iron_will.png', // ✨ 아이언 윌 스킬 아이콘
             'status_poison': 'assets/icons/status_effects/poison.png',
             'status_stun': 'assets/icons/status_effects/stun.png',
             'status_bleed': 'assets/icons/status_effects/bleed.png', // ✨ 출혈 아이콘 경로 추가

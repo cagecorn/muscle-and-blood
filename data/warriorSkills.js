@@ -67,11 +67,13 @@ export const WARRIOR_SKILLS = {
         id: 'skill_warrior_iron_will',
         name: '강철 의지',
         type: SKILL_TYPES.PASSIVE,
-        probability: 0, // 패시브는 확률 없음
-        description: '받는 마법 피해가 감소합니다.',
+        description: '잃은 체력에 비례하여 받는 피해량이 최대 30%까지 감소합니다.',
         requiredUserTags: ['방어'],
         effect: {
-            magicDamageReduction: 0.15 // 마법 피해 15% 감소
+            // 이 효과는 ConditionalManager가 실시간으로 계산하므로
+            // 여기에는 패시브 식별용 정보만 남겨둡니다.
+            type: 'damage_reduction_on_lost_hp',
+            maxReduction: 0.3 // 최대 30% 감소
         }
     }
 };
