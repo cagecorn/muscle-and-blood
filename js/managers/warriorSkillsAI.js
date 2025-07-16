@@ -37,8 +37,19 @@ export class WarriorSkillsAI {
         }
         if (GAME_DEBUG_MODE) console.log(`[WarriorSkillsAI] ${userUnit.name} uses ${skillData.name} on ${targetUnit.name}!`);
 
+        // ✨ 공격 애니메이션 시작 (warrior-attack.png)
+        if (userUnit.classId === 'class_warrior') {
+            this.managers.revertManager.saveState(userUnit.id, userUnit.image);
+            userUnit.image = this.managers.assetLoaderManager.getImage('sprite_warrior_attack');
+        }
+
         // 1. ✨ 스킬 아이콘 애니메이션 시작 (즉시 발행)
         this.managers.eventManager.emit(GAME_EVENTS.SKILL_EXECUTED, { skillId: skillData.id, userId: userUnit.id, targetId: targetUnit.id });
+
+        // ✨ 애니메이션 끝나면 원상복구
+        if (userUnit.classId === 'class_warrior') {
+            this.managers.revertManager.revertState(userUnit.id, 100); // 100ms 후 복귀
+        }
         await this.managers.delayEngine.waitFor(800);
 
         const userUnitClassData = await this.managers.idManager.get(userUnit.classId);
@@ -87,6 +98,12 @@ export class WarriorSkillsAI {
         }
         if (GAME_DEBUG_MODE) console.log(`[WarriorSkillsAI] ${userUnit.name} uses ${skillData.name}!`);
 
+        // ✨ 공격 애니메이션 시작 (warrior-attack.png)
+        if (userUnit.classId === 'class_warrior') {
+            this.managers.revertManager.saveState(userUnit.id, userUnit.image);
+            userUnit.image = this.managers.assetLoaderManager.getImage('sprite_warrior_attack');
+        }
+
         // 1. 스탯 버프 적용
         if (skillData.effect.statBuff) {
             this.managers.eventManager.emit(GAME_EVENTS.LOG_MESSAGE, { message: `${userUnit.name}의 공격력이 ${skillData.effect.statBuff.amount} 증가합니다!` });
@@ -100,6 +117,11 @@ export class WarriorSkillsAI {
         }
 
         this.managers.eventManager.emit(GAME_EVENTS.SKILL_EXECUTED, { skillId: skillData.id, userId: userUnit.id });
+
+        // ✨ 애니메이션 끝나면 원상복구
+        if (userUnit.classId === 'class_warrior') {
+            this.managers.revertManager.revertState(userUnit.id, 100); // 100ms 후 복귀
+        }
     }
 
     /**
@@ -117,6 +139,12 @@ export class WarriorSkillsAI {
         }
         if (GAME_DEBUG_MODE) console.log(`[WarriorSkillsAI] ${userUnit.name} attempts ${skillData.name} on ${targetUnit.name}!`);
 
+        // ✨ 공격 애니메이션 시작 (warrior-attack.png)
+        if (userUnit.classId === 'class_warrior') {
+            this.managers.revertManager.saveState(userUnit.id, userUnit.image);
+            userUnit.image = this.managers.assetLoaderManager.getImage('sprite_warrior_attack');
+        }
+
         if (skillData.effect.applyChance && this.managers.diceEngine.getRandomFloat() < skillData.effect.applyChance) {
             this.managers.workflowManager.triggerStatusEffectApplication(targetUnit.id, skillData.effect.statusEffectId);
             await this.managers.delayEngine.waitFor(100);
@@ -126,6 +154,11 @@ export class WarriorSkillsAI {
         }
 
         this.managers.eventManager.emit(GAME_EVENTS.SKILL_EXECUTED, { skillId: skillData.id, userId: userUnit.id, targetId: targetUnit.id });
+
+        // ✨ 애니메이션 끝나면 원상복구
+        if (userUnit.classId === 'class_warrior') {
+            this.managers.revertManager.revertState(userUnit.id, 100); // 100ms 후 복귀
+        }
     }
 
     /**
@@ -142,6 +175,12 @@ export class WarriorSkillsAI {
         }
         if (GAME_DEBUG_MODE) console.log(`[WarriorSkillsAI] ${userUnit.name} uses ${skillData.name} on ${attackerUnit.name}!`);
 
+        // ✨ 공격 애니메이션 시작 (warrior-attack.png)
+        if (userUnit.classId === 'class_warrior') {
+            this.managers.revertManager.saveState(userUnit.id, userUnit.image);
+            userUnit.image = this.managers.assetLoaderManager.getImage('sprite_warrior_attack');
+        }
+
         const counterAttackDamageMultiplier = skillData.effect.counterAttackDamageMultiplier || 1;
         const attackSkillData = {
             type: ATTACK_TYPES.PHYSICAL,
@@ -153,6 +192,11 @@ export class WarriorSkillsAI {
         await this.managers.delayEngine.waitFor(300);
 
         this.managers.eventManager.emit(GAME_EVENTS.SKILL_EXECUTED, { skillId: skillData.id, userId: userUnit.id, targetId: attackerUnit.id });
+
+        // ✨ 애니메이션 끝나면 원상복구
+        if (userUnit.classId === 'class_warrior') {
+            this.managers.revertManager.revertState(userUnit.id, 100); // 100ms 후 복귀
+        }
     }
 
     /**
