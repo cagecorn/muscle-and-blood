@@ -2,7 +2,7 @@
 
 import { HeroEngine } from '../../js/managers/HeroEngine.js';
 
-export function runHeroEngineUnitTests(idManager, assetLoaderManager, diceBotManager) {
+export function runHeroEngineUnitTests(idManager, assetLoaderManager, diceEngine, diceBotManager) {
     console.log("--- HeroEngine Unit Test Start ---");
 
     let testCount = 0;
@@ -43,7 +43,7 @@ export function runHeroEngineUnitTests(idManager, assetLoaderManager, diceBotMan
     // 테스트 1: 초기화 확인
     testCount++;
     try {
-        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, mockDiceBotManager);
+        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, diceEngine, mockDiceBotManager);
         if (heroEngine.idManager === mockIdManager && heroEngine.heroes instanceof Map) {
             console.log("HeroEngine: Initialized correctly. [PASS]");
             passCount++;
@@ -59,7 +59,7 @@ export function runHeroEngineUnitTests(idManager, assetLoaderManager, diceBotMan
     mockDiceBotManager.getRandomIntResults = [100, 50, 20, 10, 15, 5, 10, 20, 30, 60, 1, 4, 1];
     mockDiceBotManager.getRandomIntIndex = 0;
     try {
-        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, mockDiceBotManager);
+        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, diceEngine, mockDiceBotManager);
         const hero = await heroEngine.generateHero({
             name: '테스트 영웅',
             classId: 'class_test',
@@ -81,7 +81,7 @@ export function runHeroEngineUnitTests(idManager, assetLoaderManager, diceBotMan
     // 테스트 3: getHero - 존재하는 영웅 가져오기
     testCount++;
     try {
-        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, mockDiceBotManager);
+        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, diceEngine, mockDiceBotManager);
         const generatedHero = await heroEngine.generateHero({ heroId: 'test_hero_get', name: '가져올 영웅' });
         heroEngine.heroes.set(generatedHero.id, generatedHero);
 
@@ -99,7 +99,7 @@ export function runHeroEngineUnitTests(idManager, assetLoaderManager, diceBotMan
     // 테스트 4: getHero - 존재하지 않는 영웅 가져오기
     testCount++;
     try {
-        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, mockDiceBotManager);
+        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, diceEngine, mockDiceBotManager);
         const nonExistentHero = heroEngine.getHero('non_existent_hero');
         if (nonExistentHero === undefined) {
             console.log("HeroEngine: getHero returned undefined for non-existent hero. [PASS]");
@@ -114,7 +114,7 @@ export function runHeroEngineUnitTests(idManager, assetLoaderManager, diceBotMan
     // 테스트 5: getAllHeroes - 모든 영웅 목록 반환
     testCount++;
     try {
-        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, mockDiceBotManager);
+        const heroEngine = new HeroEngine(mockIdManager, mockAssetLoaderManager, diceEngine, mockDiceBotManager);
         await heroEngine.generateHero({ heroId: 'hero_1', name: 'Hero One' });
         await heroEngine.generateHero({ heroId: 'hero_2', name: 'Hero Two' });
         const allHeroes = heroEngine.getAllHeroes();

@@ -268,7 +268,12 @@ export class GameEngine {
         // 9. Game Content & Feature Engines
         // ------------------------------------------------------------------
         // HeroEngine 초기화
-        this.heroEngine = new HeroEngine(this.idManager, this.assetLoaderManager, this.diceBotManager);
+        this.heroEngine = new HeroEngine(
+            this.idManager,
+            this.assetLoaderManager,
+            this.diceEngine,
+            this.diceBotManager
+        );
 
         // ✨ SynergyEngine 초기화
         this.synergyEngine = new SynergyEngine(this.idManager, this.eventManager);

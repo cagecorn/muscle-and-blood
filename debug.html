@@ -273,7 +273,7 @@
             // --- 버튼 이벤트 리스너 설정 ---
             document.getElementById('runAllEngineTestsBtn').addEventListener('click', () => {
                 // gameLoop는 gameEngine 내부에 있으므로 gameEngine.gameLoop로 전달 (혹은 getter)
-                runEngineTests(renderer, gameLoop, battleSimulationManager, gameEngine.getBattleGridManager(), idManager, gameEngine.getAssetLoaderManager(), diceBotManager, eventManager);
+                runEngineTests(renderer, gameLoop, battleSimulationManager, gameEngine.getBattleGridManager(), idManager, gameEngine.getAssetLoaderManager(), diceEngine, diceBotManager, eventManager);
                 runEventManagerTests(eventManager);
                 runGuardianManagerTests(guardianManager);
                 runMeasureManagerIntegrationTest(gameEngine);
@@ -396,7 +396,7 @@
             });
 
             document.getElementById("runHeroEngineUnitTestsBtn").addEventListener("click", () => {
-                runHeroEngineUnitTests(idManager, gameEngine.getAssetLoaderManager(), diceBotManager);
+                runHeroEngineUnitTests(idManager, gameEngine.getAssetLoaderManager(), diceEngine, diceBotManager);
             });
             // ✨ SynergyEngine 단위 테스트 버튼 리스너 추가
             document.getElementById('runSynergyEngineUnitTestsBtn').addEventListener('click', () => {
@@ -593,7 +593,7 @@
             };
 
             // 페이지 로드 시 기본 엔진 테스트 자동 실행
-            runEngineTests(renderer, gameLoop, battleSimulationManager, gameEngine.getBattleGridManager(), idManager, gameEngine.getAssetLoaderManager(), diceBotManager, eventManager);
+            runEngineTests(renderer, gameLoop, battleSimulationManager, gameEngine.getBattleGridManager(), idManager, gameEngine.getAssetLoaderManager(), diceEngine, diceBotManager, eventManager);
             runEventManagerTests(eventManager); // EventManager 테스트도 자동 실행
             runGuardianManagerTests(guardianManager); // GuardianManager 테스트도 자동 실행
             runMeasureManagerIntegrationTest(gameEngine); // MeasureManager 통합 테스트도 자동 실행
