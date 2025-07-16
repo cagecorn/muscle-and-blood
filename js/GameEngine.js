@@ -20,6 +20,8 @@ import { VFXManager } from './managers/VFXManager.js';
 import { ParticleEngine } from './managers/ParticleEngine.js'; // ✨ ParticleEngine 임포트
 import { DisarmManager } from './managers/DisarmManager.js'; // ✨ DisarmManager 임포트
 import { CanvasBridgeManager } from './managers/CanvasBridgeManager.js'; // ✨ CanvasBridgeManager 추가
+import { SkillIconManager } from './managers/SkillIconManager.js'; // ✨ SkillIconManager 추가
+import { StatusIconManager } from './managers/StatusIconManager.js'; // ✨ StatusIconManager 추가
 import { BindingManager } from './managers/BindingManager.js';
 import { BattleCalculationManager } from './managers/BattleCalculationManager.js';
 import { MercenaryPanelManager } from './managers/MercenaryPanelManager.js'; // ✨ MercenaryPanelManager 추가
@@ -89,6 +91,9 @@ export class GameEngine {
         this.assetLoaderManager = new AssetLoaderManager();
         // ✨ AssetLoaderManager에 EventManager 주입
         this.assetLoaderManager.setEventManager(this.eventManager);
+
+        // ✨ SkillIconManager 초기화
+        this.skillIconManager = new SkillIconManager(this.assetLoaderManager, this.idManager);
 
         // ✨ 에셋 로딩 진행 상황 구독
         this.eventManager.subscribe(GAME_EVENTS.ASSET_LOAD_PROGRESS, (data) => {
@@ -242,6 +247,15 @@ export class GameEngine {
             this.battleSimulationManager
         );
 
+        // ✨ StatusIconManager 초기화
+        this.statusIconManager = new StatusIconManager(
+            this.skillIconManager,
+            this.battleSimulationManager,
+            this.animationManager,
+            this.measureManager,
+            this.turnCountManager
+        );
+
         // ✨ DisarmManager 초기화 (StatusEffectManager가 먼저 초기화되어야 함)
         this.disarmManager = new DisarmManager(
             this.eventManager,
@@ -320,6 +334,11 @@ export class GameEngine {
             this.sceneEngine.draw(ctx);
         }, 10);
 
+        // ✨ StatusIconManager의 draw 메서드를 레이어로 등록 (VFXManager 위에 표시)
+        this.layerEngine.registerLayer('statusIconLayer', (ctx) => {
+            this.statusIconManager.draw(ctx);
+        }, 15);
+
         this.layerEngine.registerLayer('uiLayer', (ctx) => {
             this.uiEngine.draw(ctx);
         }, 100);
@@ -336,7 +355,7 @@ export class GameEngine {
         this.gameLoop = new GameLoop(this._update, this._draw);
 
         // ✨ _initAsyncManagers에서 로드할 총 에셋 및 데이터 수를 수동으로 계산
-        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length;
+        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length + 5 + 5;
         this.assetLoaderManager.setTotalAssetsToLoad(expectedDataAndAssetCount);
 
         // 초기화 과정의 비동기 처리
@@ -412,6 +431,10 @@ export class GameEngine {
             await this.idManager.addOrUpdateId(skill.id, skill);
         }
         if (GAME_DEBUG_MODE) console.log(`[GameEngine] Registered ${Object.keys(WARRIOR_SKILLS).length} warrior skills.`);
+
+        // ✨ SkillIconManager의 기본 아이콘 로드를 시작
+        await this.skillIconManager._loadDefaultSkillIcons();
+        if (GAME_DEBUG_MODE) console.log("[GameEngine] All initial icons have been queued for loading by SkillIconManager.");
 
         // 2. AssetLoaderManager로 전사 스프라이트 로드
         await this.assetLoaderManager.loadImage(
@@ -568,4 +591,8 @@ export class GameEngine {
     getTagManager() { return this.tagManager; }
     // ✨ 워리어 스킬 AI getter 추가
     getWarriorSkillsAI() { return this.warriorSkillsAI; }
+    // ✨ SkillIconManager getter 추가
+    getSkillIconManager() { return this.skillIconManager; }
+    // ✨ StatusIconManager getter 추가
+    getStatusIconManager() { return this.statusIconManager; }
 }
