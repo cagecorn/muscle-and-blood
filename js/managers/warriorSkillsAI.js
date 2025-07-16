@@ -56,10 +56,10 @@ export class WarriorSkillsAI {
             if (GAME_DEBUG_MODE) console.log("[WarriorSkillsAI] Charge: Failed to move to optimal position, proceeding with attack from current location.");
         }
 
-        // 2. 물리 피해 계산 및 적용
+        // 2. 물리 피해 계산 및 적용 (데이터 참조)
         const attackSkillData = {
             type: ATTACK_TYPES.PHYSICAL,
-            dice: { num: 1, sides: 8 },
+            dice: skillData.effect.dice,
             damageMultiplier: skillData.effect.damageMultiplier || 1
         };
 
@@ -106,7 +106,7 @@ export class WarriorSkillsAI {
                     attackType: ATTACK_TYPES.MELEE
                 });
 
-                const normalAttackData = { type: ATTACK_TYPES.PHYSICAL, dice: { num: 1, sides: 6 } };
+                const normalAttackData = { type: ATTACK_TYPES.PHYSICAL, dice: skillData.effect.dice };
                 this.managers.battleCalculationManager.requestDamageCalculation(userUnit.id, closestEnemy.id, normalAttackData);
                 await this.managers.delayEngine.waitFor(500);
             } else {

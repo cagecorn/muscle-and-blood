@@ -66,6 +66,8 @@ import { PassiveSkillManager } from './managers/PassiveSkillManager.js';
 import { ReactionSkillManager } from './managers/ReactionSkillManager.js'; // ✨ ReactionSkillManager import
 import { ConditionalManager } from './managers/ConditionalManager.js';
 import { PassiveIconManager } from './managers/PassiveIconManager.js';
+import { BattleFormationManager } from './managers/BattleFormationManager.js';
+import { MonsterSpawnManager } from './managers/MonsterSpawnManager.js';
 
 // ✨ 상수 파일 임포트
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES, GAME_DEBUG_MODE } from './constants.js';
@@ -341,7 +343,7 @@ export class GameEngine {
         this.statusIconManager = new StatusIconManager(
             this.skillIconManager,
             this.battleSimulationManager,
-            this.animationManager,
+            this.bindingManager,
             this.measureManager,
             this.turnCountManager
         );
@@ -442,6 +444,9 @@ export class GameEngine {
             this.battleSimulationManager,
             this.unitSpriteEngine
         );
+
+        this.battleFormationManager = new BattleFormationManager(this.battleSimulationManager);
+        this.monsterSpawnManager = new MonsterSpawnManager(this.idManager, this.assetLoaderManager, this.battleSimulationManager);
 
         // ------------------------------------------------------------------
         // 13. Conditional & Passive Visual Managers
@@ -638,30 +643,9 @@ export class GameEngine {
     }
 
     async _initBattleGrid() {
-        // ✨ 기존 테스트용 전사 유닛 생성 코드를 제거하고 HeroManager를 사용합니다.
-        await this.heroManager.createAndPlaceWarriors(3);
-
-        const zombieImage = this.assetLoaderManager.getImage('sprite_zombie_default');
-
-        const zombieClassData = await this.idManager.get('class_zombie');
-        for (let i = 0; i < 5; i++) {
-            const unitId = `unit_zombie_${i + 1}`;
-            const startX = 12 + i;
-            const startY = 6;
-
-            const zombieUnit = {
-                id: unitId,
-                name: '좀비',
-                classId: 'class_zombie',
-                type: ATTACK_TYPES.ENEMY,
-                spriteId: 'sprite_zombie_default',
-                gridX: startX,
-                gridY: startY,
-                baseStats: zombieClassData && zombieClassData.baseStats ? { ...zombieClassData.baseStats } : { hp: 80, attack: 15, defense: 5, speed: 30 },
-                currentHp: zombieClassData && zombieClassData.baseStats ? zombieClassData.baseStats.hp : 80
-            };
-            this.battleSimulationManager.addUnit(zombieUnit, zombieImage, startX, startY);
-        }
+        const heroes = await this.heroManager.createWarriors(3);
+        this.battleFormationManager.placeAllies(heroes);
+        await this.monsterSpawnManager.spawnMonstersForStage('stage1');
     }
 
     _update(deltaTime) {
@@ -672,6 +656,22 @@ export class GameEngine {
         this.particleEngine.update(deltaTime); // ✨ ParticleEngine 업데이트 호출
         // ✨ DetailInfoManager 업데이트 호출
         this.detailInfoManager.update(deltaTime);
+
+        const { effectiveTileSize, gridOffsetX, gridOffsetY } = this.battleSimulationManager.getGridRenderParameters();
+        for (const unit of this.battleSimulationManager.unitsOnGrid) {
+            const { drawX, drawY } = this.animationManager.getRenderPosition(
+                unit.id,
+                unit.gridX,
+                unit.gridY,
+                effectiveTileSize,
+                gridOffsetX,
+                gridOffsetY
+            );
+            this.bindingManager.bindUnit(unit.id, {
+                renderX: drawX,
+                renderY: drawY
+            });
+        }
     }
 
     _draw() {
@@ -765,6 +765,8 @@ export class GameEngine {
     getSkillIconManager() { return this.skillIconManager; }
     // ✨ StatusIconManager getter 추가
     getStatusIconManager() { return this.statusIconManager; }
+    getBattleFormationManager() { return this.battleFormationManager; }
+    getMonsterSpawnManager() { return this.monsterSpawnManager; }
     getShadowEngine() { return this.shadowEngine; } // ✨ ShadowEngine getter 추가
     getUnitSpriteEngine() { return this.unitSpriteEngine; }
     getUnitActionManager() { return this.unitActionManager; }

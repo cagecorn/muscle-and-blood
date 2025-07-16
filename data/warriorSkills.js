@@ -15,10 +15,12 @@ export const WARRIOR_SKILLS = {
         id: 'skill_warrior_charge',
         name: '돌격',
         type: SKILL_TYPES.ACTIVE,
+        aiFunction: 'charge',
         probability: 40, // 이 확률은 RuleManager에 정의된 슬롯 확률에 따라 재조정될 수 있습니다.
         description: '적에게 돌진하여 물리 피해를 입힙니다. 이동과 공격을 동시에 수행합니다.',
         requiredUserTags: ['근접'], // 근접 태그를 가진 유닛만 사용 가능
         effect: {
+            dice: { num: 1, sides: 8 },
             damageMultiplier: 1.5,
             stunChance: 0.2 // 20% 확률로 기절
         }
@@ -28,10 +30,12 @@ export const WARRIOR_SKILLS = {
         id: 'skill_warrior_battle_cry',
         name: '전투의 외침',
         type: SKILL_TYPES.BUFF,
+        aiFunction: 'battleCry',
         probability: 30,
         description: '자신의 공격력을 일시적으로 증가시키고 일반 공격을 수행합니다.',
         requiredUserTags: ['전사_클래스'],
         effect: {
+            dice: { num: 1, sides: 6 },
             statusEffectId: 'status_battle_cry', // 적용할 상태이상 ID
             allowAdditionalAttack: true // 버프 후 추가 공격 가능 플래그
         }

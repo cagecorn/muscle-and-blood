@@ -20,19 +20,22 @@ export class HeroManager {
     }
 
     /**
-     * 지정된 수만큼의 전사 클래스 영웅을 생성하여 전투에 배치합니다.
+     * 지정된 수만큼의 전사 클래스 영웅 데이터를 생성하여 반환합니다.
      * @param {number} count - 생성할 영웅의 수
+     * @returns {Promise<object[]>} 생성된 영웅 데이터 배열
      */
-    async createAndPlaceWarriors(count) {
-        console.log(`[HeroManager] Creating ${count} new warriors...`);
+    async createWarriors(count) {
+        console.log(`[HeroManager] Creating data for ${count} new warriors...`);
         const warriorClassData = await this.idManager.get(CLASSES.WARRIOR.id);
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
         const warriorSkillKeys = Object.keys(WARRIOR_SKILLS);
 
         if (!warriorClassData || !warriorImage) {
             console.error('[HeroManager] Warrior class data or image not found. Cannot create warriors.');
-            return;
+            return [];
         }
+
+        const createdHeroes = [];
 
         for (let i = 0; i < count; i++) {
             const unitId = `hero_warrior_${Date.now()}_${i}`;
@@ -45,17 +48,14 @@ export class HeroManager {
                 randomSkills.add(randomSkillId);
             }
 
-            const startX = 2 + i * 2;
-            const startY = 4;
-
             const heroUnitData = {
                 id: unitId,
                 name: randomName,
                 classId: CLASSES.WARRIOR.id,
                 type: ATTACK_TYPES.MERCENARY,
                 spriteId: UNITS.WARRIOR.spriteId,
-                gridX: startX,
-                gridY: startY,
+                gridX: 0,
+                gridY: 0,
                 baseStats: { ...UNITS.WARRIOR.baseStats },
                 currentHp: UNITS.WARRIOR.baseStats.hp,
                 skillSlots: [...randomSkills],
@@ -63,8 +63,6 @@ export class HeroManager {
             };
 
             await this.idManager.addOrUpdateId(unitId, heroUnitData);
-            this.battleSimulationManager.addUnit(heroUnitData, warriorImage, startX, startY);
-
             await this.unitSpriteEngine.registerUnitSprites(unitId, {
                 idle: 'assets/images/warrior.png',
                 attack: 'assets/images/warrior-attack.png',
@@ -73,7 +71,9 @@ export class HeroManager {
                 status: 'assets/images/warrior-status-effects.png'
             });
 
-            console.log(`[HeroManager] Created warrior: ${randomName} (ID: ${unitId}) at (${startX}, ${startY}) and registered its sprites.`);
+            createdHeroes.push(heroUnitData);
+            console.log(`[HeroManager] Created data for warrior: ${heroUnitData.name}`);
         }
+        return createdHeroes;
     }
 }
