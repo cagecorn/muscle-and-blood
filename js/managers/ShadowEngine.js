@@ -21,6 +21,7 @@ export class ShadowEngine {
 
         this.shadowsEnabled = true; // \u2728 그림자 효과 활성화/비활성화 토글 기능
         this.baseShadowOpacity = 0.4; // 그림자 기본 투명도
+        // 그림자 타원 형태 비율
         this.shadowScaleY = 0.5; // 그림자의 Y축 스케일 (납작하게 만듦)
         // 그림자 오프셋 (유닛 타일 크기 대비 비율) - 45도 느낌
         this.shadowOffsetXRatio = 0.3;
@@ -73,28 +74,29 @@ export class ShadowEngine {
             );
 
             ctx.save();
-            ctx.globalAlpha = this.baseShadowOpacity; // 그림자 투명도 적용
-            // 그림자를 검은색으로 만들기 (간단한 방법: source-atop 합성)
+            ctx.globalAlpha = this.baseShadowOpacity;
             ctx.fillStyle = 'black';
 
-            // 45도 방향 오프셋 (유닛 타일 크기 대비)
             const offsetX = effectiveTileSize * this.shadowOffsetXRatio;
             const offsetY = effectiveTileSize * this.shadowOffsetYRatio;
-
-            // 그림자 그리기 위치
             const shadowDrawX = drawX + offsetX;
             const shadowDrawY = drawY + offsetY;
 
-            // 그림자를 Y축으로 납작하게 만들고 그립니다.
-            ctx.translate(shadowDrawX + effectiveTileSize / 2, shadowDrawY + effectiveTileSize / 2); // 중심을 기준으로 스케일링
-            ctx.scale(1, this.shadowScaleY); // Y축으로 납작하게
-            ctx.translate(-(shadowDrawX + effectiveTileSize / 2), -(shadowDrawY + effectiveTileSize / 2)); // 원래 위치로 이동
+            ctx.translate(shadowDrawX + effectiveTileSize / 2, shadowDrawY + effectiveTileSize / 2);
+            ctx.scale(1, this.shadowScaleY);
+            ctx.translate(-(shadowDrawX + effectiveTileSize / 2), -(shadowDrawY + effectiveTileSize / 2));
 
-            ctx.drawImage(unit.image, shadowDrawX, shadowDrawY, effectiveTileSize, effectiveTileSize);
-
-            // 그림자 이미지를 검은색으로 덮어씌움 (유닛 이미지의 형태를 유지하면서 검은색으로)
-            ctx.globalCompositeOperation = 'source-atop';
-            ctx.fillRect(shadowDrawX, shadowDrawY, effectiveTileSize, effectiveTileSize / this.shadowScaleY); // 스케일링 전의 높이로 사각형을 그려야 함
+            ctx.beginPath();
+            ctx.ellipse(
+                shadowDrawX + effectiveTileSize / 2,
+                shadowDrawY + effectiveTileSize * 0.9,
+                effectiveTileSize / 2,
+                (effectiveTileSize * this.shadowScaleY) / 2,
+                0,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
 
             ctx.restore();
         }

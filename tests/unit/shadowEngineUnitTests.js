@@ -29,13 +29,18 @@ export function runShadowEngineUnitTests() {
     const mockCtx = {
         save: () => {},
         restore: () => {},
-        drawImage: function() { this.drawImageCalled = true; },
-        fillRect: function() { this.fillRectCalled = true; }, // 그림자를 검은색으로 채울 때 사용
+        beginPath: function() { this.beginPathCalled = true; },
+        ellipse: function() { this.ellipseCalled = true; },
+        fill: function() { this.fillCalled = true; },
         translate: () => {},
         scale: () => {},
         // 속성 추적
-        globalAlpha: 1, globalCompositeOperation: 'source-over', fillStyle: '',
-        drawImageCalled: false, fillRectCalled: false,
+        globalAlpha: 1,
+        globalCompositeOperation: 'source-over',
+        fillStyle: '',
+        beginPathCalled: false,
+        ellipseCalled: false,
+        fillCalled: false,
     };
 
 
@@ -78,14 +83,14 @@ export function runShadowEngineUnitTests() {
 
     // 테스트 3: draw - 그림자가 활성화되어 있을 때 그리기 호출 확인
     testCount++;
-    mockCtx.drawImageCalled = false;
-    mockCtx.fillRectCalled = false;
+    mockCtx.ellipseCalled = false;
+    mockCtx.fillCalled = false;
     try {
         const se = new ShadowEngine(mockBattleSimulationManager, mockAnimationManager, mockMeasureManager);
         se.setShadowsEnabled(true);
         se.draw(mockCtx);
 
-        if (mockCtx.drawImageCalled && mockCtx.fillRectCalled) {
+        if (mockCtx.ellipseCalled && mockCtx.fillCalled) {
             if (GAME_DEBUG_MODE) console.log("ShadowEngine: draw called drawing operations when enabled. [PASS]"); // \u2728 조건부 로그
             passCount++;
         } else {
@@ -97,14 +102,14 @@ export function runShadowEngineUnitTests() {
 
     // 테스트 4: draw - 그림자가 비활성화되어 있을 때 그리기 호출 없음
     testCount++;
-    mockCtx.drawImageCalled = false;
-    mockCtx.fillRectCalled = false;
+    mockCtx.ellipseCalled = false;
+    mockCtx.fillCalled = false;
     try {
         const se = new ShadowEngine(mockBattleSimulationManager, mockAnimationManager, mockMeasureManager);
         se.setShadowsEnabled(false);
         se.draw(mockCtx);
 
-        if (!mockCtx.drawImageCalled && !mockCtx.fillRectCalled) {
+        if (!mockCtx.ellipseCalled && !mockCtx.fillCalled) {
             if (GAME_DEBUG_MODE) console.log("ShadowEngine: draw correctly skipped drawing when disabled. [PASS]"); // \u2728 조건부 로그
             passCount++;
         } else {
@@ -119,14 +124,14 @@ export function runShadowEngineUnitTests() {
     const mockDeadUnit = { ...mockUnit, currentHp: 0 };
     const originalUnits = mockBattleSimulationManager.unitsOnGrid;
     mockBattleSimulationManager.unitsOnGrid = [mockDeadUnit];
-    mockCtx.drawImageCalled = false;
-    mockCtx.fillRectCalled = false;
+    mockCtx.ellipseCalled = false;
+    mockCtx.fillCalled = false;
     try {
         const se = new ShadowEngine(mockBattleSimulationManager, mockAnimationManager, mockMeasureManager);
         se.setShadowsEnabled(true);
         se.draw(mockCtx);
 
-        if (!mockCtx.drawImageCalled && !mockCtx.fillRectCalled) {
+        if (!mockCtx.ellipseCalled && !mockCtx.fillCalled) {
             if (GAME_DEBUG_MODE) console.log("ShadowEngine: draw correctly skipped drawing for dead unit. [PASS]"); // \u2728 조건부 로그
             passCount++;
         } else {
