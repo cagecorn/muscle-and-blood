@@ -30,7 +30,7 @@ import { CLASSES } from '../../data/class.js'; // ◀◀◀ **이 부분을 추�
  */
 export class BattleEngine {
     constructor(eventManager, measureManager, assetEngine, renderEngine) {
-        console.log("\u2694\ufe0f BattleEngine initialized.");
+        console.log("⚔️ BattleEngine initialized.");
 
         const idManager = assetEngine.getIdManager();
         const assetLoaderManager = assetEngine.getAssetLoaderManager();
@@ -109,7 +109,8 @@ export class BattleEngine {
         await this.assetLoaderManager.loadImage('sprite_warrior_default', 'assets/images/warrior.png');
         await this.assetLoaderManager.loadImage('sprite_zombie_default', 'assets/images/zombie.png');
 
-        // static 데이터를 직접 HeroManager에 전달하여 IdManager 의존성을 제거합니다.
+        // IdManager를 거치지 않고, 미리 import 해둔 정적 데이터를 직접 HeroManager에 전달합니다.
+        // 이것이 레이스 컨디션을 막는 가장 확실한 방법입니다.
         const heroes = await this.heroManager.createWarriors(3, CLASSES.WARRIOR);
         this.battleFormationManager.placeAllies(heroes);
         await this.monsterSpawnManager.spawnMonstersForStage('stage1');
