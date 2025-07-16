@@ -105,6 +105,8 @@
         <button id="runTagManagerUnitTestsBtn">TagManager 유닛 테스트</button>
         <button id="runSkillIconManagerUnitTestsBtn">SkillIconManager 유닛 테스트</button>
         <button id="runStatusIconManagerUnitTestsBtn">StatusIconManager 유닛 테스트</button>
+        <button id="runMovingManagerUnitTestsBtn">MovingManager 유닛 테스트</button>
+        <button id="runWarriorSkillsAIUnitTestsBtn">WarriorSkillsAI 유닛 테스트</button>
 
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
@@ -411,6 +413,12 @@
             // ✨ StatusIconManager 단위 테스트 버튼 리스너
             document.getElementById('runStatusIconManagerUnitTestsBtn').addEventListener('click', () => {
                 runStatusIconManagerUnitTests();
+            });
+            document.getElementById('runMovingManagerUnitTestsBtn').addEventListener('click', () => {
+                runMovingManagerUnitTests();
+            });
+            document.getElementById('runWarriorSkillsAIUnitTestsBtn').addEventListener('click', () => {
+                runWarriorSkillsAIUnitTests();
             });
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
                 injectRendererFault(renderer);

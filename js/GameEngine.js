@@ -18,6 +18,7 @@ import { BattleSimulationManager } from './managers/BattleSimulationManager.js';
 import { AnimationManager } from './managers/AnimationManager.js';
 import { VFXManager } from './managers/VFXManager.js';
 import { ParticleEngine } from './managers/ParticleEngine.js'; // ✨ ParticleEngine 임포트
+import { MovingManager } from './managers/MovingManager.js'; // ✨ MovingManager 추가
 import { DisarmManager } from './managers/DisarmManager.js'; // ✨ DisarmManager 임포트
 import { CanvasBridgeManager } from './managers/CanvasBridgeManager.js'; // ✨ CanvasBridgeManager 추가
 import { SkillIconManager } from './managers/SkillIconManager.js'; // ✨ SkillIconManager 추가
@@ -186,6 +187,14 @@ export class GameEngine {
         this.battleGridManager = new BattleGridManager(this.measureManager, this.logicManager);
         // ✨ CoordinateManager 초기화 - BattleSimulationManager 후
         this.coordinateManager = new CoordinateManager(this.battleSimulationManager, this.battleGridManager);
+
+        // ✨ MovingManager 초기화
+        this.movingManager = new MovingManager(
+            this.battleSimulationManager,
+            this.animationManager,
+            this.delayEngine,
+            this.coordinateManager
+        );
         // VFXManager에 AnimationManager를 전달하여 HP 바 위치를 애니메이션과 동기화합니다.
         this.vfxManager = new VFXManager(
             this.renderer,
@@ -296,6 +305,7 @@ export class GameEngine {
             this.cameraEngine,
             this.battleSimulationManager
         );
+        this.animationManager.particleEngine = this.particleEngine; // AnimationManager에 ParticleEngine 전달
 
         // VFXManager에 ParticleEngine 전달
         this.vfxManager.particleEngine = this.particleEngine;
@@ -314,7 +324,8 @@ export class GameEngine {
             workflowManager: this.workflowManager,
             animationManager: this.animationManager,
             measureManager: this.measureManager,
-            idManager: this.idManager
+            idManager: this.idManager,
+            movingManager: this.movingManager
         };
         this.warriorSkillsAI = new WarriorSkillsAI(commonManagersForSkills);
 
@@ -571,6 +582,7 @@ export class GameEngine {
     getWorkflowManager() { return this.workflowManager; }
     getDisarmManager() { return this.disarmManager; }
     getParticleEngine() { return this.particleEngine; } // ✨ ParticleEngine getter 추가
+    getMovingManager() { return this.movingManager; } // ✨ MovingManager getter 추가
 
     getButtonEngine() { return this.buttonEngine; }
 

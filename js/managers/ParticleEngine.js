@@ -71,6 +71,36 @@ export class ParticleEngine {
     }
 
     /**
+     * ✨ 유닛의 잔상(afterimage)을 생성하여 추가합니다.
+     * @param {string} unitId - 잔상을 생성할 유닛의 ID
+     * @param {HTMLImageElement} unitImage - 유닛 이미지 객체
+     * @param {number} gridX - 잔상 생성 시 유닛의 그리드 X 좌표
+     * @param {number} gridY - 잔상 생성 시 유닛의 그리드 Y 좌표
+     */
+    addUnitAfterimage(unitId, unitImage, gridX, gridY) {
+        const { effectiveTileSize, gridOffsetX, gridOffsetY } = this.battleSimulationManager.getGridRenderParameters();
+
+        const afterimageDuration = 300;
+        const fadeDuration = 300;
+
+        const { drawX, drawY } = this.battleSimulationManager.animationManager.getRenderPosition(
+            unitId, gridX, gridY, effectiveTileSize, gridOffsetX, gridOffsetY
+        );
+
+        this.activeParticles.push({
+            x: drawX,
+            y: drawY,
+            size: effectiveTileSize,
+            image: unitImage,
+            alpha: 0.7,
+            startTime: performance.now(),
+            duration: afterimageDuration,
+            fadeDuration: fadeDuration,
+            type: 'afterimage'
+        });
+    }
+
+    /**
      * 모든 활성 파티클의 상태를 업데이트합니다.
      * @param {number} deltaTime - 지난 프레임과의 시간 차이 (ms)
      */
@@ -85,12 +115,14 @@ export class ParticleEngine {
                 continue;
             }
 
-            // 위치 업데이트 (speedY는 음수이므로 빼기)
-            particle.x += particle.speedX * (deltaTime / 16);
-            particle.y -= particle.speedY * (deltaTime / 16);
-
-            // 투명도 업데이트 (점점 사라지게)
-            particle.alpha = Math.max(0, 1 - (elapsed / particle.duration));
+            if (particle.type === 'afterimage') {
+                const progress = elapsed / particle.fadeDuration;
+                particle.alpha = Math.max(0, particle.alpha - progress);
+            } else {
+                particle.x += particle.speedX * (deltaTime / 16);
+                particle.y -= particle.speedY * (deltaTime / 16);
+                particle.alpha = Math.max(0, 1 - (elapsed / particle.duration));
+            }
         }
     }
 
@@ -105,15 +137,24 @@ export class ParticleEngine {
 
         for (const particle of this.activeParticles) {
             ctx.globalAlpha = particle.alpha;
-            ctx.fillStyle = particle.color;
 
-            // 파티클은 사각형으로 그립니다.
-            ctx.fillRect(
-                particle.x - particle.size / 2,
-                particle.y - particle.size / 2,
-                particle.size,
-                particle.size
-            );
+            if (particle.type === 'afterimage' && particle.image) {
+                ctx.drawImage(
+                    particle.image,
+                    particle.x,
+                    particle.y,
+                    particle.size,
+                    particle.size
+                );
+            } else {
+                ctx.fillStyle = particle.color;
+                ctx.fillRect(
+                    particle.x - particle.size / 2,
+                    particle.y - particle.size / 2,
+                    particle.size,
+                    particle.size
+                );
+            }
         }
         ctx.restore();
     }
