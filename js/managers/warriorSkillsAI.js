@@ -82,24 +82,37 @@ export class WarriorSkillsAI {
      */
     async battleCry(userUnit, skillData) {
         if (!userUnit || userUnit.currentHp <= 0) {
-            console.warn("[WarriorSkillsAI] Battle Cry skill failed: Invalid user unit.");
+            if (GAME_DEBUG_MODE) console.warn("[WarriorSkillsAI] Battle Cry skill failed: Invalid user unit.");
             return;
         }
         if (GAME_DEBUG_MODE) console.log(`[WarriorSkillsAI] ${userUnit.name} uses ${skillData.name}!`);
 
-        // 1. 스탯 버프 적용
-        if (skillData.effect.statBuff) {
-            this.managers.eventManager.emit(GAME_EVENTS.LOG_MESSAGE, { message: `${userUnit.name}의 공격력이 ${skillData.effect.statBuff.amount} 증가합니다!` });
-            await this.managers.delayEngine.waitFor(200);
-        }
-
-        // 2. 추가 공격 허용
-        if (skillData.effect.allowAdditionalAttack) {
-            if (GAME_DEBUG_MODE) console.log(`[WarriorSkillsAI] ${userUnit.name}은(는) 이제 추가 일반 공격을 할 수 있습니다.`);
-            // TurnEngine이 이 플래그를 보고 추가 행동을 지시해야 함.
-        }
-
+        // 1. 스킬 시전 시각 효과
         this.managers.eventManager.emit(GAME_EVENTS.SKILL_EXECUTED, { skillId: skillData.id, userId: userUnit.id });
+
+        // 2. 자신에게 버프 상태 적용
+        this.managers.workflowManager.triggerStatusEffectApplication(userUnit.id, skillData.effect.statusEffectId);
+        await this.managers.delayEngine.waitFor(500);
+
+        // 3. 버프 후 추가 공격 처리
+        if (skillData.effect.allowAdditionalAttack) {
+            console.log(`[WarriorSkillsAI] ${userUnit.name} performs an additional attack after Battle Cry.`);
+            const closestEnemy = this.managers.coordinateManager.findClosestUnit(userUnit.id, ATTACK_TYPES.ENEMY);
+
+            if (closestEnemy) {
+                this.managers.eventManager.emit(GAME_EVENTS.UNIT_ATTACK_ATTEMPT, {
+                    attackerId: userUnit.id,
+                    targetId: closestEnemy.id,
+                    attackType: ATTACK_TYPES.MELEE
+                });
+
+                const normalAttackData = { type: ATTACK_TYPES.PHYSICAL, dice: { num: 1, sides: 6 } };
+                this.managers.battleCalculationManager.requestDamageCalculation(userUnit.id, closestEnemy.id, normalAttackData);
+                await this.managers.delayEngine.waitFor(500);
+            } else {
+                console.log(`[WarriorSkillsAI] No target found for additional attack.`);
+            }
+        }
     }
 
     /**

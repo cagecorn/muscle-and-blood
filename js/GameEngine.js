@@ -122,7 +122,6 @@ export class GameEngine {
         this.statManager = new StatManager(this.valorEngine, this.weightEngine);
 
         this.diceEngine = new DiceEngine();
-        this.diceRollManager = new DiceRollManager(this.diceEngine, this.valorEngine);
         this.diceBotManager = new DiceBotManager(this.diceEngine);
 
         // ------------------------------------------------------------------
@@ -299,11 +298,11 @@ export class GameEngine {
         // ------------------------------------------------------------------
         // 11. Combat Flow & AI Managers
         // ------------------------------------------------------------------
-        // BattleCalculationManager는 DiceRollManager가 준비된 이후에 초기화합니다.
+        // BattleCalculationManager는 DiceRollManager를 나중에 주입합니다.
         this.battleCalculationManager = new BattleCalculationManager(
             this.eventManager,
             this.battleSimulationManager,
-            this.diceRollManager,
+            null,
             this.delayEngine
         );
 
@@ -315,6 +314,10 @@ export class GameEngine {
             this.turnCountManager,
             this.battleCalculationManager
         );
+
+        // 이제 StatusEffectManager가 준비되었으므로 DiceRollManager를 생성
+        this.diceRollManager = new DiceRollManager(this.diceEngine, this.valorEngine, this.statusEffectManager);
+        this.battleCalculationManager.diceRollManager = this.diceRollManager;
         this.workflowManager = new WorkflowManager(
             this.eventManager,
             this.statusEffectManager,

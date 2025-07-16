@@ -1,10 +1,16 @@
 // js/managers/DiceRollManager.js
 
 export class DiceRollManager {
-    constructor(diceEngine, valorEngine) {
+    /**
+     * @param {DiceEngine} diceEngine
+     * @param {ValorEngine} valorEngine
+     * @param {StatusEffectManager} statusEffectManager - \u2728 상태 효과 확인을 위해 추가
+     */
+    constructor(diceEngine, valorEngine, statusEffectManager) {
         console.log("\u2694\uFE0F DiceRollManager initialized. Ready for D&D-based rolls. \u2694\uFE0F");
         this.diceEngine = diceEngine;
         this.valorEngine = valorEngine;
+        this.statusEffectManager = statusEffectManager; // \u2728 인스턴스 저장
     }
 
     /**
@@ -70,13 +76,28 @@ export class DiceRollManager {
             attackBonus = attackerStats.magic;
         }
 
-        const damageAmplification = this.valorEngine.calculateDamageAmplification(
+        let finalAttackModifier = 1.0;
+
+        // 1. \uC6A9\uBA85\uC5D0 \uC758\uD55C \uB370\uBBF8\uC9C0 \uC99D\uD3ED
+        const valorAmplification = this.valorEngine.calculateDamageAmplification(
             attackerUnit.currentBarrier || 0,
             attackerUnit.maxBarrier || 0
         );
+        finalAttackModifier *= valorAmplification;
 
-        const finalDamage = (damageRoll + attackBonus) * damageAmplification;
-        console.log(`[DiceRollManager] Performed damage roll (${skillData.dice.num}d${skillData.dice.sides} + ${attackBonus}) * ${damageAmplification.toFixed(2)} (Amp) = ${finalDamage.toFixed(0)}`);
+        // 2. \uC0C1\uD0DC \uD6A8\uACFC \uC801\uC6A9
+        const activeEffects = this.statusEffectManager.getUnitActiveEffects(attackerUnit.id);
+        if (activeEffects) {
+            for (const [effectId, effectWrapper] of activeEffects.entries()) {
+                if (effectWrapper.effectData.effect.attackModifier) {
+                    finalAttackModifier *= effectWrapper.effectData.effect.attackModifier;
+                    console.log(`[DiceRollManager] Applying '${effectId}' modifier: ${effectWrapper.effectData.effect.attackModifier}`);
+                }
+            }
+        }
+
+        const finalDamage = (damageRoll + attackBonus) * finalAttackModifier;
+        console.log(`[DiceRollManager] Performed damage roll (${skillData.dice.num}d${skillData.dice.sides} + ${attackBonus}) * ${finalAttackModifier.toFixed(2)} (Modifiers) = ${finalDamage.toFixed(0)}`);
         return Math.max(0, Math.floor(finalDamage));
     }
 
