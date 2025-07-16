@@ -19,6 +19,10 @@ import { ClassAIManager } from '../managers/ClassAIManager.js';
 import { TargetingManager } from '../managers/TargetingManager.js';
 import { TurnEngine } from '../managers/TurnEngine.js';
 import { ConditionalManager } from '../managers/ConditionalManager.js';
+import { DiceRollManager } from '../managers/DiceRollManager.js';
+import { BattleCalculationManager } from '../managers/BattleCalculationManager.js';
+import { TurnCountManager } from '../managers/TurnCountManager.js';
+import { StatusEffectManager } from '../managers/StatusEffectManager.js';
 
 /**
  * 전투 시뮬레이션과 턴 진행을 담당하는 엔진입니다.
@@ -29,6 +33,7 @@ export class BattleEngine {
 
         const idManager = assetEngine.getIdManager();
         const assetLoaderManager = assetEngine.getAssetLoaderManager();
+        this.assetLoaderManager = assetLoaderManager;
         const animationManager = renderEngine.getAnimationManager();
         this.stageDataManager = new StageDataManager();
 
@@ -48,10 +53,29 @@ export class BattleEngine {
         );
         assetEngine.getUnitSpriteEngine().battleSimulationManager = this.battleSimulationManager;
 
+        this.turnCountManager = new TurnCountManager();
+        this.diceRollManager = new DiceRollManager(this.diceEngine, this.valorEngine, null);
+
         this.delayEngine = new DelayEngine();
         this.timingEngine = new TimingEngine(this.delayEngine);
         this.coordinateManager = new CoordinateManager(this.battleSimulationManager, null);
         this.turnOrderManager = new TurnOrderManager(eventManager, this.battleSimulationManager, this.weightEngine);
+
+        this.conditionalManager = new ConditionalManager(this.battleSimulationManager, idManager);
+        this.battleCalculationManager = new BattleCalculationManager(
+            eventManager,
+            this.battleSimulationManager,
+            this.diceRollManager,
+            this.delayEngine,
+            this.conditionalManager
+        );
+        this.statusEffectManager = new StatusEffectManager(
+            eventManager,
+            idManager,
+            this.turnCountManager,
+            this.battleCalculationManager
+        );
+        this.diceRollManager.statusEffectManager = this.statusEffectManager;
 
         this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
         this.targetingManager = new TargetingManager(this.battleSimulationManager);
@@ -66,8 +90,8 @@ export class BattleEngine {
             this.timingEngine,
             measureManager,
             animationManager,
-            null,
-            null
+            this.battleCalculationManager,
+            this.statusEffectManager
         );
 
         this.heroManager = new HeroManager(idManager, this.diceEngine, assetLoaderManager, this.battleSimulationManager, assetEngine.getUnitSpriteEngine());
@@ -78,11 +102,12 @@ export class BattleEngine {
             this.battleSimulationManager,
             this.stageDataManager
         );
-
-        this.conditionalManager = new ConditionalManager(this.battleSimulationManager, idManager);
     }
 
     async setupBattle() {
+        await this.assetLoaderManager.loadImage('sprite_warrior_default', 'assets/images/warrior.png');
+        await this.assetLoaderManager.loadImage('sprite_zombie_default', 'assets/images/zombie.png');
+
         const heroes = await this.heroManager.createWarriors(3);
         this.battleFormationManager.placeAllies(heroes);
         await this.monsterSpawnManager.spawnMonstersForStage('stage1');
