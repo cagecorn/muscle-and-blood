@@ -75,11 +75,14 @@ export class MercenaryPanelManager {
 
                 ctx.font = `${unitHpFontSize}px Arial`;
                 ctx.fillText(`HP: ${unit.currentHp}/${unit.baseStats.hp}`, x, y + unitHpFontSize * this.measureManager.get('mercenaryPanel.unitTextOffsetYScale'));
-                if (unit.image) {
+
+                // ✨ panelImage가 존재하면 우선 사용하고, 없으면 기본 이미지 사용
+                const imageToDraw = unit.panelImage || unit.image;
+                if (imageToDraw) {
                     const imgSize = Math.min(slotWidth, slotHeight) * this.measureManager.get('mercenaryPanel.unitImageScale');
                     const imgX = panelX + col * slotWidth + (slotWidth - imgSize) / 2;
                     const imgY = panelY + row * slotHeight + (slotHeight - imgSize) / 2 - unitTextFontSize * this.measureManager.get('mercenaryPanel.unitImageOffsetYScale');
-                    ctx.drawImage(unit.image, imgX, imgY, imgSize, imgSize);
+                    ctx.drawImage(imageToDraw, imgX, imgY, imgSize, imgSize);
                 }
             } else {
                 ctx.font = `${unitTextFontSize}px Arial`;
