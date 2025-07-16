@@ -105,23 +105,19 @@ export class GameEngine {
             if (GAME_DEBUG_MODE) console.log("[GameEngine] All initial assets are loaded! Game ready.");
         });
 
-        // AnimationManager는 BattleSimulationManager의 렌더링에 사용됩니다.
-        this.animationManager = new AnimationManager(this.measureManager);
-
         // ✨ ValorEngine을 먼저 초기화하여 BattleSimulationManager에 전달합니다.
         this.valorEngine = new ValorEngine();
 
-        // 전투 시뮬레이션 매니저 초기화
+        // 전투 시뮬레이션 매니저는 AnimationManager 보다 먼저 필요하므로
+        // 초기화 시 animationManager는 null로 설정해 둡니다.
         this.battleSimulationManager = new BattleSimulationManager(
             this.measureManager,
             this.assetLoaderManager,
             this.idManager,
             this.logicManager,
-            this.animationManager,
+            null,
             this.valorEngine // ✨ valorEngine 추가
         );
-        // 생성 후 상호 참조 설정
-        this.animationManager.battleSimulationManager = this.battleSimulationManager;
 
         // ✨ ShadowEngine 초기화
         this.shadowEngine = new ShadowEngine(
@@ -196,22 +192,33 @@ export class GameEngine {
         // ✨ CoordinateManager 초기화 - BattleSimulationManager 후
         this.coordinateManager = new CoordinateManager(this.battleSimulationManager, this.battleGridManager);
 
-        // ✨ MovingManager 초기화
-        this.movingManager = new MovingManager(
-            this.battleSimulationManager,
-            this.animationManager,
-            this.delayEngine,
-            this.coordinateManager
+        // ParticleEngine은 AnimationManager보다 먼저 초기화되어야 합니다.
+        this.particleEngine = new ParticleEngine(
+            this.measureManager,
+            this.cameraEngine,
+            this.battleSimulationManager
         );
-        // VFXManager에 AnimationManager를 전달하여 HP 바 위치를 애니메이션과 동기화합니다.
+
+        // AnimationManager는 BattleSimulationManager의 렌더링에 사용됩니다.
+        this.animationManager = new AnimationManager(
+            this.measureManager,
+            this.battleSimulationManager,
+            this.particleEngine
+        );
+        // 상호 참조 설정
+        this.battleSimulationManager.animationManager = this.animationManager;
+
+        // VFXManager에 AnimationManager와 ParticleEngine을 전달하여 HP 바 위치를 애니메이션과 동기화합니다.
         this.vfxManager = new VFXManager(
             this.renderer,
             this.measureManager,
             this.cameraEngine,
             this.battleSimulationManager,
             this.animationManager,
-            this.eventManager // ✨ eventManager 추가
+            this.eventManager,
+            this.particleEngine
         );
+
         this.bindingManager = new BindingManager();
 
         // ✨ 새로운 엔진들 초기화
@@ -219,6 +226,14 @@ export class GameEngine {
         this.timingEngine = new TimingEngine(this.delayEngine);
         this.weightEngine = new WeightEngine(); // ✨ WeightEngine 초기화
         this.statManager = new StatManager(this.valorEngine, this.weightEngine); // ✨ StatManager 초기화
+
+        // ✨ MovingManager 초기화 - delayEngine이 준비된 이후
+        this.movingManager = new MovingManager(
+            this.battleSimulationManager,
+            this.animationManager,
+            this.delayEngine,
+            this.coordinateManager
+        );
 
         // ✨ DiceEngine 및 관련 매니저 초기화
         this.diceEngine = new DiceEngine();
@@ -306,17 +321,6 @@ export class GameEngine {
             this.battleCalculationManager,
             this.statusEffectManager
         );
-
-        // ✨ ParticleEngine 초기화 (VFXManager보다 먼저)
-        this.particleEngine = new ParticleEngine(
-            this.measureManager,
-            this.cameraEngine,
-            this.battleSimulationManager
-        );
-        this.animationManager.particleEngine = this.particleEngine; // AnimationManager에 ParticleEngine 전달
-
-        // VFXManager에 ParticleEngine 전달
-        this.vfxManager.particleEngine = this.particleEngine;
 
         // ✨ 워리어 스킬 AI 초기화 (다른 매니저들을 주입)
         const commonManagersForSkills = {
