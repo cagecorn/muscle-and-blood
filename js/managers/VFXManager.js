@@ -185,7 +185,7 @@ export class VFXManager {
         ctx.fillStyle = 'rgba(50, 50, 50, 0.8)';
         ctx.fillRect(hpBarDrawX, hpBarDrawY, barWidth, barHeight);
 
-        ctx.fillStyle = hpRatio > 0.5 ? 'lightgreen' : hpRatio > 0.2 ? 'yellow' : 'red';
+        ctx.fillStyle = 'lightgreen'; // 항상 초록색으로 그립니다
         ctx.fillRect(hpBarDrawX, hpBarDrawY, barWidth * hpRatio, barHeight);
 
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
@@ -194,7 +194,7 @@ export class VFXManager {
     }
 
     /**
-     * ✨ 특정 유닛의 배리어 바를 그립니다 (HP 바 아래에 노란색 게이지).
+     * ✨ 특정 유닛의 배리어 바를 그립니다 (HP 바 위에 노란색 게이지를 덧씌움).
      * @param {CanvasRenderingContext2D} ctx - 캔버스 2D 렌더링 컨텍스트
      * @param {object} unit - 배리어 바를 그릴 유닛 객체
      * @param {number} effectiveTileSize - 유닛이 그려지는 타일의 유효 크기
@@ -210,22 +210,17 @@ export class VFXManager {
         const maxBarrier = unit.maxBarrier;
         const barrierRatio = maxBarrier > 0 ? currentBarrier / maxBarrier : 0;
 
-        const barWidth = effectiveTileSize * this.measureManager.get('vfx.barrierBarWidthRatio');
-        const barHeight = effectiveTileSize * this.measureManager.get('vfx.barrierBarHeightRatio');
-        const barOffsetY = effectiveTileSize * this.measureManager.get('vfx.barrierBarVerticalOffset');
+        // HP 바와 동일한 위치와 크기로 계산하여 정확히 겹치도록 합니다
+        const barWidth = effectiveTileSize * this.measureManager.get('vfx.hpBarWidthRatio');
+        const barHeight = effectiveTileSize * this.measureManager.get('vfx.hpBarHeightRatio');
+        const barOffsetY = -(barHeight + this.measureManager.get('vfx.hpBarVerticalOffset'));
 
         const barrierBarDrawX = actualDrawX + (effectiveTileSize - barWidth) / 2;
         const barrierBarDrawY = actualDrawY + barOffsetY;
 
-        ctx.fillStyle = 'rgba(50, 50, 50, 0.8)';
-        ctx.fillRect(barrierBarDrawX, barrierBarDrawY, barWidth, barHeight);
-
+        // 노란색 배리어 바를 HP 바 위에 덧씌움 (배경과 테두리는 없음)
         ctx.fillStyle = '#FFFF00';
         ctx.fillRect(barrierBarDrawX, barrierBarDrawY, barWidth * barrierRatio, barHeight);
-
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(barrierBarDrawX, barrierBarDrawY, barWidth, barHeight);
     }
 
     /**
