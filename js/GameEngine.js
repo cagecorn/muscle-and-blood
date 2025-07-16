@@ -33,14 +33,23 @@ export class GameEngine {
         this.gameLoop = new GameLoop(this._update.bind(this), this._draw.bind(this));
 
         // 비동기 매니저 초기화 후 게임 시작
-        this._initAsyncManagers().then(() => {
-            this.start();
-        });
+        this._initAsyncManagers()
+            .then(() => {
+                this.start();
+            })
+            .catch((err) => {
+                console.error('Fatal Error: Async manager initialization failed.', err);
+            });
     }
 
     async _initAsyncManagers() {
-        await this.assetEngine.getIdManager().initialize();
-        await this.battleEngine.setupBattle();
+        try {
+            await this.assetEngine.getIdManager().initialize();
+            await this.battleEngine.setupBattle();
+        } catch (error) {
+            console.error('Async manager initialization failed.', error);
+            throw error;
+        }
     }
 
     _update(deltaTime) {

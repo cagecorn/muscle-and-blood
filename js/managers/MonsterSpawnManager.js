@@ -18,6 +18,11 @@ export class MonsterSpawnManager {
      * @param {string} stageId - 몬스터를 스폰할 스테이지의 ID
      */
     async spawnMonstersForStage(stageId) {
+        if (!this.stageDataManager) {
+            console.error('[MonsterSpawnManager] StageDataManager not provided.');
+            return;
+        }
+
         const currentStage = this.stageDataManager.getStageData(stageId);
         if (!currentStage) {
             console.error(`[MonsterSpawnManager] Stage data for '${stageId}' not found.`);
