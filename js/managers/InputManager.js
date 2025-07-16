@@ -6,6 +6,10 @@ import { GAME_EVENTS, UI_STATES, BUTTON_IDS } from '../constants.js';
 export class InputManager {
     constructor(renderer, cameraEngine, uiEngine, buttonEngine, eventManager) { // ✨ buttonEngine 추가
         console.log("🎮 InputManager initialized. Ready to process user input. 🎮");
+        if (!renderer || !cameraEngine || !uiEngine || !buttonEngine) {
+            // 필수 매니저가 누락되면 즉시 게임을 중단합니다.
+            throw new Error("[InputManager] Missing one or more essential dependencies (renderer, cameraEngine, uiEngine, buttonEngine). Cannot initialize InputManager.");
+        }
         this.renderer = renderer;
         this.cameraEngine = cameraEngine;
         this.uiEngine = uiEngine;

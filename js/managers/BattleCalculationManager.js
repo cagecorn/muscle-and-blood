@@ -14,6 +14,12 @@ export class BattleCalculationManager {
         this.worker.onmessage = this._handleWorkerMessage.bind(this);
         this.worker.onerror = (e) => {
             console.error("[BattleCalculationManager] Worker Error:", e);
+            // ✨ 심각한 에러 발생 시 게임 엔진에 알릴 이벤트 발행
+            this.eventManager.emit(GAME_EVENTS.CRITICAL_ERROR, {
+                source: 'BattleCalculationWorker',
+                message: e.message || 'Unknown worker error',
+                errorObject: e
+            });
         };
     }
 

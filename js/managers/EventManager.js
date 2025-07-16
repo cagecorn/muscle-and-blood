@@ -16,6 +16,12 @@ export class EventManager {
         // 에러 발생 시 처리
         this.worker.onerror = (e) => {
             console.error("[EventManager] Worker Error:", e);
+            // ✨ 심각한 에러 발생 시 게임 엔진에 알릴 이벤트 발행
+            this.emit(GAME_EVENTS.CRITICAL_ERROR, {
+                source: 'EventManagerWorker',
+                message: e.message || 'Unknown worker error',
+                errorObject: e
+            });
         };
 
         console.log("[EventManager] Initialized with Web Worker.");

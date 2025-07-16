@@ -48,6 +48,16 @@ export class LogicManager {
         const canvasHeight = this.measureManager.get('gameResolution.height');
         const contentDimensions = this.getCurrentSceneContentDimensions();
 
+        // ✨ canvasWidth 또는 canvasHeight가 유효하지 않은 경우 처리
+        if (typeof canvasWidth !== 'number' || isNaN(canvasWidth) || canvasWidth <= 0) {
+            console.error("[LogicManager] Invalid 'gameResolution.width' from MeasureManager. Cannot calculate zoom limits.");
+            return { minZoom: 1.0, maxZoom: 10.0 };
+        }
+        if (typeof canvasHeight !== 'number' || isNaN(canvasHeight) || canvasHeight <= 0) {
+            console.error("[LogicManager] Invalid 'gameResolution.height' from MeasureManager. Cannot calculate zoom limits.");
+            return { minZoom: 1.0, maxZoom: 10.0 };
+        }
+
         // 콘텐츠를 캔버스 너비에 맞추기 위한 줌 비율
         const minZoomX = canvasWidth / contentDimensions.width;
         // 콘텐츠를 캔버스 높이에 맞추기 위한 줌 비율

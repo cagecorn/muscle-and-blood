@@ -87,10 +87,13 @@ export class SynergyEngine {
         const synergyCounts = new Map();
 
         for (const hero of heroesOnTeam) {
+            // ✨ hero.synergies가 유효한 배열인지 확인
             if (hero.synergies && Array.isArray(hero.synergies)) {
                 for (const synergyId of hero.synergies) {
                     synergyCounts.set(synergyId, (synergyCounts.get(synergyId) || 0) + 1);
                 }
+            } else {
+                console.warn(`[SynergyEngine] Hero '${hero.id}' has invalid or missing 'synergies' property. Skipping.`);
             }
         }
 
