@@ -23,7 +23,7 @@ export class RenderEngine {
         this.animationManager = new AnimationManager(measureManager, null, this.particleEngine);
 
         this.buttonEngine = new ButtonEngine();
-        this.uiEngine = new UIEngine(this.renderer, measureManager, eventManager, null, this.buttonEngine);
+        this.uiEngine = new UIEngine(this.renderer, measureManager, eventManager, null, this.buttonEngine, null);
         this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine, this.buttonEngine, eventManager);
     }
 
