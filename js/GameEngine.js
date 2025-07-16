@@ -47,6 +47,7 @@ import { STATUS_EFFECTS } from '../data/statusEffects.js';
 import { TerritoryManager } from './managers/TerritoryManager.js';
 import { BattleStageManager } from './managers/BattleStageManager.js';
 import { BattleGridManager } from './managers/BattleGridManager.js';
+import { CoordinateManager } from './managers/CoordinateManager.js';
 import { ButtonEngine } from './managers/ButtonEngine.js'; // ✨ ButtonEngine 임포트
 
 // ✨ 상수 파일 임포트
@@ -161,6 +162,8 @@ export class GameEngine {
         this.territoryManager = new TerritoryManager();
         this.battleStageManager = new BattleStageManager(this.assetLoaderManager); // ✨ assetLoaderManager 전달
         this.battleGridManager = new BattleGridManager(this.measureManager, this.logicManager);
+        // ✨ CoordinateManager 초기화 - BattleSimulationManager 후
+        this.coordinateManager = new CoordinateManager(this.battleSimulationManager, this.battleGridManager);
         // VFXManager에 AnimationManager를 전달하여 HP 바 위치를 애니메이션과 동기화합니다.
         this.vfxManager = new VFXManager(
             this.renderer,
@@ -469,4 +472,6 @@ export class GameEngine {
     getDiceEngine() { return this.diceEngine; }
     getDiceRollManager() { return this.diceRollManager; }
     getDiceBotManager() { return this.diceBotManager; }
+    // ✨ CoordinateManager getter 추가
+    getCoordinateManager() { return this.coordinateManager; }
 }
