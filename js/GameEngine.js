@@ -65,6 +65,7 @@ import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES, GAME_DEBUG_MODE } fro
 
 import { UNITS } from '../data/unit.js';
 import { CLASSES } from '../data/class.js';
+import { WARRIOR_SKILLS } from '../data/warriorSkills.js';
 
 export class GameEngine {
     constructor(canvasId) {
