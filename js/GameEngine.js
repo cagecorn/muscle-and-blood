@@ -282,14 +282,6 @@ export class GameEngine {
             this.diceBotManager
         );
 
-        // ✨ HeroManager 초기화 - 실제 전사 영웅 생성을 담당
-        this.heroManager = new HeroManager(
-            this.idManager,
-            this.diceEngine,
-            this.assetLoaderManager,
-            this.battleSimulationManager
-        );
-
         // ✨ SynergyEngine 초기화
         this.synergyEngine = new SynergyEngine(this.idManager, this.eventManager);
 
@@ -371,9 +363,18 @@ export class GameEngine {
             this.battleSimulationManager,
             this.weightEngine // ✨ weightEngine 추가
         );
-        this.classAIManager = new ClassAIManager(this.idManager, this.battleSimulationManager, this.measureManager, this.basicAIManager);
-        // ✨ TargetingManager 초기화
-        this.targetingManager = new TargetingManager(this.battleSimulationManager); // BattleSimulationManager를 의존성으로 전달
+        // 먼저 TargetingManager를 초기화
+        this.targetingManager = new TargetingManager(this.battleSimulationManager);
+        // ClassAIManager에 추가 매니저 전달
+        this.classAIManager = new ClassAIManager(
+            this.idManager,
+            this.battleSimulationManager,
+            this.measureManager,
+            this.basicAIManager,
+            this.warriorSkillsAI,
+            this.diceEngine,
+            this.targetingManager
+        );
 
         // ✨ TurnEngine에 새로운 의존성 전달
         this.turnEngine = new TurnEngine(
@@ -431,6 +432,15 @@ export class GameEngine {
             this.battleSimulationManager,
             this.battleCalculationManager,
             this.delayEngine
+        );
+
+        // HeroManager는 UnitSpriteEngine이 준비된 이후 생성한다
+        this.heroManager = new HeroManager(
+            this.idManager,
+            this.diceEngine,
+            this.assetLoaderManager,
+            this.battleSimulationManager,
+            this.unitSpriteEngine
         );
 
         // ------------------------------------------------------------------
@@ -594,14 +604,6 @@ export class GameEngine {
 
         console.log(`[GameEngine] Registered unit ID: ${UNITS.WARRIOR.id}`);
         console.log(`[GameEngine] Loaded warrior sprite: ${UNITS.WARRIOR.spriteId}`);
-
-        await this.unitSpriteEngine.registerUnitSprites('unit_warrior_001', {
-            idle: 'assets/images/warrior.png',
-            attack: 'assets/images/warrior-attack.png',
-            hitted: 'assets/images/warrior-hitted.png',
-            finish: 'assets/images/warrior-finish.png',
-            status: 'assets/images/warrior-status-effects.png'
-        });
 
         const mockEnemyUnitData = {
             id: 'unit_zombie_001', // ID 변경

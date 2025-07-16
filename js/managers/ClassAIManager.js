@@ -1,12 +1,18 @@
 // js/managers/ClassAIManager.js
 
+import { WARRIOR_SKILLS } from '../../data/warriorSkills.js';
+import { GAME_DEBUG_MODE } from '../constants.js';
+
 export class ClassAIManager {
-    constructor(idManager, battleSimulationManager, measureManager, basicAIManager) {
-        console.log("\ud83d\udcbb ClassAIManager initialized. Ready to define class-based AI. \ud83d\udcbb");
+    constructor(idManager, battleSimulationManager, measureManager, basicAIManager, warriorSkillsAI, diceEngine, targetingManager) {
+        console.log("\uD83D\uDD33 ClassAIManager initialized. Ready to define class-based AI. \uD83D\uDD33");
         this.idManager = idManager;
         this.battleSimulationManager = battleSimulationManager;
         this.measureManager = measureManager;
         this.basicAIManager = basicAIManager;
+        this.warriorSkillsAI = warriorSkillsAI;
+        this.diceEngine = diceEngine;
+        this.targetingManager = targetingManager;
     }
 
     /**
@@ -22,14 +28,60 @@ export class ClassAIManager {
             return null;
         }
 
+        // 1. 결정된 스킬이 있는지 먼저 확인
+        const skillToUse = this.decideSkillToUse(unit);
+        if (skillToUse) {
+            if (GAME_DEBUG_MODE) console.log(`[ClassAIManager] ${unit.name} decided to use skill: ${skillToUse.name}`);
+            await this.executeSkillAI(unit, skillToUse);
+            return null;
+        }
+
+        if (GAME_DEBUG_MODE) console.log(`[ClassAIManager] No skill was chosen for ${unit.name}, proceeding with basic AI.`);
         switch (unitClass.id) {
             case 'class_warrior':
                 return this._getWarriorAction(unit, allUnits, unitClass);
             default:
-                console.warn(`[ClassAIManager] No specific AI defined for class: ${unitClass.name} (${unitClass.id}).`);
                 const defaultMoveRange = unitClass.moveRange || 1;
                 const defaultAttackRange = unitClass.attackRange || 1;
                 return this.basicAIManager.determineMoveAndTarget(unit, allUnits, defaultMoveRange, defaultAttackRange);
+        }
+    }
+
+    decideSkillToUse(unit) {
+        if (!unit.skillSlots || unit.skillSlots.length === 0) {
+            return null;
+        }
+
+        const roll = this.diceEngine.getRandomFloat() * 100;
+        let cumulativeProbability = 0;
+
+        for (const skillId of unit.skillSlots) {
+            const skillData = Object.values(WARRIOR_SKILLS).find(s => s.id === skillId);
+            if (skillData && (skillData.type === 'active' || skillData.type === 'buff')) {
+                cumulativeProbability += skillData.probability;
+                if (roll < cumulativeProbability) {
+                    return skillData;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    async executeSkillAI(userUnit, skillData) {
+        let targetUnit = null;
+
+        if (skillData.id === WARRIOR_SKILLS.CHARGE.id) {
+            targetUnit = this.targetingManager.getLowestHpUnit('enemy');
+            if (targetUnit) {
+                await this.warriorSkillsAI.charge(userUnit, targetUnit, skillData);
+            } else if (GAME_DEBUG_MODE) {
+                console.log(`[ClassAIManager] Charge skill for ${userUnit.name} has no target.`);
+            }
+        } else if (skillData.id === WARRIOR_SKILLS.BATTLE_CRY.id) {
+            await this.warriorSkillsAI.battleCry(userUnit, skillData);
+        } else if (GAME_DEBUG_MODE) {
+            console.warn(`[ClassAIManager] No specific AI execution logic found for skill: ${skillData.name}`);
         }
     }
 
