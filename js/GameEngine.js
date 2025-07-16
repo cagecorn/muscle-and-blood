@@ -56,14 +56,14 @@ import { DetailInfoManager } from './managers/DetailInfoManager.js'; // ✨ Deta
 import { TagManager } from './managers/TagManager.js'; // ✨ TagManager 추가
 
 // ✨ 상수 파일 임포트
-import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES } from './constants.js';
+import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES, GAME_DEBUG_MODE } from './constants.js';
 
 import { UNITS } from '../data/unit.js';
 import { CLASSES } from '../data/class.js';
 
 export class GameEngine {
     constructor(canvasId) {
-        console.log("\u2699\ufe0f GameEngine initializing... \u2699\ufe0f");
+        if (GAME_DEBUG_MODE) console.log("\u2699\ufe0f GameEngine initializing... \u2699\ufe0f");
 
         this.renderer = new Renderer(canvasId);
         if (!this.renderer.canvas) {
@@ -87,6 +87,16 @@ export class GameEngine {
         // IdManager 및 AssetLoaderManager 초기화
         this.idManager = new IdManager();
         this.assetLoaderManager = new AssetLoaderManager();
+        // ✨ AssetLoaderManager에 EventManager 주입
+        this.assetLoaderManager.setEventManager(this.eventManager);
+
+        // ✨ 에셋 로딩 진행 상황 구독
+        this.eventManager.subscribe(GAME_EVENTS.ASSET_LOAD_PROGRESS, (data) => {
+            if (GAME_DEBUG_MODE) console.log(`[GameEngine] Assets loading: ${data.loaded}/${data.total} (${(data.loaded / data.total * 100).toFixed(1)}%)`);
+        });
+        this.eventManager.subscribe(GAME_EVENTS.ASSETS_LOADED, () => {
+            if (GAME_DEBUG_MODE) console.log("[GameEngine] All initial assets are loaded! Game ready.");
+        });
 
         // AnimationManager는 BattleSimulationManager의 렌더링에 사용됩니다.
         this.animationManager = new AnimationManager(this.measureManager);
@@ -307,6 +317,10 @@ export class GameEngine {
 
         this.gameLoop = new GameLoop(this._update, this._draw);
 
+        // ✨ _initAsyncManagers에서 로드할 총 에셋 수 설정
+        const expectedAssetCount = 9; // warrior.png 등 총 9개
+        this.assetLoaderManager.setTotalAssetsToLoad(expectedAssetCount);
+
         // 초기화 과정의 비동기 처리
         this._initAsyncManagers().then(() => {
             const initialGameData = {
@@ -322,7 +336,7 @@ export class GameEngine {
 
             try {
                 this.guardianManager.enforceRules(initialGameData);
-                console.log("[GameEngine] Initial game data passed GuardianManager rules. \u2728");
+                if (GAME_DEBUG_MODE) console.log("[GameEngine] Initial game data passed GuardianManager rules. \u2728");
             } catch (e) {
                 if (e.name === "ImmutableRuleViolationError") {
                     console.error("[GameEngine] CRITICAL ERROR: Game initialization failed due to immutable rule violation!", e.message);
@@ -336,17 +350,17 @@ export class GameEngine {
             // 초기 카메라 위치와 줌을 설정하여 모든 콘텐츠가 화면에 들어오도록 합니다.
             this.cameraEngine.reset();
             // ✨ 추가: 카메라 엔진의 초기 상태 확인
-            console.log(`[GameEngine Debug] Camera Initial State: X=${this.cameraEngine.x}, Y=${this.cameraEngine.y}, Zoom=${this.cameraEngine.zoom}`);
+            if (GAME_DEBUG_MODE) console.log(`[GameEngine Debug] Camera Initial State: X=${this.cameraEngine.x}, Y=${this.cameraEngine.y}, Zoom=${this.cameraEngine.zoom}`);
 
             // ✨ 이벤트 구독에 GAME_EVENTS 상수 사용
             this.eventManager.subscribe(GAME_EVENTS.UNIT_DEATH, (data) => {
-                console.log(`[GameEngine] Notification: Unit ${data.unitId} (${data.unitName}) has died.`);
+                if (GAME_DEBUG_MODE) console.log(`[GameEngine] Notification: Unit ${data.unitId} (${data.unitName}) has died.`);
             });
             this.eventManager.subscribe(GAME_EVENTS.SKILL_EXECUTED, (data) => {
-                console.log(`[GameEngine] Notification: Skill '${data.skillName}' was executed.`);
+                if (GAME_DEBUG_MODE) console.log(`[GameEngine] Notification: Skill '${data.skillName}' was executed.`);
             });
             this.eventManager.subscribe(GAME_EVENTS.BATTLE_START, async (data) => {
-                console.log(`[GameEngine] Battle started for map: ${data.mapId}, difficulty: ${data.difficulty}`);
+                if (GAME_DEBUG_MODE) console.log(`[GameEngine] Battle started for map: ${data.mapId}, difficulty: ${data.difficulty}`);
                 this.sceneEngine.setCurrentScene(UI_STATES.COMBAT_SCREEN); // ✨ UI_STATES 상수 사용
                 this.uiEngine.setUIState(UI_STATES.COMBAT_SCREEN); // ✨ UI_STATES 상수 사용
                 this.cameraEngine.reset();
@@ -355,7 +369,7 @@ export class GameEngine {
                 await this.turnEngine.startBattleTurns();
             });
 
-            console.log("\u2699\ufe0f GameEngine initialized successfully. \u2699\ufe0f");
+            if (GAME_DEBUG_MODE) console.log("\u2699\ufe0f GameEngine initialized successfully. \u2699\ufe0f");
         }).catch(error => {
             console.error("Fatal Error: Async manager initialization failed.", error);
             alert("\uAC8C\uC784 \uC2DC\uC791 \uC911 \uCE58\uBA85\uC801\uC778 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4. \uCF58\uC194\uC744 \uD655\uC778\uD574\uC8FC\uC138\uC694.");
@@ -455,7 +469,7 @@ export class GameEngine {
     }
 
     start() {
-        console.log("\ud83d\ude80 GameEngine starting game loop... \ud83d\ude80");
+        if (GAME_DEBUG_MODE) console.log("\ud83d\ude80 GameEngine starting game loop... \ud83d\ude80");
         this.gameLoop.start();
     }
 

@@ -1,8 +1,9 @@
 // js/managers/ParticleEngine.js
+import { GAME_DEBUG_MODE } from '../constants.js';
 
 export class ParticleEngine {
     constructor(measureManager, cameraEngine, battleSimulationManager) {
-        console.log("\u2728 ParticleEngine initialized. Ready to create visual sparks. \u2728");
+        if (GAME_DEBUG_MODE) console.log("\u2728 ParticleEngine initialized. Ready to create visual sparks. \u2728");
         this.measureManager = measureManager;
         this.cameraEngine = cameraEngine;
         this.battleSimulationManager = battleSimulationManager; // 유닛 위치 정보를 얻기 위함
@@ -66,7 +67,7 @@ export class ParticleEngine {
             };
             this.activeParticles.push(particle);
         }
-        console.log(`[ParticleEngine] Added ${particleCount} particles for unit ${unitId}.`);
+        if (GAME_DEBUG_MODE) console.log(`[ParticleEngine] Added ${particleCount} particles for unit ${unitId}.`);
     }
 
     /**
@@ -75,10 +76,13 @@ export class ParticleEngine {
      */
     update(deltaTime) {
         const currentTime = performance.now();
-        this.activeParticles = this.activeParticles.filter(particle => {
+        let i = this.activeParticles.length;
+        while (i--) {
+            const particle = this.activeParticles[i];
             const elapsed = currentTime - particle.startTime;
             if (elapsed > particle.duration) {
-                return false; // 파티클 수명 만료
+                this.activeParticles.splice(i, 1);
+                continue;
             }
 
             // 위치 업데이트 (speedY는 음수이므로 빼기)
@@ -87,8 +91,7 @@ export class ParticleEngine {
 
             // 투명도 업데이트 (점점 사라지게)
             particle.alpha = Math.max(0, 1 - (elapsed / particle.duration));
-            return true;
-        });
+        }
     }
 
     /**

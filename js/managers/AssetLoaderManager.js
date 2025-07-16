@@ -1,9 +1,25 @@
 // js/managers/AssetLoaderManager.js
+import { GAME_EVENTS, GAME_DEBUG_MODE } from '../constants.js';
 
 export class AssetLoaderManager {
     constructor() {
-        console.log("\ud83d\udce6 AssetLoaderManager initialized. Ready to load game assets. \ud83d\udce6");
+        if (GAME_DEBUG_MODE) console.log("\ud83d\udce6 AssetLoaderManager initialized. Ready to load game assets. \ud83d\udce6");
         this.assets = new Map();
+        this.totalAssetsToLoad = 0;
+        this.assetsLoadedCount = 0;
+        this.eventManager = null;
+    }
+
+    // ✨ EventManager를 설정하는 메서드 추가
+    setEventManager(eventManager) {
+        this.eventManager = eventManager;
+    }
+
+    // ✨ 총 로드할 에셋 수를 설정
+    setTotalAssetsToLoad(count) {
+        this.totalAssetsToLoad = count;
+        this.assetsLoadedCount = 0;
+        if (GAME_DEBUG_MODE) console.log(`[AssetLoaderManager] Expected to load ${this.totalAssetsToLoad} assets.`);
     }
 
     /**
@@ -14,7 +30,7 @@ export class AssetLoaderManager {
      */
     loadImage(assetId, url) {
         if (this.assets.has(assetId)) {
-            console.warn(`[AssetLoaderManager] Asset '${assetId}' is already loaded. Returning existing asset.`);
+            if (GAME_DEBUG_MODE) console.warn(`[AssetLoaderManager] Asset '${assetId}' is already loaded. Returning existing asset.`);
             return Promise.resolve(this.assets.get(assetId));
         }
 
@@ -22,7 +38,20 @@ export class AssetLoaderManager {
             const img = new Image();
             img.onload = () => {
                 this.assets.set(assetId, img);
-                console.log(`[AssetLoaderManager] Image '${assetId}' loaded from ${url}`);
+                this.assetsLoadedCount++;
+                if (GAME_DEBUG_MODE) console.log(`[AssetLoaderManager] Image '${assetId}' loaded from ${url} (${this.assetsLoadedCount}/${this.totalAssetsToLoad}).`);
+
+                // ✨ 진행 상황 이벤트 발행
+                if (this.eventManager) {
+                    this.eventManager.emit(GAME_EVENTS.ASSET_LOAD_PROGRESS, {
+                        loaded: this.assetsLoadedCount,
+                        total: this.totalAssetsToLoad
+                    });
+                    if (this.assetsLoadedCount >= this.totalAssetsToLoad) {
+                        this.eventManager.emit(GAME_EVENTS.ASSETS_LOADED, {});
+                        if (GAME_DEBUG_MODE) console.log("[AssetLoaderManager] All expected assets loaded!");
+                    }
+                }
                 resolve(img);
             };
             img.onerror = (e) => {
@@ -40,7 +69,7 @@ export class AssetLoaderManager {
      */
     getImage(assetId) {
         if (!this.assets.has(assetId)) {
-            console.warn(`[AssetLoaderManager] Image asset '${assetId}' not found. Was it loaded?`);
+            if (GAME_DEBUG_MODE) console.warn(`[AssetLoaderManager] Image asset '${assetId}' not found. Was it loaded?`);
         }
         return this.assets.get(assetId);
     }

@@ -1,11 +1,11 @@
 // js/managers/VFXManager.js
 
-import { GAME_EVENTS } from '../constants.js';
+import { GAME_EVENTS, GAME_DEBUG_MODE } from '../constants.js';
 
 export class VFXManager {
     // animationManager를 추가로 받아 유닛의 애니메이션 위치를 참조합니다.
     constructor(renderer, measureManager, cameraEngine, battleSimulationManager, animationManager, eventManager, particleEngine = null) { // ✨ particleEngine 추가
-        console.log("\u2728 VFXManager initialized. Ready to render visual effects. \u2728");
+        if (GAME_DEBUG_MODE) console.log("\u2728 VFXManager initialized. Ready to render visual effects. \u2728");
         this.renderer = renderer;
         this.measureManager = measureManager;
         this.cameraEngine = cameraEngine;
@@ -19,7 +19,7 @@ export class VFXManager {
         // ✨ 무기 드롭 애니메이션 관리
         this.eventManager.subscribe(GAME_EVENTS.WEAPON_DROPPED, this._onWeaponDropped.bind(this));
         this.activeWeaponDrops = new Map(); // unitId => animation data
-        console.log("[VFXManager] Subscribed to 'weaponDropped' event.");
+        if (GAME_DEBUG_MODE) console.log("[VFXManager] Subscribed to 'weaponDropped' event.");
 
         // ✨ subscribe to damage display events
         this.eventManager.subscribe(GAME_EVENTS.DISPLAY_DAMAGE, (data) => {
@@ -52,7 +52,7 @@ export class VFXManager {
             floatSpeed: this.measureManager.get('vfx.damageNumberFloatSpeed'),
             color: color
         });
-        console.log(`[VFXManager] Added damage number: ${damageAmount} (${color}) for ${unit.name}`);
+        if (GAME_DEBUG_MODE) console.log(`[VFXManager] Added damage number: ${damageAmount} (${color}) for ${unit.name}`);
     }
 
     /**
@@ -121,7 +121,7 @@ export class VFXManager {
             fadeDuration: this.measureManager.get('vfx.weaponDropFadeDuration'),
             totalDuration: this.measureManager.get('vfx.weaponDropTotalDuration')
         });
-        console.log(`[VFXManager] Weapon drop animation data added for unit ${data.unitId}.`);
+        if (GAME_DEBUG_MODE) console.log(`[VFXManager] Weapon drop animation data added for unit ${data.unitId}.`);
     }
 
     /**
@@ -130,9 +130,13 @@ export class VFXManager {
      */
     update(deltaTime) {
         const currentTime = performance.now();
-        this.activeDamageNumbers = this.activeDamageNumbers.filter(dmgNum => {
-            return currentTime - dmgNum.startTime < dmgNum.duration;
-        });
+        let i = this.activeDamageNumbers.length;
+        while (i--) {
+            const dmgNum = this.activeDamageNumbers[i];
+            if (currentTime - dmgNum.startTime >= dmgNum.duration) {
+                this.activeDamageNumbers.splice(i, 1);
+            }
+        }
 
         // 무기 드롭 애니메이션 업데이트
         for (const [unitId, drop] of this.activeWeaponDrops.entries()) {
@@ -151,7 +155,7 @@ export class VFXManager {
                 drop.opacity = Math.max(0, 1 - progress);
             } else {
                 this.activeWeaponDrops.delete(unitId);
-                console.log(`[VFXManager] Weapon drop animation for unit ${unitId} completed.`);
+                if (GAME_DEBUG_MODE) console.log(`[VFXManager] Weapon drop animation for unit ${unitId} completed.`);
             }
         }
     }
@@ -251,7 +255,7 @@ export class VFXManager {
         const gridOffsetY = (canvasHeight - totalGridHeight) / 2;
 
         // ✨ DEBUG LOG START FOR VFXManager Drawing Parameters
-        console.log(`[VFXManager Debug] Drawing VFX Parameters: \n            Canvas (Logical): ${canvasWidth}x${canvasHeight}\n            Effective Tile Size: ${effectiveTileSize.toFixed(2)}\n            Grid Offset (X, Y): ${gridOffsetX.toFixed(2)}, ${gridOffsetY.toFixed(2)}`);
+        if (GAME_DEBUG_MODE) console.log(`[VFXManager Debug] Drawing VFX Parameters: \n            Canvas (Logical): ${canvasWidth}x${canvasHeight}\n            Effective Tile Size: ${effectiveTileSize.toFixed(2)}\n            Grid Offset (X, Y): ${gridOffsetX.toFixed(2)}, ${gridOffsetY.toFixed(2)}`);
         // ✨ DEBUG LOG END FOR VFXManager Drawing Parameters
 
         for (const unit of this.battleSimulationManager.unitsOnGrid) {
@@ -265,7 +269,7 @@ export class VFXManager {
                 gridOffsetY
             );
             // ✨ 추가: 각 유닛의 HP/배리어 바가 그려지는 최종 위치 로그
-            console.log(`[VFXManager Debug] Unit ${unit.id} (HP/Barrier Bar): drawX=${drawX.toFixed(2)}, drawY=${drawY.toFixed(2)}`);
+            if (GAME_DEBUG_MODE) console.log(`[VFXManager Debug] Unit ${unit.id} (HP/Barrier Bar): drawX=${drawX.toFixed(2)}, drawY=${drawY.toFixed(2)}`);
             this.drawHpBar(ctx, unit, effectiveTileSize, drawX, drawY);
             this.drawBarrierBar(ctx, unit, effectiveTileSize, drawX, drawY); // ✨ 배리어 바 그리기 호출
         }
