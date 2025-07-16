@@ -42,6 +42,7 @@ export { runStatusEffectManagerUnitTests } from './unit/statusEffectManagerUnitT
 export { runWorkflowManagerUnitTests } from './unit/workflowManagerUnitTests.js';
 export { runDisarmManagerUnitTests } from './unit/disarmManagerUnitTests.js';
 export { runCoordinateManagerUnitTests } from './unit/coordinateManagerUnitTests.js';
+export { runTargetingManagerUnitTests } from './unit/targetingManagerUnitTests.js'; // ✨ TargetingManager 단위 테스트 추가
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 export { runBattleSimulationIntegrationTest } from './integration/battleSimulationIntegrationTest.js';
@@ -54,7 +55,15 @@ export { injectSceneEngineFaults } from './fault_injection/sceneEngineFaults.js'
 export { injectLogicManagerFaults } from './fault_injection/logicManagerFaults.js';
 export { injectCompatibilityManagerFaults } from './fault_injection/compatibilityManagerFaults.js';
 
-export function runEngineTests(renderer, gameLoop) {
+export function runEngineTests(renderer, gameLoop, battleSimulationManager = null, battleGridManager = null) {
     runRendererTests(renderer);
     runGameLoopTests(gameLoop);
+    // 이전 요청에 의해 추가된 코드
+    if (battleSimulationManager && battleGridManager) {
+        runCoordinateManagerUnitTests(battleSimulationManager, battleGridManager);
+    }
+    // ✨ TargetingManager 단위 테스트 추가
+    if (battleSimulationManager) {
+        runTargetingManagerUnitTests(battleSimulationManager);
+    }
 }
