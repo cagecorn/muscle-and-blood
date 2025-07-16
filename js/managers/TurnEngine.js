@@ -73,6 +73,7 @@ export class TurnEngine {
         this.eventManager.emit(GAME_EVENTS.TURN_START, { turn: this.currentTurn }); // ✨ 상수 사용
         this.timingEngine.clearActions();
 
+        this.eventManager.emit(GAME_EVENTS.TURN_PHASE, { phase: 'startOfTurn', turn: this.currentTurn });
         for (const callback of this.turnPhaseCallbacks.startOfTurn) {
             await callback();
         }
@@ -154,6 +155,7 @@ export class TurnEngine {
                 console.log(`[TurnEngine] Unit ${unit.name} has no determined action for this turn.`);
             }
 
+            this.eventManager.emit(GAME_EVENTS.TURN_PHASE, { phase: 'unitActions', unitId: unit.id, turn: this.currentTurn });
             for (const callback of this.turnPhaseCallbacks.unitActions) {
                 await callback(unit);
             }
@@ -163,6 +165,7 @@ export class TurnEngine {
             this.timingEngine.clearActions();
         }
 
+        this.eventManager.emit(GAME_EVENTS.TURN_PHASE, { phase: 'endOfTurn', turn: this.currentTurn });
         for (const callback of this.turnPhaseCallbacks.endOfTurn) {
             await callback();
         }

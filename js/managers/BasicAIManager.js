@@ -1,116 +1,129 @@
 // js/managers/BasicAIManager.js
 
+import { GAME_DEBUG_MODE } from '../constants.js';
+
 export class BasicAIManager {
     constructor(battleSimulationManager) {
-        console.log("\ud83c\udfa5 BasicAIManager initialized. Ready to provide fundamental AI behaviors. \ud83c\udfa5");
+        if (GAME_DEBUG_MODE) console.log("\uD83E\uDD16 BasicAIManager initialized. Providing fundamental AI logic. \uD83E\uDD16");
         this.battleSimulationManager = battleSimulationManager;
     }
 
     /**
-     * \uc720\ub2c8\ud2b8\uc758 \uae30\ubcf8\uc801\uc778 \uc774\ub3d9 \ubc0f \uacf5\uaca9/\uc2a4\ud0ac \ubaa9\ud45c\ub97c \uacb0\uc815\ud569\ub2c8\ub2e4.
-     * \uba38\ub9ac \ud074\ub798\uc2a4 AI\uac00 \uacf5\ud1b5\uc73c\ub85c \uc0ac\uc6a9\ud560 \uc218 \uc788\ub294 \ub85c\uc9c1\uc785\ub2c8\ub2e4.
-     * @param {object} unit - \ud604\uc7ac \ud130\ub110 \uc9c4\ud589\uc911\uc778 \uc720\ub2c8\ud2b8 (fullUnitData \ud3ec\ud568)
-     * @param {object[]} allUnits - \ud604\uc7ac \uc804\uc7c1\uc5d0 \uc788\ub294 \ubaa8\ub4e0 \uc720\ub2c8\ud2b8
-     * @param {number} moveRange - \uc720\ub2c8\ud2b8\uc758 \uc774\ub3d9 \uac00\ub2a5 \uac70\ub9ac
-     * @param {number} attackRange - \uc720\ub2c8\ud2b8\uc758 \uacf5\uaca9 \uc0ac\uac70\ub9ac
-     * @returns {{actionType: string, targetId?: string, moveTargetX?: number, moveTargetY?: number} | null}
+     * Determine the unit's action.
+     * @param {object} unit
+     * @param {object[]} allUnits
+     * @param {number} moveRange
+     * @param {number} attackRange
+     * @returns {{actionType:string,targetId?:string,moveTargetX?:number,moveTargetY?:number}|null}
      */
     determineMoveAndTarget(unit, allUnits, moveRange, attackRange) {
         const enemies = allUnits.filter(u => u.type !== unit.type && u.currentHp > 0);
-        if (enemies.length === 0) {
-            console.log(`[BasicAIManager] Unit ${unit.name}: No valid targets to attack.`);
-            return null;
+        if (enemies.length === 0) return null;
+
+        const best = this._findBestAttackPosition(unit, enemies, moveRange, attackRange);
+        if (best) {
+            if (best.path.length <= 1) {
+                return { actionType: 'attack', targetId: best.target.id };
+            }
+            const dest = best.path[best.path.length - 1];
+            return {
+                actionType: 'moveAndAttack',
+                targetId: best.target.id,
+                moveTargetX: dest.x,
+                moveTargetY: dest.y
+            };
         }
 
-        let closestEnemy = null;
-        let minDistance = Infinity;
+        const closest = this._findClosestUnit(unit, enemies);
+        if (closest) {
+            const path = this._findPath(unit.gridX, unit.gridY, closest.gridX, closest.gridY, moveRange);
+            if (path && path.length > 1) {
+                const dest = path[path.length - 1];
+                return { actionType: 'move', moveTargetX: dest.x, moveTargetY: dest.y };
+            }
+        }
+        return null;
+    }
 
+    _findBestAttackPosition(unit, enemies, moveRange, attackRange) {
+        let best = null;
         for (const enemy of enemies) {
-            const dist = Math.abs(unit.gridX - enemy.gridX) + Math.abs(unit.gridY - enemy.gridY);
-            if (dist < minDistance) {
-                minDistance = dist;
-                closestEnemy = enemy;
-            }
-        }
-
-        if (!closestEnemy) {
-            return null;
-        }
-
-        const isTargetInAttackRange = (unitX, unitY, targetX, targetY, range) => {
-            const dx = Math.abs(unitX - targetX);
-            const dy = Math.abs(unitY - targetY);
-            return (dx <= range && dy <= range && dx + dy <= range * 2);
-        };
-
-        if (isTargetInAttackRange(unit.gridX, unit.gridY, closestEnemy.gridX, closestEnemy.gridY, attackRange)) {
-            console.log(`[BasicAIManager] Unit ${unit.name}: Target ${closestEnemy.name} is in attack range.`);
-            return { actionType: 'attack', targetId: closestEnemy.id };
-        } else {
-            console.log(`[BasicAIManager] Unit ${unit.name}: Moving towards ${closestEnemy.name}.`);
-            let currentX = unit.gridX;
-            let currentY = unit.gridY;
-
-            let finalMoveX = currentX;
-            let finalMoveY = currentY;
-
-            for (let i = 0; i < moveRange; i++) {
-                let movedThisStep = false;
-                let nextX = finalMoveX;
-                let nextY = finalMoveY;
-
-                const dxToTarget = closestEnemy.gridX - finalMoveX;
-                const dyToTarget = closestEnemy.gridY - finalMoveY;
-
-                let preferredXMove = 0;
-                if (dxToTarget > 0) preferredXMove = 1;
-                else if (dxToTarget < 0) preferredXMove = -1;
-
-                let preferredYMove = 0;
-                if (dyToTarget > 0) preferredYMove = 1;
-                else if (dyToTarget < 0) preferredYMove = -1;
-
-                if (preferredXMove !== 0) {
-                    const potentialX = finalMoveX + preferredXMove;
-                    if (!this.battleSimulationManager.isTileOccupied(potentialX, finalMoveY, unit.id)) {
-                        nextX = potentialX;
-                        movedThisStep = true;
+            const positions = this._getAttackablePositions(enemy, attackRange);
+            for (const pos of positions) {
+                if (pos.x === unit.gridX && pos.y === unit.gridY) {
+                    const score = this._evaluateTarget(enemy);
+                    if (!best || score > best.score) {
+                        best = { target: enemy, path: [{x:unit.gridX,y:unit.gridY}], score };
+                    }
+                    continue;
+                }
+                const path = this._findPath(unit.gridX, unit.gridY, pos.x, pos.y, moveRange);
+                if (path) {
+                    const score = this._evaluateTarget(enemy);
+                    if (!best || score > best.score) {
+                        best = { target: enemy, path, score };
                     }
                 }
-
-                if (!movedThisStep && preferredYMove !== 0) {
-                    const potentialY = finalMoveY + preferredYMove;
-                    if (!this.battleSimulationManager.isTileOccupied(finalMoveX, potentialY, unit.id)) {
-                        nextY = potentialY;
-                        movedThisStep = true;
-                    }
-                } else if (movedThisStep && preferredYMove !== 0) {
-                    const potentialY = finalMoveY + preferredYMove;
-                    if (!this.battleSimulationManager.isTileOccupied(nextX, potentialY, unit.id)) {
-                        nextY = potentialY;
-                    }
-                }
-
-                if (movedThisStep) {
-                    finalMoveX = nextX;
-                    finalMoveY = nextY;
-                } else {
-                    break;
-                }
-
-                if (isTargetInAttackRange(finalMoveX, finalMoveY, closestEnemy.gridX, closestEnemy.gridY, attackRange)) {
-                    console.log(`[BasicAIManager] Unit ${unit.name}: Moved to (${finalMoveX},${finalMoveY}) and now in attack range.`);
-                    return { actionType: 'moveAndAttack', targetId: closestEnemy.id, moveTargetX: finalMoveX, moveTargetY: finalMoveY };
-                }
-            }
-
-            if (finalMoveX !== unit.gridX || finalMoveY !== unit.gridY) {
-                console.log(`[BasicAIManager] Unit ${unit.name}: Only moved to (${finalMoveX},${finalMoveY}), not in attack range.`);
-                return { actionType: 'move', moveTargetX: finalMoveX, moveTargetY: finalMoveY };
-            } else {
-                console.log(`[BasicAIManager] Unit ${unit.name}: Could not move closer to enemy.`);
-                return null;
             }
         }
+        return best;
+    }
+
+    _evaluateTarget(target) {
+        return 1000 - target.currentHp;
+    }
+
+    _findClosestUnit(unit, others) {
+        let closest = null;
+        let minDist = Infinity;
+        for (const other of others) {
+            const dist = Math.abs(unit.gridX - other.gridX) + Math.abs(unit.gridY - other.gridY);
+            if (dist < minDist) {
+                minDist = dist;
+                closest = other;
+            }
+        }
+        return closest;
+    }
+
+    _getAttackablePositions(enemy, range) {
+        const positions = [];
+        for (let dx = -range; dx <= range; dx++) {
+            for (let dy = -range; dy <= range; dy++) {
+                const x = enemy.gridX + dx;
+                const y = enemy.gridY + dy;
+                if (Math.abs(dx) + Math.abs(dy) <= range*2 && !this.battleSimulationManager.isTileOccupied(x, y) && this._isInsideMap(x, y)) {
+                    positions.push({x,y});
+                }
+            }
+        }
+        return positions;
+    }
+
+    _isInsideMap(x, y) {
+        return x >= 0 && x < this.battleSimulationManager.gridCols && y >= 0 && y < this.battleSimulationManager.gridRows;
+    }
+
+    _findPath(sx, sy, ex, ey, maxLen) {
+        if (sx === ex && sy === ey) return [{x:sx,y:sy}];
+        const queue = [{x:sx,y:sy,path:[{x:sx,y:sy}],dist:0}];
+        const visited = new Set([`${sx},${sy}`]);
+        while (queue.length > 0) {
+            const current = queue.shift();
+            if (current.dist >= maxLen) continue;
+            const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+            for (const [dx,dy] of dirs) {
+                const nx = current.x + dx;
+                const ny = current.y + dy;
+                const key = `${nx},${ny}`;
+                if (!this._isInsideMap(nx, ny) || visited.has(key)) continue;
+                if (this.battleSimulationManager.isTileOccupied(nx, ny, null)) continue;
+                const newPath = current.path.concat({x:nx,y:ny});
+                if (nx === ex && ny === ey) return newPath;
+                visited.add(key);
+                queue.push({x:nx,y:ny,path:newPath,dist:current.dist+1});
+            }
+        }
+        return null;
     }
 }
