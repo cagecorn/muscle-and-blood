@@ -101,7 +101,7 @@
         <button id="runStatusEffectManagerUnitTestsBtn">StatusEffectManager 유닛 테스트</button>
         <button id="runWorkflowManagerUnitTestsBtn">WorkflowManager 유닛 테스트</button>
         <button id="runDisarmManagerUnitTestsBtn">DisarmManager 유닛 테스트</button>
-        <button id="runCoordinateManagerUnitTestsBtn">CoordinateManager 유닛 테스트</button> <button id="runTargetingManagerUnitTestsBtn">TargetingManager 유닛 테스트</button> <button id="runHeroEngineUnitTestsBtn">HeroEngine 유닛 테스트</button>
+        <button id="runCoordinateManagerUnitTestsBtn">CoordinateManager 유닛 테스트</button> <button id="runTargetingManagerUnitTestsBtn">TargetingManager 유닛 테스트</button> <button id="runHeroEngineUnitTestsBtn">HeroEngine 유닛 테스트</button> <button id="runSynergyEngineUnitTestsBtn">SynergyEngine 유닛 테스트</button>
 
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
@@ -183,7 +183,8 @@
             runWorkflowManagerUnitTests,
             runDisarmManagerUnitTests,
             runCoordinateManagerUnitTests,
-            runHeroEngineUnitTests
+            runHeroEngineUnitTests,
+            runSynergyEngineUnitTests
     } from './tests/index.js';
     import { STATUS_EFFECTS } from './data/statusEffects.js';
     // ✨ 상수 파일 임포트
@@ -259,7 +260,7 @@
             // --- 버튼 이벤트 리스너 설정 ---
             document.getElementById('runAllEngineTestsBtn').addEventListener('click', () => {
                 // gameLoop는 gameEngine 내부에 있으므로 gameEngine.gameLoop로 전달 (혹은 getter)
-                runEngineTests(renderer, gameLoop, battleSimulationManager, gameEngine.getBattleGridManager(), idManager, gameEngine.getAssetLoaderManager(), diceBotManager);
+                runEngineTests(renderer, gameLoop, battleSimulationManager, gameEngine.getBattleGridManager(), idManager, gameEngine.getAssetLoaderManager(), diceBotManager, eventManager);
                 runEventManagerTests(eventManager);
                 runGuardianManagerTests(guardianManager);
                 runMeasureManagerIntegrationTest(gameEngine);
@@ -383,6 +384,10 @@
 
             document.getElementById("runHeroEngineUnitTestsBtn").addEventListener("click", () => {
                 runHeroEngineUnitTests(idManager, gameEngine.getAssetLoaderManager(), diceBotManager);
+            });
+            // ✨ SynergyEngine 단위 테스트 버튼 리스너 추가
+            document.getElementById('runSynergyEngineUnitTestsBtn').addEventListener('click', () => {
+                runSynergyEngineUnitTests(idManager, eventManager);
             });
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
                 injectRendererFault(renderer);
@@ -539,7 +544,7 @@
             };
 
             // 페이지 로드 시 기본 엔진 테스트 자동 실행
-            runEngineTests(renderer, gameLoop, battleSimulationManager, gameEngine.getBattleGridManager(), idManager, gameEngine.getAssetLoaderManager(), diceBotManager);
+            runEngineTests(renderer, gameLoop, battleSimulationManager, gameEngine.getBattleGridManager(), idManager, gameEngine.getAssetLoaderManager(), diceBotManager, eventManager);
             runEventManagerTests(eventManager); // EventManager 테스트도 자동 실행
             runGuardianManagerTests(guardianManager); // GuardianManager 테스트도 자동 실행
             runMeasureManagerIntegrationTest(gameEngine); // MeasureManager 통합 테스트도 자동 실행

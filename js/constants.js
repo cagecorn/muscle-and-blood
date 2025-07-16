@@ -18,7 +18,9 @@ export const GAME_EVENTS = {
     DRAG_START: 'dragStart',
     DRAG_MOVE: 'dragMove',
     DROP: 'drop',
-    DRAG_CANCEL: 'dragCancel'
+    DRAG_CANCEL: 'dragCancel',
+    SYNERGY_ACTIVATED: 'synergyActivated',
+    SYNERGY_DEACTIVATED: 'synergyDeactivated'
 };
 
 export const UI_STATES = {

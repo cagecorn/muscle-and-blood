@@ -44,6 +44,7 @@ export { runDisarmManagerUnitTests } from './unit/disarmManagerUnitTests.js';
 export { runCoordinateManagerUnitTests } from './unit/coordinateManagerUnitTests.js';
 export { runTargetingManagerUnitTests } from './unit/targetingManagerUnitTests.js'; // ✨ TargetingManager 단위 테스트 추가
 export { runHeroEngineUnitTests } from "./unit/heroEngineUnitTests.js"; // ✨ HeroEngine 단위 테스트 추가
+export { runSynergyEngineUnitTests } from './unit/synergyEngineUnitTests.js'; // ✨ SynergyEngine 단위 테스트 추가
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 export { runBattleSimulationIntegrationTest } from './integration/battleSimulationIntegrationTest.js';
@@ -54,7 +55,7 @@ export { injectEventManagerFaults } from './fault_injection/eventManagerFaults.j
 export { injectGuardianManagerFaults } from './fault_injection/guardianManagerFaults.js';
 export { injectSceneEngineFaults } from './fault_injection/sceneEngineFaults.js';
 export { injectLogicManagerFaults } from './fault_injection/logicManagerFaults.js';
-export function runEngineTests(renderer, gameLoop, battleSimulationManager = null, battleGridManager = null, idManager = null, assetLoaderManager = null, diceBotManager = null) {
+export function runEngineTests(renderer, gameLoop, battleSimulationManager = null, battleGridManager = null, idManager = null, assetLoaderManager = null, diceBotManager = null, eventManager = null) {
     runRendererTests(renderer);
     runGameLoopTests(gameLoop);
     if (battleSimulationManager && battleGridManager) {
@@ -64,4 +65,7 @@ export function runEngineTests(renderer, gameLoop, battleSimulationManager = nul
         runTargetingManagerUnitTests(battleSimulationManager);
     }
     runHeroEngineUnitTests(idManager, assetLoaderManager, diceBotManager);
+    if (idManager && eventManager) {
+        runSynergyEngineUnitTests(idManager, eventManager);
+    }
 }
