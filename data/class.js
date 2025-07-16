@@ -64,6 +64,20 @@ export const CLASSES = {
         description: '느릿느릿 움직이는 언데드.',
         skills: ['skill_melee_attack'],
         moveRange: 2,
+        baseStats: {
+            hp: 40,
+            attack: 8,
+            defense: 3,
+            speed: 2,
+            valor: 0,
+            strength: 8,
+            endurance: 6,
+            agility: 4,
+            intelligence: 2,
+            wisdom: 1,
+            luck: 1,
+            weight: 15
+        },
         tags: ['근접', '언데드', '적_클래스']
     },
     // 다른 클래스들이 여기에 추가됩니다.
