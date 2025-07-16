@@ -59,6 +59,8 @@ import { ButtonEngine } from './managers/ButtonEngine.js'; // ✨ ButtonEngine �
 import { DetailInfoManager } from './managers/DetailInfoManager.js'; // ✨ DetailInfoManager 추가
 import { TagManager } from './managers/TagManager.js'; // ✨ TagManager 추가
 import { WarriorSkillsAI } from './managers/warriorSkillsAI.js'; // ✨ WarriorSkillsAI 추가
+import { UnitSpriteEngine } from './managers/UnitSpriteEngine.js';
+import { UnitActionManager } from './managers/UnitActionManager.js';
 
 // ✨ 상수 파일 임포트
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES, GAME_DEBUG_MODE } from './constants.js';
@@ -382,7 +384,13 @@ export class GameEngine {
         this.warriorSkillsAI = new WarriorSkillsAI(commonManagersForSkills);
 
         // ------------------------------------------------------------------
-        // 12. Scene Registrations & Layer Engine Setup
+        // 12. Sprite & Action Managers
+        // ------------------------------------------------------------------
+        this.unitSpriteEngine = new UnitSpriteEngine(this.assetLoaderManager, this.battleSimulationManager);
+        this.unitActionManager = new UnitActionManager(this.eventManager, this.unitSpriteEngine, this.delayEngine);
+
+        // ------------------------------------------------------------------
+        // 13. Scene Registrations & Layer Engine Setup
         // ------------------------------------------------------------------
         // ✨ sceneEngine에 UI_STATES 상수 사용
         this.sceneEngine.registerScene(UI_STATES.MAP_SCREEN, [this.territoryManager]);
@@ -422,7 +430,7 @@ export class GameEngine {
         this.gameLoop = new GameLoop(this._update, this._draw);
 
         // ✨ _initAsyncManagers에서 로드할 총 에셋 및 데이터 수를 수동으로 계산
-        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length + 5 + 5 + 1; // 9(기존) + 5(워리어 스킬) + 5(기본 상태 아이콘) + 5(워리어 스킬 아이콘) + 1(warrior-finish.png)
+        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length + 5 + 5 + 3; // 9(기존) + 5(워리어 스킬) + 5(기본 상태 아이콘) + 5(워리어 스킬 아이콘) + 3(전사 상태 스프라이트)
         this.assetLoaderManager.setTotalAssetsToLoad(expectedDataAndAssetCount);
 
         // 초기화 과정의 비동기 처리
@@ -508,6 +516,18 @@ export class GameEngine {
             UNITS.WARRIOR.spriteId,
             'assets/images/warrior.png'
         );
+        await this.assetLoaderManager.loadImage(
+            'sprite_warrior_attack',
+            'assets/images/warrior-attack.png'
+        );
+        await this.assetLoaderManager.loadImage(
+            'sprite_warrior_hitted',
+            'assets/images/warrior-hitted.png'
+        );
+        await this.assetLoaderManager.loadImage(
+            'sprite_warrior_finish',
+            'assets/images/warrior-finish.png'
+        );
         // ✨ 전사 패널 이미지 로드
         await this.assetLoaderManager.loadImage('sprite_warrior_panel', 'assets/images/warrior-panel-1.png');
         // ✨ 전투 배경 이미지 로드
@@ -521,6 +541,13 @@ export class GameEngine {
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
         // ✨ 전사 패널 이미지 로드 후 참조
         const warriorPanelImage = this.assetLoaderManager.getImage('sprite_warrior_panel');
+
+        await this.unitSpriteEngine.registerUnitSprites('unit_warrior_001', {
+            idle: 'assets/images/warrior.png',
+            attack: 'assets/images/warrior-attack.png',
+            hitted: 'assets/images/warrior-hitted.png',
+            finish: 'assets/images/warrior-finish.png'
+        });
 
         // ✨ BattleSimulationManager에 유닛 배치 시 currentHp 초기화
         // 전사를 그리드의 더 왼쪽에 배치 (gridX: 3)
@@ -664,4 +691,6 @@ export class GameEngine {
     // ✨ StatusIconManager getter 추가
     getStatusIconManager() { return this.statusIconManager; }
     getShadowEngine() { return this.shadowEngine; } // ✨ ShadowEngine getter 추가
+    getUnitSpriteEngine() { return this.unitSpriteEngine; }
+    getUnitActionManager() { return this.unitActionManager; }
 }
