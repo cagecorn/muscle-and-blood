@@ -58,6 +58,7 @@ import { CoordinateManager } from './managers/CoordinateManager.js';
 import { ButtonEngine } from './managers/ButtonEngine.js'; // ✨ ButtonEngine 임포트
 import { DetailInfoManager } from './managers/DetailInfoManager.js'; // ✨ DetailInfoManager 추가
 import { TagManager } from './managers/TagManager.js'; // ✨ TagManager 추가
+import { WarriorSkillsAI } from './managers/warriorSkillsAI.js'; // ✨ WarriorSkillsAI 추가
 
 // ✨ 상수 파일 임포트
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES, GAME_DEBUG_MODE } from './constants.js';
