@@ -286,6 +286,24 @@ export class GameEngine {
         // VFXManager에 ParticleEngine 전달
         this.vfxManager.particleEngine = this.particleEngine;
 
+        // ✨ 워리어 스킬 AI 초기화 (다른 매니저들을 주입)
+        const commonManagersForSkills = {
+            battleSimulationManager: this.battleSimulationManager,
+            battleCalculationManager: this.battleCalculationManager,
+            eventManager: this.eventManager,
+            delayEngine: this.delayEngine,
+            statusEffectManager: this.statusEffectManager,
+            coordinateManager: this.coordinateManager,
+            targetingManager: this.targetingManager,
+            vfxManager: this.vfxManager,
+            diceEngine: this.diceEngine,
+            workflowManager: this.workflowManager,
+            animationManager: this.animationManager,
+            measureManager: this.measureManager,
+            idManager: this.idManager
+        };
+        this.warriorSkillsAI = new WarriorSkillsAI(commonManagersForSkills);
+
         // ✨ sceneEngine에 UI_STATES 상수 사용
         this.sceneEngine.registerScene(UI_STATES.MAP_SCREEN, [this.territoryManager]);
         this.sceneEngine.registerScene(UI_STATES.COMBAT_SCREEN, [
@@ -317,9 +335,9 @@ export class GameEngine {
 
         this.gameLoop = new GameLoop(this._update, this._draw);
 
-        // ✨ _initAsyncManagers에서 로드할 총 에셋 수 설정
-        const expectedAssetCount = 9; // warrior.png 등 총 9개
-        this.assetLoaderManager.setTotalAssetsToLoad(expectedAssetCount);
+        // ✨ _initAsyncManagers에서 로드할 총 에셋 및 데이터 수를 수동으로 계산
+        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length;
+        this.assetLoaderManager.setTotalAssetsToLoad(expectedDataAndAssetCount);
 
         // 초기화 과정의 비동기 처리
         this._initAsyncManagers().then(() => {
@@ -387,6 +405,13 @@ export class GameEngine {
         await this.idManager.addOrUpdateId(CLASSES.WARRIOR.id, CLASSES.WARRIOR);
         // ✨ 새롭게 추가된 해골 클래스도 등록
         await this.idManager.addOrUpdateId(CLASSES.SKELETON.id, CLASSES.SKELETON);
+
+        // ✨ IdManager에 WARRIOR_SKILLS 데이터 등록
+        for (const skillKey in WARRIOR_SKILLS) {
+            const skill = WARRIOR_SKILLS[skillKey];
+            await this.idManager.addOrUpdateId(skill.id, skill);
+        }
+        if (GAME_DEBUG_MODE) console.log(`[GameEngine] Registered ${Object.keys(WARRIOR_SKILLS).length} warrior skills.`);
 
         // 2. AssetLoaderManager로 전사 스프라이트 로드
         await this.assetLoaderManager.loadImage(
@@ -541,4 +566,6 @@ export class GameEngine {
     getTargetingManager() { return this.targetingManager; }
     // ✨ TagManager getter 추가
     getTagManager() { return this.tagManager; }
+    // ✨ 워리어 스킬 AI getter 추가
+    getWarriorSkillsAI() { return this.warriorSkillsAI; }
 }

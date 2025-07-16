@@ -42,6 +42,29 @@ export class RuleManager {
         this.addRule('derived_criticalDamageMultiplier', '치명타 피해 배율: 치명타 발생 시 추가되는 피해 배율입니다.');
         this.addRule('derived_statusEffectApplication', '상태이상 적용률: 지능 스탯에 의해 계산되는 상태이상 적용 성공률입니다.');
         this.addRule('derived_statusEffectResistance', '상태이상 저항력: 인내 스탯에 의해 계산되는 상태이상 저항률입니다.');
+
+        // ✨ 유닛 스킬 관련 규칙 추가
+        this.addRule('unitSkillCount', '모든 유닛은 각 클래스에 맞는 랜덤한 3가지 스킬을 가집니다.');
+        this.addRule('unitSkillOrderImportance', '스킬의 순서(첫 번째, 두 번째, 세 번째)가 스킬 발동 확률에 중요하게 작용합니다.');
+        this.addRule('unitTurnAction', '유닛은 한 턴 당 [이동 + 공격 또는 스킬] 행동을 수행합니다.');
+        this.addRule('skillActivationProbability', '일반 공격이 아닌 스킬을 사용하는 기준은 확률입니다. (첫 번째 스킬: 40%, 두 번째 스킬: 30%, 세 번째 스킬: 20%)');
+        this.addRule('skillProbabilityCompetition', '세 스킬은 서로 확률 경쟁을 하며, 한 스킬이 발동되면 다른 스킬은 해당 턴에 발동되지 않습니다.');
+
+        // ✨ 스킬 종류 관련 규칙 추가
+        this.addRule('skillType_Active', '액티브: 유닛이 확률적으로 사용하는 스킬입니다.');
+        this.addRule('skillType_Passive', '패시브: 확률과 상관없이 늘 적용되는 스킬입니다.');
+        this.addRule('skillType_Debuff', '디버프: 일반 공격 시 일정 확률로 상대에게 묻어나가는 스킬입니다.');
+        this.addRule('skillType_Reaction', '리액션: 공격을 받을 시 일정 확률로 발동하는 스킬입니다.');
+        this.addRule('skillType_Buff', '버프: 유일하게 한 턴에 [스킬 + 일반 공격]을 같이 쓸 수 있는 스킬입니다. 버프 발동 후 일반 공격을 수행합니다.');
+
+        this.addRule('goodUnitCriteria', '이 게임에서 "좋은 발동 스킬"을 첫 번째 스킬로 가지고 있는 유닛일수록 좋은 유닛으로 간주됩니다.');
+        this.addRule('passiveSkillPlacement', '상시 발동하는 패시브 스킬을 두 번째, 세 번째 슬롯으로 가질 수록 좋은 유닛으로 간주됩니다.');
+
+        // ✨ 유닛 턴 행동 알고리즘 규칙 추가
+        this.addRule('unitTurnAlgorithm_1', '1. 유닛의 턴이 돌아옵니다.');
+        this.addRule('unitTurnAlgorithm_2', '2. 스킬 주사위를 굴려 발동할 스킬을 결정합니다.');
+        this.addRule('unitTurnAlgorithm_3', '3. 사용할 스킬이 없다면 일반 공격(클래스 AI)을 수행합니다.');
+        this.addRule('unitTurnAlgorithm_4', '4. 사용할 스킬이 있다면, 해당 스킬에 해당하는 AI를 발동하여 스킬을 사용합니다.');
         console.log("[RuleManager] Basic rules loaded.");
     }
 
