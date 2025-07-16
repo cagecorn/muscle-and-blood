@@ -3,12 +3,13 @@ import { DelayEngine } from './DelayEngine.js'; // ✨ DelayEngine 추가
 import { GAME_EVENTS } from '../constants.js';
 
 export class BattleCalculationManager {
-    constructor(eventManager, battleSimulationManager, diceRollManager, delayEngine) {
+    constructor(eventManager, battleSimulationManager, diceRollManager, delayEngine, conditionalManager) {
         console.log("\ud83d\udcca BattleCalculationManager initialized. Delegating heavy calculations to worker. \ud83d\udcca");
         this.eventManager = eventManager;
         this.battleSimulationManager = battleSimulationManager;
         this.diceRollManager = diceRollManager;
         this.delayEngine = delayEngine; // ✨ delayEngine 저장
+        this.conditionalManager = conditionalManager; // ✨ 인스턴스 저장
         this.worker = new Worker('./js/workers/battleCalculationWorker.js');
 
         this.worker.onmessage = this._handleWorkerMessage.bind(this);
@@ -76,6 +77,9 @@ export class BattleCalculationManager {
         );
         console.log(`[BattleCalculationManager] Final damage roll from DiceRollManager: ${finalDamageRoll}`);
 
+        // ✨ ConditionalManager에서 수비자의 현재 피해 감소율을 가져옴
+        const damageReduction = this.conditionalManager.getDamageReduction(targetUnitId);
+
         const payload = {
             attackerStats: attackerUnit.fullUnitData ? attackerUnit.fullUnitData.baseStats : attackerUnit.baseStats,
             targetStats: targetUnit.fullUnitData ? targetUnit.fullUnitData.baseStats : targetUnit.baseStats,
@@ -86,7 +90,8 @@ export class BattleCalculationManager {
             maxBarrier: targetUnit.maxBarrier,
             skillData: skillData,
             targetUnitId: targetUnitId,
-            preCalculatedDamageRoll: finalDamageRoll
+            preCalculatedDamageRoll: finalDamageRoll,
+            damageReduction: damageReduction // ✨ 피해 감소율 추가
         };
 
         this.worker.postMessage({ type: 'CALCULATE_DAMAGE', payload });

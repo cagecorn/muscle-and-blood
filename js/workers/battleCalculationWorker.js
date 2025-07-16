@@ -5,12 +5,20 @@ self.onmessage = (event) => {
 
     switch (type) {
         case 'CALCULATE_DAMAGE': {
-            // ✨ payload에서 대상 유닛의 배리어 정보를 가져옵니다.
-            const { attackerStats, targetStats, skillData, currentTargetHp, currentTargetBarrier, maxBarrier, preCalculatedDamageRoll } = payload;
+            // ✨ payload에서 defender's damage reduction 값을 추가로 받음
+            const { attackerStats, targetStats, skillData, currentTargetHp, currentTargetBarrier, maxBarrier, preCalculatedDamageRoll, damageReduction } = payload;
 
-            // 최종 적용될 데미지 (방어력 적용 후)
-            let finalDamageToApply = preCalculatedDamageRoll - targetStats.defense;
-            if (finalDamageToApply < 0) finalDamageToApply = 0; // 데미지는 0 미만이 될 수 없음
+            // 방어력 적용
+            let finalDamage = preCalculatedDamageRoll - targetStats.defense;
+            if (finalDamage < 0) finalDamage = 0;
+
+            // ✨ '강철 의지' 같은 패시브 스킬로 인한 최종 피해 감소 적용
+            if (damageReduction > 0) {
+                finalDamage *= (1 - damageReduction);
+            }
+
+            finalDamage = Math.floor(finalDamage); // 최종 데미지는 정수로
+            let finalDamageToApply = finalDamage;
 
             let barrierDamageDealt = 0; // 배리어로 흡수된 데미지
             let hpDamageDealt = 0;      // HP로 들어간 데미지
