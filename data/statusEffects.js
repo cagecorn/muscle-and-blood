@@ -50,6 +50,17 @@ export const STATUS_EFFECTS = {
         }
     },
 
+    BATTLE_CRY: {
+        id: 'status_battle_cry',
+        name: '전투의 외침',
+        type: STATUS_EFFECT_TYPES.BUFF,
+        description: '공격력이 3턴간 10% 증가합니다.',
+        duration: 3,
+        effect: {
+            attackModifier: 1.1 // 공격력 1.1배 (10% 증가)
+        }
+    },
+
     // ✨ 새롭게 추가된 '무장해제' 상태 이상
     DISARMED: {
         id: 'status_disarmed',

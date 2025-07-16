@@ -26,10 +26,14 @@ export function runDiceRollManagerUnitTests() {
         calculateDamageAmplification: () => 1.0
     };
 
+    const mockStatusEffectManager = {
+        getUnitActiveEffects: () => null
+    };
+
     // 테스트 1: 초기화 확인
     testCount++;
     try {
-        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine, mockStatusEffectManager);
         if (drm.diceEngine === mockDiceEngine) {
             console.log("DiceRollManager: Initialized correctly. [PASS]");
             passCount++;
@@ -45,7 +49,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [3, 4];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine, mockStatusEffectManager);
         const result = drm.rollDice(2, 6);
         if (result === 7) {
             console.log("DiceRollManager: rollDice(2, 6) returned correct sum. [PASS]");
@@ -62,7 +66,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [10, 15];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine, mockStatusEffectManager);
         const result = drm.rollWithAdvantage(20);
         if (result === 15) {
             console.log("DiceRollManager: rollWithAdvantage returned correct higher value. [PASS]");
@@ -79,7 +83,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [12, 5];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine, mockStatusEffectManager);
         const result = drm.rollWithDisadvantage(20);
         if (result === 5) {
             console.log("DiceRollManager: rollWithDisadvantage returned correct lower value. [PASS]");
@@ -96,7 +100,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [6, 6];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine, mockStatusEffectManager);
         const attackerUnit = { baseStats: { attack: 10 }, currentBarrier: 0, maxBarrier: 0 };
         const skillData = { type: 'physical', dice: { num: 2, sides: 6 } };
         const result = drm.performDamageRoll(attackerUnit, skillData);
@@ -115,7 +119,7 @@ export function runDiceRollManagerUnitTests() {
     mockDiceEngine.rollDResults = [4];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine, mockStatusEffectManager);
         const attackerUnit = { baseStats: { magic: 15 }, currentBarrier: 0, maxBarrier: 0 };
         const skillData = { type: 'magic', dice: { num: 1, sides: 8 } };
         const result = drm.performDamageRoll(attackerUnit, skillData);
@@ -129,12 +133,34 @@ export function runDiceRollManagerUnitTests() {
         console.error("DiceRollManager: Error during performDamageRoll (magic) test. [FAIL]", e);
     }
 
-    // 테스트 7: performSavingThrow (성공)
+    // 테스트 7: 버프 상태 적용 시 공격력 증가 확인
+    testCount++;
+    mockDiceEngine.rollDResults = [5];
+    mockDiceEngine.rollDIndex = 0;
+    mockStatusEffectManager.getUnitActiveEffects = () => new Map([
+        ['status_battle_cry', { effectData: { effect: { attackModifier: 1.5 } } }]
+    ]);
+    try {
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine, mockStatusEffectManager);
+        const attackerUnit = { id: 'test', baseStats: { attack: 10 }, currentBarrier: 0, maxBarrier: 0 };
+        const skillData = { type: 'physical', dice: { num: 1, sides: 6 } };
+        const result = drm.performDamageRoll(attackerUnit, skillData);
+        if (result === 22) {
+            console.log("DiceRollManager: attack modifier applied correctly. [PASS]");
+            passCount++;
+        } else {
+            console.error(`DiceRollManager: attack modifier failed. Expected 22, got ${result}. [FAIL]`);
+        }
+    } catch (e) {
+        console.error("DiceRollManager: Error during attack modifier test. [FAIL]", e);
+    }
+
+    // 테스트 8: performSavingThrow (성공)
     testCount++;
     mockDiceEngine.rollDResults = [18];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine, mockStatusEffectManager);
         const unitStats = { strength: 3 };
         const difficultyClass = 20;
         const result = drm.performSavingThrow(unitStats, difficultyClass, 'strength');
@@ -148,12 +174,12 @@ export function runDiceRollManagerUnitTests() {
         console.error("DiceRollManager: Error during performSavingThrow (success) test. [FAIL]", e);
     }
 
-    // 테스트 8: performSavingThrow (실패)
+    // 테스트 9: performSavingThrow (실패)
     testCount++;
     mockDiceEngine.rollDResults = [5];
     mockDiceEngine.rollDIndex = 0;
     try {
-        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine);
+        const drm = new DiceRollManager(mockDiceEngine, mockValorEngine, mockStatusEffectManager);
         const unitStats = { agility: 2 };
         const difficultyClass = 10;
         const result = drm.performSavingThrow(unitStats, difficultyClass, 'dexterity');

@@ -32,8 +32,8 @@ export const WARRIOR_SKILLS = {
         description: '자신의 공격력을 일시적으로 증가시키고 일반 공격을 수행합니다.',
         requiredUserTags: ['전사_클래스'],
         effect: {
-            statBuff: { type: 'attack', amount: 10, duration: 1 }, // 공격력 10 증가, 1턴 지속
-            allowAdditionalAttack: true // 버프 후 추가 공격 가능 (이것이 이 스킬 타입의 핵심)
+            statusEffectId: 'status_battle_cry', // 적용할 상태이상 ID
+            allowAdditionalAttack: true // 버프 후 추가 공격 가능 플래그
         }
     },
     // 디버프 스킬 (일반 공격 시 묻어남 예시)
