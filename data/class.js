@@ -18,7 +18,8 @@ export const CLASSES = {
         role: CLASS_ROLES.MELEE_DPS,
         description: '강력한 근접 공격과 방어력을 겸비한 병종.',
         skills: ['skill_melee_attack', 'skill_shield_block'],
-        moveRange: 3 // 전사의 이동 거리
+        moveRange: 3, // 전사의 이동 거리
+        tags: ['근접', '방어', '용병_클래스'] // ✨ 태그 추가
     },
     // ✨ 새롭게 추가된 해골 클래스
     SKELETON: {
@@ -27,7 +28,8 @@ export const CLASSES = {
         role: CLASS_ROLES.MELEE_DPS,
         description: '다수로 몰려오는 기본적인 언데드 적.',
         skills: ['skill_melee_attack'],
-        moveRange: 2 // 해골의 이동 거리(예시)
+        moveRange: 2, // 해골의 이동 거리(예시)
+        tags: ['근접', '언데드', '적_클래스'] // ✨ 태그 추가
     }
     // 다른 클래스들이 여기에 추가됩니다.
     // MAGE: { id: 'class_mage', ... }

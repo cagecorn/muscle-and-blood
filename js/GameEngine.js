@@ -53,6 +53,7 @@ import { BattleGridManager } from './managers/BattleGridManager.js';
 import { CoordinateManager } from './managers/CoordinateManager.js';
 import { ButtonEngine } from './managers/ButtonEngine.js'; // ✨ ButtonEngine 임포트
 import { DetailInfoManager } from './managers/DetailInfoManager.js'; // ✨ DetailInfoManager 추가
+import { TagManager } from './managers/TagManager.js'; // ✨ TagManager 추가
 
 // ✨ 상수 파일 임포트
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES } from './constants.js';
@@ -206,6 +207,9 @@ export class GameEngine {
             this.heroEngine,
             this.idManager
         );
+
+        // ✨ TagManager 초기화
+        this.tagManager = new TagManager(this.idManager);
         // BattleCalculationManager는 DiceRollManager가 준비된 이후에 초기화합니다.
         this.battleCalculationManager = new BattleCalculationManager(
             this.eventManager,
@@ -521,4 +525,6 @@ export class GameEngine {
     getCoordinateManager() { return this.coordinateManager; }
     // ✨ TargetingManager getter 추가
     getTargetingManager() { return this.targetingManager; }
+    // ✨ TagManager getter 추가
+    getTagManager() { return this.tagManager; }
 }
