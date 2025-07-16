@@ -577,10 +577,14 @@ export class GameEngine {
         await this.idManager.addOrUpdateId(CLASSES.ZOMBIE.id, CLASSES.ZOMBIE);
         await this.idManager.addOrUpdateId(CLASSES.WARRIOR_VALIANT.id, CLASSES.WARRIOR_VALIANT);
 
-        // ✨ IdManager에 WARRIOR_SKILLS 데이터 등록
-        for (const skillKey in WARRIOR_SKILLS) {
+        // ✨ IdManager에 WARRIOR_SKILLS 데이터 등록 (오류 수정)
+        // 기존 for...in 루프를 Object.keys 기반 반복으로 변경하여 안전하게 처리
+        for (const skillKey of Object.keys(WARRIOR_SKILLS)) {
             const skill = WARRIOR_SKILLS[skillKey];
-            await this.idManager.addOrUpdateId(skill.id, skill);
+            // skill 객체와 id 속성을 확인하여 잘못된 데이터가 등록되지 않도록 방어
+            if (skill && skill.id) {
+                await this.idManager.addOrUpdateId(skill.id, skill);
+            }
         }
         if (GAME_DEBUG_MODE) console.log(`[GameEngine] Registered ${Object.keys(WARRIOR_SKILLS).length} warrior skills.`);
 
