@@ -87,7 +87,8 @@ export class MeasureManager {
             },
             // ✨ 새로운 게임 설정 섹션
             gameConfig: {
-                enableDisarmSystem: true // 무장해제 시스템 활성화 여부
+                enableDisarmSystem: true, // 무장해제 시스템 활성화 여부
+                captureChance: 0.5 // 유닛 포획 확률 (0 ~ 1)
             }
         };
     }
