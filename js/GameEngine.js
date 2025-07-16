@@ -69,29 +69,34 @@ export class GameEngine {
     constructor(canvasId) {
         if (GAME_DEBUG_MODE) console.log("\u2699\ufe0f GameEngine initializing... \u2699\ufe0f");
 
+        // ------------------------------------------------------------------
+        // 1. Core Systems & Fundamental Managers
+        // ------------------------------------------------------------------
         this.renderer = new Renderer(canvasId);
         if (!this.renderer.canvas) {
             console.error("GameEngine: Failed to initialize Renderer. Game cannot proceed.");
             throw new Error("Renderer initialization failed.");
         }
+
         this.eventManager = new EventManager();
         // ✨ CRITICAL_ERROR 이벤트 구독
         this.eventManager.subscribe(GAME_EVENTS.CRITICAL_ERROR, this._handleCriticalError.bind(this));
+
         this.guardianManager = new GuardianManager();
         this.measureManager = new MeasureManager();
-        // 게임 규칙을 관리하는 RuleManager 초기화
         this.ruleManager = new RuleManager();
 
-        // SceneEngine 초기화 (LogicManager보다 먼저 초기화되어야 함)
+        // ------------------------------------------------------------------
+        // 2. Scene & Logic Managers
+        // ------------------------------------------------------------------
         this.sceneEngine = new SceneEngine();
-
-        // LogicManager 초기화
         this.logicManager = new LogicManager(this.measureManager, this.sceneEngine);
 
-        // IdManager 및 AssetLoaderManager 초기화
+        // ------------------------------------------------------------------
+        // 3. ID & Asset Loading
+        // ------------------------------------------------------------------
         this.idManager = new IdManager();
         this.assetLoaderManager = new AssetLoaderManager();
-        // ✨ AssetLoaderManager에 EventManager 주입
         this.assetLoaderManager.setEventManager(this.eventManager);
 
         // ✨ SkillIconManager 초기화
@@ -105,10 +110,21 @@ export class GameEngine {
             if (GAME_DEBUG_MODE) console.log("[GameEngine] All initial assets are loaded! Game ready.");
         });
 
-        // ✨ ValorEngine을 먼저 초기화하여 BattleSimulationManager에 전달합니다.
+        // ------------------------------------------------------------------
+        // 4. Core Game Mechanics Engines
+        // ------------------------------------------------------------------
         this.valorEngine = new ValorEngine();
+        this.weightEngine = new WeightEngine();
+        this.statManager = new StatManager(this.valorEngine, this.weightEngine);
 
-        // === 순환 의존성 해결을 위한 초기화 순서 조정 ===
+        this.diceEngine = new DiceEngine();
+        this.diceRollManager = new DiceRollManager(this.diceEngine, this.valorEngine);
+        this.diceBotManager = new DiceBotManager(this.diceEngine);
+
+        // ------------------------------------------------------------------
+        // 5. Battle Simulation & Related Managers
+        // ------------------------------------------------------------------
+        // 순환 의존성 해결을 위한 초기화 순서 조정
         // 1. BattleSimulationManager 초기화 (animationManager는 나중에 설정)
         this.battleSimulationManager = new BattleSimulationManager(
             this.measureManager,
@@ -149,6 +165,9 @@ export class GameEngine {
             this.measureManager
         );
 
+        // ------------------------------------------------------------------
+        // 6. UI, Input, Log & Other Managers
+        // ------------------------------------------------------------------
         // MercenaryPanelManager는 별도 캔버스를 사용하지 않고 UIEngine을 통해 그려집니다.
         this.mercenaryPanelManager = new MercenaryPanelManager(
             this.measureManager,
@@ -214,6 +233,9 @@ export class GameEngine {
         // ✨ CoordinateManager 초기화 - BattleSimulationManager 후
         this.coordinateManager = new CoordinateManager(this.battleSimulationManager, this.battleGridManager);
 
+        // ------------------------------------------------------------------
+        // 7. Visual Effects & Rendering Helpers
+        // ------------------------------------------------------------------
         // VFXManager에 AnimationManager와 ParticleEngine을 전달하여 HP 바 위치를 애니메이션과 동기화합니다.
         this.vfxManager = new VFXManager(
             this.renderer,
@@ -227,11 +249,11 @@ export class GameEngine {
 
         this.bindingManager = new BindingManager();
 
-        // ✨ 새로운 엔진들 초기화
+        // ------------------------------------------------------------------
+        // 8. Timing & Movement Engines
+        // ------------------------------------------------------------------
         this.delayEngine = new DelayEngine();
         this.timingEngine = new TimingEngine(this.delayEngine);
-        this.weightEngine = new WeightEngine(); // ✨ WeightEngine 초기화
-        this.statManager = new StatManager(this.valorEngine, this.weightEngine); // ✨ StatManager 초기화
 
         // ✨ MovingManager 초기화 - delayEngine이 준비된 이후
         this.movingManager = new MovingManager(
@@ -241,17 +263,18 @@ export class GameEngine {
             this.coordinateManager
         );
 
-        // ✨ DiceEngine 및 관련 매니저 초기화
-        this.diceEngine = new DiceEngine();
-        this.diceRollManager = new DiceRollManager(this.diceEngine, this.valorEngine);
-        this.diceBotManager = new DiceBotManager(this.diceEngine);
-
+        // ------------------------------------------------------------------
+        // 9. Game Content & Feature Engines
+        // ------------------------------------------------------------------
         // HeroEngine 초기화
         this.heroEngine = new HeroEngine(this.idManager, this.assetLoaderManager, this.diceBotManager);
 
         // ✨ SynergyEngine 초기화
         this.synergyEngine = new SynergyEngine(this.idManager, this.eventManager);
 
+        // ------------------------------------------------------------------
+        // 10. Detail & Shadow Engines
+        // ------------------------------------------------------------------
         // ✨ DetailInfoManager 초기화
         this.detailInfoManager = new DetailInfoManager(
             this.eventManager,
@@ -263,6 +286,10 @@ export class GameEngine {
 
         // ✨ TagManager 초기화
         this.tagManager = new TagManager(this.idManager);
+
+        // ------------------------------------------------------------------
+        // 11. Combat Flow & AI Managers
+        // ------------------------------------------------------------------
         // BattleCalculationManager는 DiceRollManager가 준비된 이후에 초기화합니다.
         this.battleCalculationManager = new BattleCalculationManager(
             this.eventManager,
@@ -305,7 +332,7 @@ export class GameEngine {
         // ✨ BasicAIManager 초기화
         this.basicAIManager = new BasicAIManager(this.battleSimulationManager);
 
-        // ✨ 새로운 매니저 초기화
+        // AI 와 턴 진행 관련 매니저들
         this.turnOrderManager = new TurnOrderManager(
             this.eventManager,
             this.battleSimulationManager,
@@ -347,6 +374,9 @@ export class GameEngine {
         };
         this.warriorSkillsAI = new WarriorSkillsAI(commonManagersForSkills);
 
+        // ------------------------------------------------------------------
+        // 12. Scene Registrations & Layer Engine Setup
+        // ------------------------------------------------------------------
         // ✨ sceneEngine에 UI_STATES 상수 사용
         this.sceneEngine.registerScene(UI_STATES.MAP_SCREEN, [this.territoryManager]);
         this.sceneEngine.registerScene(UI_STATES.COMBAT_SCREEN, [
