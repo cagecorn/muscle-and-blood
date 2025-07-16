@@ -293,7 +293,7 @@
                 runRuleManagerUnitTests();
                 runTurnOrderManagerUnitTests(eventManager, battleSimulationManager);
                 runBasicAIManagerUnitTests(battleSimulationManager);
-                runClassAIManagerUnitTests(idManager, battleSimulationManager, measureManager, basicAIManager);
+                runClassAIManagerUnitTests(idManager, battleSimulationManager, measureManager, basicAIManager, warriorSkillsAI, diceEngine, targetingManager);
                 runBattleSimulationManagerUnitTests(measureManager, gameEngine.getAssetLoaderManager(), idManager, logicManager);
                 runAnimationManagerUnitTests();
                 runValorEngineUnitTests();
@@ -615,7 +615,7 @@
             runRuleManagerUnitTests();
             runTurnOrderManagerUnitTests(eventManager, battleSimulationManager);
             runBasicAIManagerUnitTests(battleSimulationManager);
-            runClassAIManagerUnitTests(idManager, battleSimulationManager, measureManager, basicAIManager);
+            runClassAIManagerUnitTests(idManager, battleSimulationManager, measureManager, basicAIManager, warriorSkillsAI, diceEngine, targetingManager);
             runBattleSimulationManagerUnitTests(measureManager, gameEngine.getAssetLoaderManager(), idManager, logicManager);
             runAnimationManagerUnitTests();
             runValorEngineUnitTests();

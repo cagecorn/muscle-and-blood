@@ -6,12 +6,13 @@ import { CLASSES } from '../../data/class.js';
 import { WARRIOR_SKILLS } from '../../data/warriorSkills.js';
 
 export class HeroManager {
-    constructor(idManager, diceEngine, assetLoaderManager, battleSimulationManager) {
+    constructor(idManager, diceEngine, assetLoaderManager, battleSimulationManager, unitSpriteEngine) {
         console.log("\u2728 HeroManager initialized. Ready to create legendary heroes. \u2728");
         this.idManager = idManager;
         this.diceEngine = diceEngine;
         this.assetLoaderManager = assetLoaderManager;
         this.battleSimulationManager = battleSimulationManager;
+        this.unitSpriteEngine = unitSpriteEngine;
         this.heroNameList = [
             '레오닉', '아서스', '가로쉬', '스랄', '제이나', '안두인',
             '바리안', '실바나스', '그롬마쉬', '렉사르', '알렉스트라자', '이렐리아'
@@ -64,7 +65,15 @@ export class HeroManager {
             await this.idManager.addOrUpdateId(unitId, heroUnitData);
             this.battleSimulationManager.addUnit(heroUnitData, warriorImage, startX, startY);
 
-            console.log(`[HeroManager] Created warrior: ${randomName} (ID: ${unitId}) at (${startX}, ${startY})`);
+            await this.unitSpriteEngine.registerUnitSprites(unitId, {
+                idle: 'assets/images/warrior.png',
+                attack: 'assets/images/warrior-attack.png',
+                hitted: 'assets/images/warrior-hitted.png',
+                finish: 'assets/images/warrior-finish.png',
+                status: 'assets/images/warrior-status-effects.png'
+            });
+
+            console.log(`[HeroManager] Created warrior: ${randomName} (ID: ${unitId}) at (${startX}, ${startY}) and registered its sprites.`);
         }
     }
 }
