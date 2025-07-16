@@ -345,6 +345,8 @@ export class GameEngine {
             UNITS.WARRIOR.spriteId,
             'assets/images/warrior.png'
         );
+        // ✨ 전사 패널 이미지 로드
+        await this.assetLoaderManager.loadImage('sprite_warrior_panel', 'assets/images/warrior-panel-1.png');
         // ✨ 전투 배경 이미지 로드
         await this.assetLoaderManager.loadImage('sprite_battle_stage_forest', 'assets/images/battle-stage-forest.png');
 
@@ -354,10 +356,16 @@ export class GameEngine {
         // 샘플 ID 조회 및 이미지 로드 (동기적 접근을 위해)
         const warriorData = await this.idManager.get(UNITS.WARRIOR.id);
         const warriorImage = this.assetLoaderManager.getImage(UNITS.WARRIOR.spriteId);
+        // ✨ 전사 패널 이미지 로드 후 참조
+        const warriorPanelImage = this.assetLoaderManager.getImage('sprite_warrior_panel');
 
         // ✨ BattleSimulationManager에 유닛 배치 시 currentHp 초기화
         // 전사를 그리드의 더 왼쪽에 배치 (gridX: 3)
-        this.battleSimulationManager.addUnit({ ...warriorData, currentHp: warriorData.baseStats.hp }, warriorImage, 3, 4);
+        this.battleSimulationManager.addUnit({
+            ...warriorData,
+            currentHp: warriorData.baseStats.hp,
+            panelImage: warriorPanelImage // ✨ 용병 패널에 사용될 이미지
+        }, warriorImage, 3, 4);
 
         const mockEnemyUnitData = {
             id: 'unit_zombie_001', // ID 변경
@@ -398,9 +406,7 @@ export class GameEngine {
         this.sceneEngine.update(deltaTime);
         this.animationManager.update(deltaTime);
         this.vfxManager.update(deltaTime);
-        if (this.particleEngine) {
-            this.particleEngine.update(deltaTime); // ✨ ParticleEngine 업데이트 호출
-        }
+        this.particleEngine.update(deltaTime); // ✨ ParticleEngine 업데이트 호출
     }
 
     _draw() {
