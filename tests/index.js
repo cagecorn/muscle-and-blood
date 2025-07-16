@@ -55,6 +55,7 @@ export { runSynergyEngineUnitTests } from './unit/synergyEngineUnitTests.js'; //
 
 export { runMeasureManagerIntegrationTest } from './integration/measureManagerIntegrationTests.js';
 export { runBattleSimulationIntegrationTest } from './integration/battleSimulationIntegrationTest.js';
+export { runWarriorSkillsIntegrationTest } from './integration/warriorSkillsIntegrationTest.js';
 
 export { injectRendererFault } from './fault_injection/rendererFaults.js';
 export { injectGameLoopFault, getFaultFlags, setFaultFlag } from './fault_injection/gameLoopFaults.js';

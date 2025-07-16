@@ -77,6 +77,7 @@
         <button id="runAllEngineTestsBtn">모든 엔진 테스트 실행</button>
         <button id="runMeasureManagerIntegrationTestBtn">측량 매니저 통합 테스트</button>
         <button id="runBattleSimulationIntegrationTestBtn">전투 시뮬레이션 통합 테스트</button>
+        <button id="runWarriorSkillsIntegrationTestBtn">전사 스킬 통합 테스트</button>
 
         <h4>개별 유닛 테스트</h4>
         <button id="runSceneEngineUnitTestsBtn">SceneEngine 유닛 테스트</button>
@@ -155,6 +156,7 @@
             injectGuardianManagerFaults,
             runMeasureManagerIntegrationTest,
             runBattleSimulationIntegrationTest,
+            runWarriorSkillsIntegrationTest,
             runSceneEngineUnitTests,
             injectSceneEngineFaults,
             runLogicManagerUnitTests,
@@ -319,6 +321,9 @@
 
             document.getElementById('runBattleSimulationIntegrationTestBtn').addEventListener('click', () => {
                 runBattleSimulationIntegrationTest(gameEngine);
+            });
+            document.getElementById('runWarriorSkillsIntegrationTestBtn').addEventListener('click', () => {
+                runWarriorSkillsIntegrationTest(gameEngine);
             });
 
             // 개별 유닛 테스트 버튼 리스너 추가
