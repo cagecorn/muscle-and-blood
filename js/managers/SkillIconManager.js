@@ -21,6 +21,12 @@ export class SkillIconManager {
         this.idManager = idManager;
         this.skillIcons = new Map(); // key: skillId, value: HTMLImageElement
 
+        // 아이콘 로드 실패 시 사용할 기본 플레이스홀더 이미지 생성
+        this.placeholderIcon = new Image();
+        // 투명한 1x1 png 데이터
+        this.placeholderIcon.src =
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/5+hHgAHggJ/p14WAAAAAElFTkSuQmCC';
+
         this._loadDefaultSkillIcons(); // 초기 스킬 아이콘 로드
     }
 
@@ -55,6 +61,7 @@ export class SkillIconManager {
                     })
                     .catch(error => {
                         console.error(`[SkillIconManager] Failed to load icon for ${skillId} from ${url}:`, error);
+                        this.skillIcons.set(skillId, this.placeholderIcon);
                     })
             );
         }
@@ -74,7 +81,8 @@ export class SkillIconManager {
         }
         const icon = this.skillIcons.get(skillId);
         if (!icon) {
-            if (GAME_DEBUG_MODE) console.warn(`[SkillIconManager] Icon not found for skill ID: ${skillId}.`);
+            if (GAME_DEBUG_MODE) console.warn(`[SkillIconManager] Icon not found for skill ID: ${skillId}. Using placeholder.`);
+            return this.placeholderIcon;
         }
         return icon;
     }
