@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         const gameEngine = new GameEngine('gameCanvas');
         gameEngine.eventManager.setGameRunningState(true); // ✨ 게임 시작 시 상태 설정
-        gameEngine.start();
+        // GameEngine.initializeGame() 내부에서 모든 비동기 초기화가 끝난 후
+        // 자동으로 gameEngine.start()가 호출됩니다.
 
         // 영웅 패널 버튼 클릭 이벤트 리스너 추가
         const toggleHeroPanelBtn = document.getElementById(BUTTON_IDS.TOGGLE_HERO_PANEL); // ✨ 상수 사용
