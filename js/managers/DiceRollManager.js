@@ -96,7 +96,14 @@ export class DiceRollManager {
             }
         }
 
-        const finalDamage = (damageRoll + attackBonus) * finalAttackModifier;
+        let finalDamage = (damageRoll + attackBonus) * finalAttackModifier;
+
+        // ✨ 반격 등 스킬 자체의 피해량 조절자 적용
+        if (skillData.damageModifier) {
+            finalDamage *= skillData.damageModifier;
+            console.log(`[DiceRollManager] Applying skill damage modifier: ${skillData.damageModifier}`);
+        }
+
         console.log(`[DiceRollManager] Performed damage roll (${skillData.dice.num}d${skillData.dice.sides} + ${attackBonus}) * ${finalAttackModifier.toFixed(2)} (Modifiers) = ${finalDamage.toFixed(0)}`);
         return Math.max(0, Math.floor(finalDamage));
     }
