@@ -30,7 +30,8 @@ export const UNITS = {
             luck: 15,
             weight: 30
         },
-        spriteId: 'sprite_warrior_default'
+        spriteId: 'sprite_warrior_default',
+        tags: ['용병', '남자'] // ✨ 유닛 자체의 태그
     }
     // 다른 유닛들이 여기에 추가됩니다.
     // ARCHER: { id: 'unit_archer_001', ... }

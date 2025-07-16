@@ -102,6 +102,7 @@
         <button id="runWorkflowManagerUnitTestsBtn">WorkflowManager 유닛 테스트</button>
         <button id="runDisarmManagerUnitTestsBtn">DisarmManager 유닛 테스트</button>
         <button id="runCoordinateManagerUnitTestsBtn">CoordinateManager 유닛 테스트</button> <button id="runTargetingManagerUnitTestsBtn">TargetingManager 유닛 테스트</button> <button id="runHeroEngineUnitTestsBtn">HeroEngine 유닛 테스트</button> <button id="runSynergyEngineUnitTestsBtn">SynergyEngine 유닛 테스트</button> <button id="runDetailInfoManagerUnitTestsBtn">DetailInfoManager 유닛 테스트</button>
+        <button id="runTagManagerUnitTestsBtn">TagManager 유닛 테스트</button>
 
         <h4>엔진 결함 주입 테스트</h4>
         <button id="injectRendererFaultBtn" class="fault-btn">렌더러 결함 주입</button>
@@ -185,7 +186,8 @@
             runCoordinateManagerUnitTests,
             runHeroEngineUnitTests,
             runSynergyEngineUnitTests,
-            runDetailInfoManagerUnitTests
+            runDetailInfoManagerUnitTests,
+            runTagManagerUnitTests
     } from './tests/index.js';
     import { STATUS_EFFECTS } from './data/statusEffects.js';
     // ✨ 상수 파일 임포트
@@ -393,6 +395,10 @@
             // ✨ DetailInfoManager 단위 테스트 버튼 리스너 추가
             document.getElementById('runDetailInfoManagerUnitTestsBtn').addEventListener('click', () => {
                 runDetailInfoManagerUnitTests(); // 목업 사용
+            });
+            // ✨ TagManager 단위 테스트 버튼 리스너 추가
+            document.getElementById('runTagManagerUnitTestsBtn').addEventListener('click', () => {
+                runTagManagerUnitTests(idManager);
             });
             document.getElementById('injectRendererFaultBtn').addEventListener('click', () => {
                 injectRendererFault(renderer);

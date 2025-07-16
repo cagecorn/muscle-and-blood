@@ -7,6 +7,7 @@ export { runMapManagerUnitTests } from './unit/mapManagerUnitTests.js';
 export { runUIEngineUnitTests } from './unit/uiEngineUnitTests.js';
 export { runButtonEngineUnitTests } from './unit/buttonEngineUnitTests.js';
 export { runDetailInfoManagerUnitTests } from './unit/detailInfoManagerUnitTests.js'; // ✨ DetailInfoManager 단위 테스트 추가
+export { runTagManagerUnitTests } from './unit/tagManagerUnitTests.js'; // ✨ TagManager 단위 테스트 추가
 
 // new unit tests
 export { runSceneEngineUnitTests } from './unit/sceneEngineUnitTests.js';
@@ -70,4 +71,5 @@ export function runEngineTests(renderer, gameLoop, battleSimulationManager = nul
         runSynergyEngineUnitTests(idManager, eventManager);
     }
     runDetailInfoManagerUnitTests(); // 목업 사용
+    runTagManagerUnitTests(idManager);
 }
