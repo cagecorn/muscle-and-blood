@@ -47,23 +47,6 @@ export const CLASSES = {
         moveRange: 2,
         tags: ['근접', '언데드', '적_클래스']
     },
-    // ✨ 용맹한 전사 클래스 추가
-    WARRIOR_VALIANT: {
-        id: 'class_warrior_valiant',
-        name: '용맹한 전사',
-        role: CLASS_ROLES.MELEE_DPS,
-        tags: ['근접', '방어', '전사_클래스'],
-        moveRange: 4,
-        attackRange: 1,
-        baseStats: {
-            hp: 120,
-            attack: 25,
-            defense: 15,
-            speed: 60,
-            intelligence: 10
-        },
-        skills: [] // GameEngine에서 랜덤 스킬로 채워짐
-    }
     // 다른 클래스들이 여기에 추가됩니다.
     // MAGE: { id: 'class_mage', ... }
     // ARCHER: { id: 'class_archer', ... }
