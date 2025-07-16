@@ -9,6 +9,7 @@ import { DiceBotManager } from '../managers/DiceBotManager.js';
 import { HeroManager } from '../managers/HeroManager.js';
 import { BattleFormationManager } from '../managers/BattleFormationManager.js';
 import { MonsterSpawnManager } from '../managers/MonsterSpawnManager.js';
+import { StageDataManager } from '../managers/StageDataManager.js';
 import { DelayEngine } from '../managers/DelayEngine.js';
 import { TimingEngine } from '../managers/TimingEngine.js';
 import { CoordinateManager } from '../managers/CoordinateManager.js';
@@ -29,6 +30,7 @@ export class BattleEngine {
         const idManager = assetEngine.getIdManager();
         const assetLoaderManager = assetEngine.getAssetLoaderManager();
         const animationManager = renderEngine.getAnimationManager();
+        this.stageDataManager = new StageDataManager();
 
         this.valorEngine = new ValorEngine();
         this.weightEngine = new WeightEngine();
@@ -69,7 +71,12 @@ export class BattleEngine {
 
         this.heroManager = new HeroManager(idManager, this.diceEngine, assetLoaderManager, this.battleSimulationManager, assetEngine.getUnitSpriteEngine());
         this.battleFormationManager = new BattleFormationManager(this.battleSimulationManager);
-        this.monsterSpawnManager = new MonsterSpawnManager(idManager, assetLoaderManager, this.battleSimulationManager);
+        this.monsterSpawnManager = new MonsterSpawnManager(
+            idManager,
+            assetLoaderManager,
+            this.battleSimulationManager,
+            this.stageDataManager
+        );
 
         this.conditionalManager = new ConditionalManager(this.battleSimulationManager, idManager);
     }
@@ -89,4 +96,5 @@ export class BattleEngine {
     }
 
     getBattleSimulationManager() { return this.battleSimulationManager; }
+    getStageDataManager() { return this.stageDataManager; }
 }
