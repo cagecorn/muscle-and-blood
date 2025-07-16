@@ -387,20 +387,15 @@ export class GameEngine {
         // ✨ sceneEngine에 UI_STATES 상수 사용
         this.sceneEngine.registerScene(UI_STATES.MAP_SCREEN, [this.territoryManager]);
         this.sceneEngine.registerScene(UI_STATES.COMBAT_SCREEN, [
-            this.battleStageManager,
-            this.battleGridManager,
-            this.battleSimulationManager,
-            this.vfxManager
+            this.battleStageManager,    // 배경 그리기
+            this.battleGridManager,     // 그리드 그리기
+            (ctx) => { this.shadowEngine.draw(ctx); }, // ✨ 그림자 그리기 (배경/그리드 위, 유닛 아래)
+            this.battleSimulationManager, // 유닛 그리기
+            this.vfxManager             // VFX 그리기 (HP 바, 데미지 숫자 등)
         ]);
 
         // ✨ sceneEngine 초기 상태 설정에 UI_STATES 상수 사용
         this.sceneEngine.setCurrentScene(UI_STATES.MAP_SCREEN);
-
-        // ✨ LayerEngine에 ShadowEngine 그리기 레이어 등록
-        // sceneLayer(10)보다 낮게, 배경보다 높도록 5로 설정
-        this.layerEngine.registerLayer('shadowLayer', (ctx) => {
-            this.shadowEngine.draw(ctx);
-        }, 5);
 
         this.layerEngine.registerLayer('sceneLayer', (ctx) => {
             this.sceneEngine.draw(ctx);
