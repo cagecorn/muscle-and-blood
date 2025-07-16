@@ -108,18 +108,41 @@ export class GameEngine {
         // ✨ ValorEngine을 먼저 초기화하여 BattleSimulationManager에 전달합니다.
         this.valorEngine = new ValorEngine();
 
-        // 전투 시뮬레이션 매니저는 AnimationManager 보다 먼저 필요하므로
-        // 초기화 시 animationManager는 null로 설정해 둡니다.
+        // === 순환 의존성 해결을 위한 초기화 순서 조정 ===
+        // 1. BattleSimulationManager 초기화 (animationManager는 나중에 설정)
         this.battleSimulationManager = new BattleSimulationManager(
             this.measureManager,
             this.assetLoaderManager,
             this.idManager,
             this.logicManager,
             null,
-            this.valorEngine // ✨ valorEngine 추가
+            this.valorEngine
         );
 
-        // ✨ ShadowEngine 초기화
+        // 2. CameraEngine 초기화 (ParticleEngine에서 사용)
+        this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneEngine);
+
+        // 3. ParticleEngine 초기화 (battleSimulationManager와 cameraEngine 의존)
+        this.particleEngine = new ParticleEngine(
+            this.measureManager,
+            this.cameraEngine,
+            this.battleSimulationManager
+        );
+
+        // 4. AnimationManager 초기화 (particleEngine 의존, battleSimulationManager는 나중에 설정)
+        this.animationManager = new AnimationManager(
+            this.measureManager,
+            null,
+            this.particleEngine
+        );
+
+        // 5. 순환 의존성 해결: 상호 참조 설정
+        this.battleSimulationManager.animationManager = this.animationManager;
+        this.animationManager.battleSimulationManager = this.battleSimulationManager;
+
+        // === 순환 의존성 조정 끝 ===
+
+        // ShadowEngine 초기화 (animationManager가 준비된 후)
         this.shadowEngine = new ShadowEngine(
             this.battleSimulationManager,
             this.animationManager,
@@ -171,7 +194,6 @@ export class GameEngine {
             this.battleLogManager
         );
 
-        this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneEngine);
         // ✨ InputManager 초기화 시 buttonEngine과 eventManager를 함께 전달
         this.inputManager = new InputManager(this.renderer, this.cameraEngine, this.uiEngine, this.buttonEngine, this.eventManager);
 
@@ -191,22 +213,6 @@ export class GameEngine {
         this.battleGridManager = new BattleGridManager(this.measureManager, this.logicManager);
         // ✨ CoordinateManager 초기화 - BattleSimulationManager 후
         this.coordinateManager = new CoordinateManager(this.battleSimulationManager, this.battleGridManager);
-
-        // ParticleEngine은 AnimationManager보다 먼저 초기화되어야 합니다.
-        this.particleEngine = new ParticleEngine(
-            this.measureManager,
-            this.cameraEngine,
-            this.battleSimulationManager
-        );
-
-        // AnimationManager는 BattleSimulationManager의 렌더링에 사용됩니다.
-        this.animationManager = new AnimationManager(
-            this.measureManager,
-            this.battleSimulationManager,
-            this.particleEngine
-        );
-        // 상호 참조 설정
-        this.battleSimulationManager.animationManager = this.animationManager;
 
         // VFXManager에 AnimationManager와 ParticleEngine을 전달하여 HP 바 위치를 애니메이션과 동기화합니다.
         this.vfxManager = new VFXManager(
@@ -384,7 +390,7 @@ export class GameEngine {
         this.gameLoop = new GameLoop(this._update, this._draw);
 
         // ✨ _initAsyncManagers에서 로드할 총 에셋 및 데이터 수를 수동으로 계산
-        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length + 5 + 5;
+        const expectedDataAndAssetCount = 9 + Object.keys(WARRIOR_SKILLS).length + 5 + 5 + 1; // 9(기존) + 5(워리어 스킬) + 5(기본 상태 아이콘) + 5(워리어 스킬 아이콘) + 1(warrior-finish.png)
         this.assetLoaderManager.setTotalAssetsToLoad(expectedDataAndAssetCount);
 
         // 초기화 과정의 비동기 처리
