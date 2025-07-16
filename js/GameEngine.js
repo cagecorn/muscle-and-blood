@@ -9,6 +9,7 @@ import { MeasureManager } from './managers/MeasureManager.js';
 import { RuleManager } from './managers/RuleManager.js';
 import { SceneEngine } from './managers/SceneEngine.js';
 import { LogicManager } from './managers/LogicManager.js';
+import { UnitStatManager } from './managers/UnitStatManager.js';
 
 export class GameEngine {
     constructor(canvasId) {
@@ -23,6 +24,9 @@ export class GameEngine {
         this.assetEngine = new AssetEngine(this.eventManager);
         this.renderEngine = new RenderEngine(canvasId, this.eventManager, this.measureManager);
         this.battleEngine = new BattleEngine(this.eventManager, this.measureManager, this.assetEngine, this.renderEngine);
+
+        // \u2728 UnitStatManager 초기화
+        this.unitStatManager = new UnitStatManager(this.eventManager, this.battleEngine.getBattleSimulationManager());
 
         // 3. 장면 및 로직
         this.sceneEngine = new SceneEngine();
@@ -75,4 +79,5 @@ export class GameEngine {
     getAssetEngine() { return this.assetEngine; }
     getRenderEngine() { return this.renderEngine; }
     getBattleEngine() { return this.battleEngine; }
+    getUnitStatManager() { return this.unitStatManager; }
 }

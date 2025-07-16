@@ -24,6 +24,25 @@ export const CLASSES = {
             WARRIOR_SKILLS.BATTLE_CRY.id,
             WARRIOR_SKILLS.IRON_WILL.id
         ],
+        statRanges: {
+            hp: [90, 130],
+            valor: [40, 70],
+            strength: [20, 35],
+            endurance: [15, 30],
+            agility: [5, 15],
+            intelligence: [5, 10],
+            wisdom: [5, 15],
+            luck: [10, 20],
+            weight: [25, 40],
+            speed: [40, 60]
+        },
+        availableSkills: [
+            WARRIOR_SKILLS.CHARGE.id,
+            WARRIOR_SKILLS.BATTLE_CRY.id,
+            WARRIOR_SKILLS.RENDING_STRIKE.id,
+            WARRIOR_SKILLS.RETALIATE.id,
+            WARRIOR_SKILLS.IRON_WILL.id
+        ],
         moveRange: 3, // 전사의 이동 거리
         tags: ['근접', '방어', '용병_클래스'] // ✨ 태그 추가
     },

@@ -1,38 +1,37 @@
 // js/managers/UnitStatManager.js
 
+import { GAME_EVENTS } from '../constants.js';
+
+/**
+ * 유닛의 모든 핵심 스탯(HP, 배리어 등) 변경을 중앙에서 관리합니다.
+ */
 export class UnitStatManager {
-    constructor(battleSimulationManager) {
+    constructor(eventManager, battleSimulationManager) {
         console.log("\ud83d\udcca UnitStatManager initialized. Centralizing all stat modifications. \ud83d\udcca");
+        this.eventManager = eventManager;
         this.battleSim = battleSimulationManager;
+
+        this.eventManager.subscribe(GAME_EVENTS.DAMAGE_CALCULATED, this._onDamageCalculated.bind(this));
     }
 
-    _getUnit(unitId) {
-        return this.battleSim.unitsOnGrid.find(u => u.id === unitId);
-    }
-
-    dealDamage(unitId, damageAmount) {
-        const unit = this._getUnit(unitId);
+    /**
+     * 계산된 데미지 결과를 받아 실제 유닛의 스탯을 변경합니다.
+     * @param {{unitId: string, hpDamageDealt: number, barrierDamageDealt: number, newHp: number, newBarrier: number}} data
+     */
+    _onDamageCalculated({ unitId, hpDamageDealt, barrierDamageDealt, newHp, newBarrier }) {
+        const unit = this.battleSim.unitsOnGrid.find(u => u.id === unitId);
         if (!unit) return;
 
-        const barrier = unit.currentBarrier || 0;
-        const damageAfterBarrier = Math.max(0, damageAmount - barrier);
-        unit.currentBarrier = Math.max(0, barrier - damageAmount);
-        unit.currentHp = Math.max(0, unit.currentHp - damageAfterBarrier);
-        console.log(`[UnitStatManager] ${unit.name} takes ${damageAmount} damage. HP: ${unit.currentHp}, Barrier: ${unit.currentBarrier}`);
-    }
+        unit.currentHp = newHp;
+        unit.currentBarrier = newBarrier;
 
-    heal(unitId, healAmount) {
-        const unit = this._getUnit(unitId);
-        if (!unit) return;
+        console.log(`[UnitStatManager] Stats updated for ${unit.name}: HP=${newHp}, Barrier=${newBarrier}`);
 
-        unit.currentHp = Math.min(unit.baseStats.hp, unit.currentHp + healAmount);
-        console.log(`[UnitStatManager] ${unit.name} heals for ${healAmount}. HP: ${unit.currentHp}`);
-    }
-
-    applyBarrier(unitId, barrierAmount) {
-        const unit = this._getUnit(unitId);
-        if (!unit) return;
-        unit.currentBarrier = (unit.currentBarrier || 0) + barrierAmount;
-        console.log(`[UnitStatManager] ${unit.name} gains ${barrierAmount} barrier. Barrier: ${unit.currentBarrier}`);
+        if (barrierDamageDealt > 0) {
+            this.eventManager.emit(GAME_EVENTS.DISPLAY_DAMAGE, { unitId: unitId, damage: barrierDamageDealt, color: 'yellow' });
+        }
+        if (hpDamageDealt > 0) {
+            this.eventManager.emit(GAME_EVENTS.DISPLAY_DAMAGE, { unitId: unitId, damage: hpDamageDealt, color: 'red' });
+        }
     }
 }
