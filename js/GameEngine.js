@@ -33,6 +33,7 @@ import { BattleLogManager } from './managers/BattleLogManager.js'; // ✨ 새롭
 import { TurnOrderManager } from './managers/TurnOrderManager.js'; // ✨ 새롭게 추가
 import { ClassAIManager } from './managers/ClassAIManager.js';   // ✨ 새롭게 추가
 import { BasicAIManager } from './managers/BasicAIManager.js'; // ✨ 새롭게 추가
+import { TargetingManager } from './managers/TargetingManager.js'; // ✨ TargetingManager 추가
 import { ValorEngine } from './managers/ValorEngine.js';   // ✨ ValorEngine 추가
 import { WeightEngine } from './managers/WeightEngine.js'; // ✨ WeightEngine 추가
 import { StatManager } from './managers/StatManager.js'; // ✨ StatManager 추가
@@ -226,6 +227,8 @@ export class GameEngine {
             this.weightEngine // ✨ weightEngine 추가
         );
         this.classAIManager = new ClassAIManager(this.idManager, this.battleSimulationManager, this.measureManager, this.basicAIManager);
+        // ✨ TargetingManager 초기화
+        this.targetingManager = new TargetingManager(this.battleSimulationManager); // BattleSimulationManager를 의존성으로 전달
 
         // ✨ TurnEngine에 새로운 의존성 전달
         this.turnEngine = new TurnEngine(
@@ -474,4 +477,6 @@ export class GameEngine {
     getDiceBotManager() { return this.diceBotManager; }
     // ✨ CoordinateManager getter 추가
     getCoordinateManager() { return this.coordinateManager; }
+    // ✨ TargetingManager getter 추가
+    getTargetingManager() { return this.targetingManager; }
 }
