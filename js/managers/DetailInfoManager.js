@@ -10,14 +10,16 @@ export class DetailInfoManager {
      * @param {BattleSimulationManager} battleSimulationManager - 유닛 정보 및 위치 조회를 위한 BattleSimulationManager 인스턴스
      * @param {HeroEngine} heroEngine - 영웅별 상세 데이터(스킬, 시너지) 조회를 위한 HeroEngine 인스턴스
      * @param {IdManager} idManager - 클래스, 스킬, 시너지 이름 조회를 위한 IdManager 인스턴스
+     * @param {CameraEngine} cameraEngine - 카메라 위치/줌 정보를 조회하기 위한 CameraEngine 인스턴스
      */
-    constructor(eventManager, measureManager, battleSimulationManager, heroEngine, idManager) {
+    constructor(eventManager, measureManager, battleSimulationManager, heroEngine, idManager, cameraEngine) {
         console.log("🔍 DetailInfoManager initialized. Ready to show unit details on hover. 🔍");
         this.eventManager = eventManager;
         this.measureManager = measureManager;
         this.battleSimulationManager = battleSimulationManager;
         this.heroEngine = heroEngine;
         this.idManager = idManager;
+        this.cameraEngine = cameraEngine;
 
         this.hoveredUnit = null;       // 현재 마우스가 올라간 유닛
         this.lastMouseX = 0;           // 마우스의 마지막 X 좌표 (논리적 캔버스 좌표)
@@ -57,6 +59,11 @@ export class DetailInfoManager {
     update(deltaTime) {
         const { effectiveTileSize, gridOffsetX, gridOffsetY } = this.battleSimulationManager.getGridRenderParameters();
 
+        // 화면 좌표를 월드 좌표로 변환
+        const worldMouse = this.cameraEngine
+            ? this.cameraEngine.screenToWorld(this.lastMouseX, this.lastMouseY)
+            : { x: this.lastMouseX, y: this.lastMouseY };
+
         let currentHoveredUnit = null;
 
         for (const unit of this.battleSimulationManager.unitsOnGrid) {
@@ -76,10 +83,10 @@ export class DetailInfoManager {
             const unitRenderWidth = effectiveTileSize;
             const unitRenderHeight = effectiveTileSize;
 
-            // 마우스 좌표가 유닛의 렌더링 영역 안에 있는지 확인
+            // 변환된 월드 좌표로 마우스가 유닛 위에 있는지 확인
             if (
-                this.lastMouseX >= drawX && this.lastMouseX <= drawX + unitRenderWidth &&
-                this.lastMouseY >= drawY && this.lastMouseY <= drawY + unitRenderHeight
+                worldMouse.x >= drawX && worldMouse.x <= drawX + unitRenderWidth &&
+                worldMouse.y >= drawY && worldMouse.y <= drawY + unitRenderHeight
             ) {
                 currentHoveredUnit = unit;
                 break; // 한 유닛에만 호버링 가능

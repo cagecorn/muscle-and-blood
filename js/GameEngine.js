@@ -290,7 +290,8 @@ export class GameEngine {
             this.measureManager,
             this.battleSimulationManager,
             this.heroEngine,
-            this.idManager
+            this.idManager,
+            this.cameraEngine
         );
 
         // ✨ TagManager 초기화
