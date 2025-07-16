@@ -61,6 +61,7 @@ import { TagManager } from './managers/TagManager.js'; // ✨ TagManager 추가
 import { WarriorSkillsAI } from './managers/warriorSkillsAI.js'; // ✨ WarriorSkillsAI 추가
 import { UnitSpriteEngine } from './managers/UnitSpriteEngine.js';
 import { UnitActionManager } from './managers/UnitActionManager.js';
+import { PassiveSkillManager } from './managers/PassiveSkillManager.js';
 
 // ✨ 상수 파일 임포트
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES, GAME_DEBUG_MODE } from './constants.js';
@@ -397,6 +398,13 @@ export class GameEngine {
             this.delayEngine,
             this.battleSimulationManager
         );
+        this.passiveSkillManager = new PassiveSkillManager(
+            this.eventManager,
+            this.idManager,
+            this.diceEngine,
+            this.battleSimulationManager,
+            this.workflowManager
+        );
 
         // ------------------------------------------------------------------
         // 13. Scene Registrations & Layer Engine Setup
@@ -707,4 +715,5 @@ export class GameEngine {
     getShadowEngine() { return this.shadowEngine; } // ✨ ShadowEngine getter 추가
     getUnitSpriteEngine() { return this.unitSpriteEngine; }
     getUnitActionManager() { return this.unitActionManager; }
+    getPassiveSkillManager() { return this.passiveSkillManager; }
 }

@@ -41,12 +41,12 @@ export const WARRIOR_SKILLS = {
         id: 'skill_warrior_rending_strike',
         name: '찢어발기기',
         type: SKILL_TYPES.DEBUFF,
-        probability: 20,
-        description: '일반 공격 시 적에게 출혈 디버프를 부여할 확률이 있습니다.',
+        probability: 0, // 평타에 묻어나는 스킬이라 자체 발동 확률은 0
+        description: '일반 공격 시 50% 확률로 적에게 출혈 디버프를 부여합니다.',
         requiredUserTags: ['근접'],
         effect: {
-            statusEffectId: 'status_bleed', // 출혈 상태 이상 ID
-            applyChance: 0.5 // 50% 확률로 적용
+            statusEffectId: 'status_bleed', // 적용할 출혈 상태이상 ID
+            applyChance: 0.5 // 기본 적용 확률 50%
         }
     },
     // 리액션 스킬 (공격 받을 시 발동 예시)

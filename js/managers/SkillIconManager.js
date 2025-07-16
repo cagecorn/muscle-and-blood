@@ -45,7 +45,7 @@ export class SkillIconManager {
             'skill_warrior_iron_will': 'assets/icons/skills/iron_will.png',
             'status_poison': 'assets/icons/status_effects/poison.png',
             'status_stun': 'assets/icons/status_effects/stun.png',
-            'status_bleed': 'assets/icons/status_effects/bleed.png',
+            'status_bleed': 'assets/icons/status_effects/bleed.png', // ✨ 출혈 아이콘 경로 추가
             'status_berserk': 'assets/icons/status_effects/berserk.png',
             'status_battle_cry': 'assets/icons/skills/battle_cry.png', // ✨ 버프 아이콘 등록
             'status_disarmed': 'assets/icons/status_effects/disarmed.png'
