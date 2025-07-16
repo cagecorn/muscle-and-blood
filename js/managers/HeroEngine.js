@@ -95,7 +95,20 @@ export class HeroEngine {
         // 4. 랜덤한 특성 부여 (임시 특성 ID 사용)
         const traits = [`trait_${this.diceBotManager.getRandomInt(1, 3)}`];
 
-        // 5. 장비 아이템 및 퍽 (초기에는 비어있음)
+        // ✨ 5. 랜덤한 2~3개의 시너지 부여
+        const allPossibleSynergies = ['synergy_warrior', 'synergy_mage', 'synergy_healer', 'synergy_archer'];
+        const numSynergies = this.diceBotManager.getRandomInt(2, 3);
+        const assignedSynergies = [];
+        while (assignedSynergies.length < numSynergies) {
+            const randomIndex = this.diceBotManager.getRandomInt(0, allPossibleSynergies.length - 1);
+            const selectedSynergy = allPossibleSynergies[randomIndex];
+            if (!assignedSynergies.includes(selectedSynergy)) {
+                assignedSynergies.push(selectedSynergy);
+            }
+        }
+        const synergies = assignedSynergies;
+
+        // 6. 장비 아이템 및 퍽 (초기에는 비어있음)
         const equippedItems = [];
         const perks = [];
 
@@ -108,6 +121,7 @@ export class HeroEngine {
             baseStats: baseStats,
             skills: skills,
             traits: traits,
+            synergies: synergies, // ✨ 영웅 시너지 추가
             equippedItems: equippedItems,
             perks: perks,
             currentHp: baseStats.hp,

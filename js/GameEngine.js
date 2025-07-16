@@ -44,6 +44,7 @@ import { TurnCountManager } from './managers/TurnCountManager.js';
 import { StatusEffectManager } from './managers/StatusEffectManager.js';
 import { WorkflowManager } from './managers/WorkflowManager.js';
 import { HeroEngine } from "./managers/HeroEngine.js"; // HeroEngine 추가
+import { SynergyEngine } from './managers/SynergyEngine.js'; // ✨ SynergyEngine 추가
 import { STATUS_EFFECTS } from '../data/statusEffects.js';
 
 import { TerritoryManager } from './managers/TerritoryManager.js';
@@ -190,6 +191,9 @@ export class GameEngine {
 
         // HeroEngine 초기화
         this.heroEngine = new HeroEngine(this.idManager, this.assetLoaderManager, this.diceBotManager);
+
+        // ✨ SynergyEngine 초기화
+        this.synergyEngine = new SynergyEngine(this.idManager, this.eventManager);
         // BattleCalculationManager는 DiceRollManager가 준비된 이후에 초기화합니다.
         this.battleCalculationManager = new BattleCalculationManager(
             this.eventManager,
@@ -478,6 +482,8 @@ export class GameEngine {
     getDiceEngine() { return this.diceEngine; }
     getDiceRollManager() { return this.diceRollManager; }
     getHeroEngine() { return this.heroEngine; }
+    // ✨ SynergyEngine getter 추가
+    getSynergyEngine() { return this.synergyEngine; }
     getDiceBotManager() { return this.diceBotManager; }
     // ✨ CoordinateManager getter 추가
     getCoordinateManager() { return this.coordinateManager; }
