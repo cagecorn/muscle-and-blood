@@ -3,13 +3,14 @@ import { DelayEngine } from './DelayEngine.js'; // ✨ DelayEngine 추가
 import { GAME_EVENTS } from '../constants.js';
 
 export class BattleCalculationManager {
-    constructor(eventManager, battleSimulationManager, diceRollManager, delayEngine, conditionalManager) {
+    constructor(eventManager, battleSimulationManager, diceRollManager, delayEngine, conditionalManager, unitStatManager) {
         console.log("\ud83d\udcca BattleCalculationManager initialized. Delegating heavy calculations to worker. \ud83d\udcca");
         this.eventManager = eventManager;
         this.battleSimulationManager = battleSimulationManager;
         this.diceRollManager = diceRollManager;
         this.delayEngine = delayEngine; // ✨ delayEngine 저장
         this.conditionalManager = conditionalManager; // ✨ 인스턴스 저장
+        this.unitStatManager = unitStatManager;
         this.worker = new Worker('./js/workers/battleCalculationWorker.js');
 
         this.worker.onmessage = this._handleWorkerMessage.bind(this);
@@ -25,15 +26,14 @@ export class BattleCalculationManager {
     }
 
     async _handleWorkerMessage(event) {
-        const { type, unitId, newHp, newBarrier, hpDamageDealt, barrierDamageDealt } = event.data;
+        const { type, unitId, hpDamageDealt, barrierDamageDealt } = event.data;
 
         if (type === GAME_EVENTS.DAMAGE_CALCULATED) {
-            console.log(`[BattleCalculationManager] Received damage calculation result for ${unitId}: New HP = ${newHp}, New Barrier = ${newBarrier}, HP Damage = ${hpDamageDealt}, Barrier Damage = ${barrierDamageDealt}`);
+            console.log(`[BattleCalculationManager] Damage result for ${unitId}: HP Damage = ${hpDamageDealt}, Barrier Damage = ${barrierDamageDealt}`);
 
             const unitToUpdate = this.battleSimulationManager.unitsOnGrid.find(u => u.id === unitId);
             if (unitToUpdate) {
-                unitToUpdate.currentHp = newHp;
-                unitToUpdate.currentBarrier = newBarrier;
+                this.unitStatManager.dealDamage(unitId, hpDamageDealt + barrierDamageDealt);
 
                 if (barrierDamageDealt > 0) {
                     this.eventManager.emit(GAME_EVENTS.DISPLAY_DAMAGE, { unitId: unitId, damage: barrierDamageDealt, color: 'yellow' });
@@ -45,7 +45,7 @@ export class BattleCalculationManager {
                     this.eventManager.emit(GAME_EVENTS.DISPLAY_DAMAGE, { unitId: unitId, damage: hpDamageDealt, color: 'red' });
                 }
 
-                if (newHp <= 0) {
+                if (unitToUpdate.currentHp <= 0) {
                     this.eventManager.emit(GAME_EVENTS.UNIT_DEATH, { unitId: unitId, unitName: unitToUpdate.name, unitType: unitToUpdate.type });
                     console.log(`[BattleCalculationManager] Unit '${unitId}' has died.`);
                 }

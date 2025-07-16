@@ -68,6 +68,8 @@ import { ConditionalManager } from './managers/ConditionalManager.js';
 import { PassiveIconManager } from './managers/PassiveIconManager.js';
 import { BattleFormationManager } from './managers/BattleFormationManager.js';
 import { MonsterSpawnManager } from './managers/MonsterSpawnManager.js';
+import { UnitStatManager } from './managers/UnitStatManager.js';
+import { StageDataManager } from './managers/StageDataManager.js';
 
 // ✨ 상수 파일 임포트
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS, ATTACK_TYPES, GAME_DEBUG_MODE } from './constants.js';
@@ -144,6 +146,10 @@ export class GameEngine {
             null,
             this.valorEngine
         );
+
+        // Managers that rely on BattleSimulationManager
+        this.unitStatManager = new UnitStatManager(this.battleSimulationManager);
+        this.stageDataManager = new StageDataManager();
 
         // 2. CameraEngine 초기화 (ParticleEngine에서 사용)
         this.cameraEngine = new CameraEngine(this.renderer, this.logicManager, this.sceneEngine);
@@ -318,7 +324,8 @@ export class GameEngine {
             this.battleSimulationManager,
             null,
             this.delayEngine,
-            this.conditionalManager
+            this.conditionalManager,
+            this.unitStatManager
         );
 
         // Status effect 관련 매니저 초기화
@@ -446,7 +453,7 @@ export class GameEngine {
         );
 
         this.battleFormationManager = new BattleFormationManager(this.battleSimulationManager);
-        this.monsterSpawnManager = new MonsterSpawnManager(this.idManager, this.assetLoaderManager, this.battleSimulationManager);
+        this.monsterSpawnManager = new MonsterSpawnManager(this.idManager, this.assetLoaderManager, this.battleSimulationManager, this.stageDataManager);
 
         // ------------------------------------------------------------------
         // 13. Conditional & Passive Visual Managers
@@ -774,4 +781,6 @@ export class GameEngine {
     getReactionSkillManager() { return this.reactionSkillManager; }
     getConditionalManager() { return this.conditionalManager; }
     getPassiveIconManager() { return this.passiveIconManager; }
+    getUnitStatManager() { return this.unitStatManager; }
+    getStageDataManager() { return this.stageDataManager; }
 }
