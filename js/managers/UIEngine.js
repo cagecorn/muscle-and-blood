@@ -5,14 +5,13 @@
 import { GAME_EVENTS, UI_STATES, BUTTON_IDS } from '../constants.js';
 
 export class UIEngine {
-    constructor(renderer, measureManager, eventManager, mercenaryPanelManager, buttonEngine, heroManager) {
+    constructor(renderer, measureManager, eventManager, mercenaryPanelManager, buttonEngine) {
         console.log("\ud83c\udf9b UIEngine initialized. Ready to draw interfaces. \ud83c\udf9b");
         this.renderer = renderer;
         this.measureManager = measureManager;
         this.eventManager = eventManager;
         this.mercenaryPanelManager = mercenaryPanelManager;
         this.buttonEngine = buttonEngine;
-        this.heroManager = heroManager;
 
         this.canvas = renderer.canvas;
         this.ctx = renderer.ctx;
@@ -21,23 +20,6 @@ export class UIEngine {
         this.heroPanelVisible = false;
 
         this.recalculateUIDimensions();
-
-        // ✨ '전사 고용' 버튼 등록
-        const hireButtonWidth = 150;
-        const hireButtonHeight = 50;
-        this.buttonEngine.registerButton(
-            BUTTON_IDS.HIRE_WARRIOR,
-            this.measureManager.get('gameResolution.width') - hireButtonWidth - 20,
-            20,
-            hireButtonWidth,
-            hireButtonHeight,
-            () => {
-                console.log("'전사 고용' 버튼 클릭됨!");
-                if (this.heroManager) {
-                    this.heroManager.hireNewWarrior();
-                }
-            }
-        );
 
         // ✨ '전투 시작' 버튼은 이제 HTML에서 관리하므로 ButtonEngine에 등록하지 않습니다.
 
@@ -86,18 +68,7 @@ export class UIEngine {
     draw(ctx) {
         // ✨ '전투 시작' 버튼은 이제 HTML 요소이므로 캔버스에 그리지 않습니다.
         if (this._currentUIState === UI_STATES.MAP_SCREEN) {
-            const buttonRect = this.buttonEngine.getButtonRect(BUTTON_IDS.HIRE_WARRIOR);
-            if (buttonRect) {
-                ctx.fillStyle = 'darkblue';
-                ctx.fillRect(buttonRect.x, buttonRect.y, buttonRect.width, buttonRect.height);
-                ctx.strokeStyle = 'white';
-                ctx.strokeRect(buttonRect.x, buttonRect.y, buttonRect.width, buttonRect.height);
-                ctx.fillStyle = 'white';
-                ctx.font = `${this.uiFontSize}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('전사 고용', buttonRect.x + buttonRect.width / 2, buttonRect.y + buttonRect.height / 2);
-            }
+            // 다른 UI 요소가 있다면 여기에 그립니다.
         } else if (this._currentUIState === UI_STATES.COMBAT_SCREEN) {
             // 전투 화면에서는 현재 별도의 상단 텍스트를 표시하지 않습니다.
         }

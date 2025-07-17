@@ -111,8 +111,8 @@ export class BattleEngine {
 
         // IdManager를 거치지 않고, 미리 import 해둔 정적 데이터를 직접 HeroManager에 전달합니다.
         // 이것이 레이스 컨디션을 막는 가장 확실한 방법입니다.
-        // const heroes = await this.heroManager.createWarriors(3, CLASSES.WARRIOR);
-        // this.battleFormationManager.placeAllies(heroes);
+        const heroes = await this.heroManager.createWarriors(3, CLASSES.WARRIOR);
+        this.battleFormationManager.placeAllies(heroes);
         await this.monsterSpawnManager.spawnMonstersForStage('stage1');
     }
 
