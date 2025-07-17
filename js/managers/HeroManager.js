@@ -42,11 +42,6 @@ export class HeroManager {
         const availableSkills = warriorClassData.availableSkills || [];
         const tags = warriorClassData.tags || [];
 
-        // 이름 목록이 없으면 기본 이름을 사용하여 오류를 방지합니다.
-        const heroNames = Array.isArray(this.heroNameList) && this.heroNameList.length > 0
-            ? this.heroNameList
-            : ['Warrior'];
-
         if (!warriorImage) {
             console.error('[HeroManager] Warrior image not found. Cannot create warriors.');
             return [];
@@ -56,7 +51,7 @@ export class HeroManager {
 
         for (let i = 0; i < count; i++) {
             const unitId = `hero_warrior_${Date.now()}_${i}`;
-            const randomName = heroNames[this.diceEngine.getRandomInt(0, heroNames.length - 1)];
+            const randomName = this.heroNameList[this.diceEngine.getRandomInt(0, this.heroNameList.length - 1)];
 
             const baseStats = {};
             for (const stat in statRanges) {
