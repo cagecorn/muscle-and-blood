@@ -122,7 +122,6 @@ export class BattleEngine {
 
     update(deltaTime) {
         this.conditionalManager.update();
-        this.turnEngine.update();
     }
 
     getBattleSimulationManager() { return this.battleSimulationManager; }

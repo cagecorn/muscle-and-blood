@@ -2,8 +2,6 @@
 
 import { WARRIOR_SKILLS } from '../../data/warriorSkills.js';
 import { GAME_DEBUG_MODE } from '../constants.js';
-import { AttackCommand } from '../commands/AttackCommand.js';
-import { MoveCommand } from '../commands/MoveCommand.js';
 
 export class ClassAIManager {
     constructor(idManager, battleSimulationManager, measureManager, basicAIManager, warriorSkillsAI, diceEngine, targetingManager) {
@@ -102,23 +100,6 @@ export class ClassAIManager {
 
         const action = this.basicAIManager.determineMoveAndTarget(warriorUnit, allUnits, moveRange, attackRange);
 
-        if (!action) return null;
-
-        if (action.actionType === 'attack' && action.targetId) {
-            return new AttackCommand(warriorUnit.id, action.targetId);
-        }
-
-        if (action.actionType === 'move') {
-            return new MoveCommand(warriorUnit.id, action.moveTargetX, action.moveTargetY);
-        }
-
-        if (action.actionType === 'moveAndAttack' && action.targetId) {
-            return [
-                new MoveCommand(warriorUnit.id, action.moveTargetX, action.moveTargetY),
-                new AttackCommand(warriorUnit.id, action.targetId)
-            ];
-        }
-
-        return null;
+        return action;
     }
 }
