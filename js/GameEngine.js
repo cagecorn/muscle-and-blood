@@ -31,15 +31,9 @@ export class GameEngine {
         this.unitStatManager = new UnitStatManager(this.eventManager, this.battleEngine.getBattleSimulationManager());
         this.sceneEngine = new SceneEngine();
         this.logicManager = new LogicManager(this.measureManager, this.sceneEngine);
-
-        // ✨ UIEngine이 HeroManager 기능을 활용할 수 있도록 연결
-        this.renderEngine.uiEngine.heroManager = this.battleEngine.heroManager;
         
         // RenderEngine에 필요한 후반 종속성 주입
         this.renderEngine.injectDependencies(this.battleEngine.getBattleSimulationManager(), this.logicManager, this.sceneEngine);
-
-        // 순환 참조 문제를 방지하기 위해 UIEngine 인스턴스를 ButtonEngine에도 전달
-        this.renderEngine.inputManager.buttonEngine.uiEngine = this.renderEngine.uiEngine;
 
         // 4. 게임 루프 설정
         this.gameLoop = new GameLoop(this._update.bind(this), this._draw.bind(this));
