@@ -23,19 +23,23 @@ import { DiceRollManager } from '../managers/DiceRollManager.js';
 import { BattleCalculationManager } from '../managers/BattleCalculationManager.js';
 import { TurnCountManager } from '../managers/TurnCountManager.js';
 import { StatusEffectManager } from '../managers/StatusEffectManager.js';
+import { BattleGridManager } from '../managers/BattleGridManager.js';
+import { VFXManager } from '../managers/VFXManager.js';
+import { ParticleEngine } from '../managers/ParticleEngine.js';
 import { CLASSES } from '../../data/class.js'; // ◀◀◀ **이 부분을 추가해주세요!**
 
 /**
  * 전투 시뮬레이션과 턴 진행을 담당하는 엔진입니다.
  */
 export class BattleEngine {
-    constructor(eventManager, measureManager, assetEngine, renderEngine) {
+    constructor(eventManager, measureManager, assetEngine, renderEngine, logicManager) {
         console.log("⚔️ BattleEngine initialized.");
 
         const idManager = assetEngine.getIdManager();
         const assetLoaderManager = assetEngine.getAssetLoaderManager();
         this.assetLoaderManager = assetLoaderManager;
         const animationManager = renderEngine.getAnimationManager();
+        const cameraEngine = renderEngine.cameraEngine;
         this.stageDataManager = new StageDataManager();
 
         this.valorEngine = new ValorEngine();
@@ -48,11 +52,24 @@ export class BattleEngine {
             measureManager,
             assetLoaderManager,
             idManager,
-            null,
+            logicManager,
             animationManager,
             this.valorEngine
         );
         assetEngine.getUnitSpriteEngine().battleSimulationManager = this.battleSimulationManager;
+
+        // Visual managers responsible for rendering the battlefield
+        this.battleGridManager = new BattleGridManager(measureManager, logicManager);
+        const particleEngine = renderEngine.particleEngine;
+        this.vfxManager = new VFXManager(
+            renderEngine.renderer,
+            measureManager,
+            cameraEngine,
+            this.battleSimulationManager,
+            animationManager,
+            eventManager,
+            particleEngine
+        );
 
         this.turnCountManager = new TurnCountManager();
         this.diceRollManager = new DiceRollManager(this.diceEngine, this.valorEngine, null);
@@ -126,4 +143,6 @@ export class BattleEngine {
 
     getBattleSimulationManager() { return this.battleSimulationManager; }
     getStageDataManager() { return this.stageDataManager; }
+    getBattleGridManager() { return this.battleGridManager; }
+    getVFXManager() { return this.vfxManager; }
 }

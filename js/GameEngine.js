@@ -10,6 +10,7 @@ import { RuleManager } from './managers/RuleManager.js';
 import { SceneEngine } from './managers/SceneEngine.js';
 import { LogicManager } from './managers/LogicManager.js';
 import { UnitStatManager } from './managers/UnitStatManager.js';
+import { BattleStageManager } from './managers/BattleStageManager.js';
 
 export class GameEngine {
     constructor(canvasId) {
@@ -19,19 +20,23 @@ export class GameEngine {
         this.eventManager = new EventManager();
         this.measureManager = new MeasureManager();
         this.ruleManager = new RuleManager();
+        this.sceneEngine = new SceneEngine();
 
         // 2. 전문 엔진
         this.assetEngine = new AssetEngine(this.eventManager);
+        this.logicManager = new LogicManager(this.measureManager, this.sceneEngine);
         this.renderEngine = new RenderEngine(canvasId, this.eventManager, this.measureManager);
-        this.battleEngine = new BattleEngine(this.eventManager, this.measureManager, this.assetEngine, this.renderEngine);
+        this.battleEngine = new BattleEngine(this.eventManager, this.measureManager, this.assetEngine, this.renderEngine, this.logicManager);
 
         // \u2728 UnitStatManager 초기화
         this.unitStatManager = new UnitStatManager(this.eventManager, this.battleEngine.getBattleSimulationManager());
 
-        // 3. 장면 및 로직
-        this.sceneEngine = new SceneEngine();
-        this.logicManager = new LogicManager(this.measureManager, this.sceneEngine);
         this.renderEngine.injectDependencies(this.battleEngine.getBattleSimulationManager(), this.logicManager, this.sceneEngine);
+
+        // 장면과 레이어를 설정합니다.
+        this._setupScenesAndLayers();
+        this.sceneEngine.setCurrentScene('battleScene');
+        this.renderEngine.uiEngine.setUIState('combatScreen');
 
         // 게임 루프 설정
         this.gameLoop = new GameLoop(this._update.bind(this), this._draw.bind(this));
@@ -44,6 +49,26 @@ export class GameEngine {
             .catch((err) => {
                 console.error('Fatal Error: Async manager initialization failed.', err);
             });
+    }
+
+    _setupScenesAndLayers() {
+        const battleSim = this.battleEngine.getBattleSimulationManager();
+        const battleGrid = this.battleEngine.getBattleGridManager();
+        const vfxManager = this.battleEngine.getVFXManager();
+        const uiEngine = this.renderEngine.uiEngine;
+
+        const battleStage = new BattleStageManager(this.assetEngine.getAssetLoaderManager());
+
+        this.sceneEngine.registerScene('battleScene', [
+            battleStage,
+            battleGrid,
+            battleSim,
+            vfxManager,
+        ]);
+
+        const layerEngine = this.renderEngine.getLayerEngine();
+        layerEngine.registerLayer('sceneLayer', (ctx) => this.sceneEngine.draw(ctx), 10);
+        layerEngine.registerLayer('uiLayer', (ctx) => uiEngine.draw(ctx), 20);
     }
 
     async _initAsyncManagers() {
