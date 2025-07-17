@@ -10,7 +10,6 @@ import { RuleManager } from './managers/RuleManager.js';
 import { SceneEngine } from './managers/SceneEngine.js';
 import { LogicManager } from './managers/LogicManager.js';
 import { UnitStatManager } from './managers/UnitStatManager.js';
-import { GameDataManager } from './managers/GameDataManager.js';
 
 export class GameEngine {
     constructor(canvasId) {
@@ -49,9 +48,7 @@ export class GameEngine {
 
     async _initAsyncManagers() {
         try {
-            const idManager = this.assetEngine.getIdManager();
-            await idManager.initialize();
-            await GameDataManager.registerBaseClasses(idManager);
+            await this.assetEngine.getIdManager().initialize();
             await this.battleEngine.setupBattle();
         } catch (error) {
             console.error('Async manager initialization failed.', error);
