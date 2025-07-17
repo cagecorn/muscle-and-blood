@@ -210,7 +210,7 @@
             try {
                 gameEngine = new GameEngine('gameCanvas'); // GameEngine 인스턴스 생성
                 gameEngine.eventManager.setGameRunningState(true); // ✨ 디버그 모드에서도 게임 시작 시 상태 설정
-                // GameEngine.initializeGame() 내에서 초기화 완료 후 자동으로 게임이 시작됩니다.
+                gameEngine.start(); // 게임 엔진 시작
             } catch (error) {
                 console.error("Fatal Error in Debug Mode: Game Engine failed to start.", error);
                 // debug.html에서는 오류가 나도 계속 실행되도록 alert는 생략
