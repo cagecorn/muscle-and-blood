@@ -56,14 +56,12 @@ export class GameEngine {
         try {
             console.log("--- Game Initialization Start ---");
 
-        const idManager = this.assetEngine.getIdManager();
+            const idManager = this.assetEngine.getIdManager();
 
-        // 단계 1: 데이터베이스 시스템 초기화
-        console.log("Initialization Step 1: Initializing IdManager (DB)...");
-        await idManager.initialize();
-        // 디버그 환경에서 남아 있을 수 있는 이전 세션 데이터를 정리합니다.
-        await idManager.clearAllData();
-        console.log("✅ IdManager Initialized.");
+            // 단계 1: 데이터베이스 시스템 초기화
+            console.log("Initialization Step 1: Initializing IdManager (DB)...");
+            await idManager.initialize();
+            console.log("✅ IdManager Initialized.");
 
             // 단계 2: 기본 게임 데이터 등록 (클래스, 아이템 등)
             console.log("Initialization Step 2: Registering base game data...");
